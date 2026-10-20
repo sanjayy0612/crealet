@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "protocol_id": "abr-v2-small-decision-model-01",
+  "status": "draft",
+  "research_question": "Can a small decision model retain streaming quality and control stalls under unseen network groups, videos, bitrate ladders and live timing, with lower measured inference cost?",
+  "novelty_status": "unproven; small recurrent models and candidate scoring are baselines, not novelty claims",
+  "tasks": ["vod", "finite_low_latency_live"],
+  "candidate_models": ["small_dense_candidate_scorer", "small_gru_candidate_scorer"],
+  "training_seeds": [0, 1, 2, 3, 4],
+  "baseline_requirements": {
+    "diagnostic": ["lowest", "highest", "harmonic_throughput"],
+    "conventional": ["BOLA_for_vod", "robust_MPC_for_vod", "documented_live_controller"],
+    "learned": ["reproduced_learned_reference"],
+    "implementation_status": "Only diagnostic baselines exist in V2; other baselines require implementation and verification"
+  },
+  "split_rules": {
+    "unit": "collection session/group, never individual correlated segments",
+    "video_unit": "source video, including all encodings and parts",
+    "selection": "training data for optimization; validation only for tuning and checkpoint selection",
+    "final_test": "freeze data hashes, cases, code, weights, hardware and acceptance thresholds before final test; no test-driven retuning",
+    "transfer_cases": ["unseen_network_groups", "unseen_source_videos", "unseen_bitrate_ladders", "unseen_live_timing", "joint_shift"],
+    "failure_reporting": "retain all timeout, incomplete and failed episodes; never rank quality using successful episodes alone"
+  },
+  "metrics": {
+    "quality": "playback-weighted measured VMAF from packaged video; log bitrate is an engineering proxy only",
+    "playback": ["startup_s", "rebuffer_s", "stall_events", "stall_ratio", "completion_fraction", "switch_log"],
+    "live": ["wall_time_weighted_latency_after_startup_including_stalls", "playback_rate_deviation"],
+    "compute": ["batch1_end_to_end_inference_p50_ms", "batch1_end_to_end_inference_p95_ms", "peak_process_memory", "model_bytes", "parameter_count"],
+    "compute_controls": "fixed hardware, runtime, threads, precision and batch size; warm up; include preprocessing and action selection; measure cold start separately",
+    "uncertainty": "report every training seed; paired comparisons on identical cases; resample independent network/video groups rather than segments; do not treat all seeds times all segments as independent samples"
+  },
+  "primary_claim": {
+    "type": "lower inference computation with noninferior playback outcomes",
+    "reference": null,
+    "quality_noninferiority_margin_vmaf": null,
+    "maximum_stall_ratio_increase": null,
+    "maximum_live_latency_increase_s": null,
+    "minimum_p95_inference_speedup": null,
+    "rule": "set margins with validation/pilot evidence before final test; a smaller parameter count alone does not establish lower latency"
+  },
+  "validation_cases": ["constant_rate", "rate_step_down", "zero_goodput_outage", "finite_trace_exhaustion", "live_producer_wait"],
+  "validation_tolerances": {
+    "startup_s": {"absolute": 0.25, "relative": 0.0},
+    "rebuffer_s": {"absolute": 0.25, "relative": 0.0},
+    "played_s": {"absolute": 0.1, "relative": 0.0},
+    "wall_time_s": {"absolute": 0.5, "relative": 0.0},
+    "stall_events": {"absolute": 0, "relative": 0.0},
+    "mean_live_latency_s": {"absolute": 0.25, "relative": 0.0}
+  },
+  "tolerance_status": "provisional engineering thresholds, not established equivalence bounds; review on calibration cases and freeze before independent validation",
+  "freeze_blockers": ["packaged_video_and_measured_quality_tables", "independent_collection_groups", "real_player_capture_and_controlled_network_evidence", "baseline_implementations", "target_hardware", "primary_reference_and_acceptance_margins"],
+  "publication_rules": "Separate implementation, reproduction, simulation findings and real-player evidence. Report negative results and limitations. No novelty or improvement claim before experiments."
+}

@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DASH environment validation capture</title>
+<style>
+body{font:16px system-ui;max-width:880px;margin:32px auto;padding:0 20px;line-height:1.5}label{display:block;margin:16px 0}input[type=url]{width:95%;padding:8px}video{width:100%;background:#111}button{padding:9px 16px;margin:8px 8px 8px 0}pre{white-space:pre-wrap;background:#eee;padding:12px}
+</style>
+<h1>Environment validation capture</h1>
+<p>Fixed lowest video quality. No model calls and no playback loop. Use your own packaged media and controlled network. The capture page does not emulate a network.</p>
+<label>Validation case JSON <input id="case" type="file" accept=".json"></label>
+<label>Manifest URL <input id="manifest" type="url" placeholder="http://localhost:8000/media/manifest.mpd"></label>
+<label>Network setup evidence (run ID or artifact path) <input id="evidence" type="text"></label>
+<button id="start" disabled>Start capture</button><button id="stop" disabled>Stop incomplete run</button><button id="save" disabled>Download JSON</button>
+<video id="video" muted playsinline></video>
+<pre id="status">Load a validation case exported from the simulator report.</pre>
+<script src="https://cdn.dashjs.org/v4.7.4/dash.all.min.js"></script>
+<script type="module">
+import {PlaybackRecorder} from './recorder.mjs';
+const el = id => document.getElementById(id);
+let validationCase, player, recorder, timer, representations = [];
+el('case').onchange = async () => {
+    try {
+        validationCase = JSON.parse(await el('case').files[0].text());
+        if (validationCase.schema_version !== 1 || !validationCase.identity || validationCase.baseline !== 'lowest') throw Error('Expected lowest-quality validation case');
+        el('start').disabled = false;
+        el('status').textContent = JSON.stringify(validationCase, null, 2);
+    } catch (e) { el('status').textContent = e.message; el('start').disabled = true; }
+};
+function finish() {
+    clearInterval(timer);
+    el('save').disabled = false;
+    el('stop').disabled = true;
+    el('status').textContent = 'Capture stopped. Download the raw JSON and compare it with the matching simulator episode.';
+}
+el('start').onclick = () => {
+    try {
+        if (!el('evidence').value.trim()) throw Error('Record the external network setup evidence first');
+        const url = new URL(el('manifest').value);
+        if (!['http:', 'https:'].includes(url.protocol)) throw Error('Use an HTTP(S) manifest');
+        if (!window.dashjs) throw Error('dash.js 4.7.4 did not load');
+        const c = validationCase.config;
+        player = dashjs.MediaPlayer().create();
+        player.updateSettings({streaming: {
+            abr: {autoSwitchBitrate: {video: false}, initialRepresentationRatio: {video: 0}},
+            lastBitrateCachingInfo: {enabled: false}, lastMediaSettingsCachingInfo: {enabled: false},
+            buffer: {initialBufferLevel: c.startup_s, stableBufferTime: c.max_buffer_s,
+                     bufferTimeAtTopQuality: c.max_buffer_s, bufferTimeAtTopQualityLongForm: c.max_buffer_s},
+            liveCatchup: {enabled: false}, delay: {liveDelay: c.target_latency_s, useSuggestedPresentationDelay: false}
+        }});
+        recorder = new PlaybackRecorder(el('video'), validationCase.identity,
+            {liveLatency: () => c.mode === 'live' ? player.getCurrentLiveLatency() : null});
+        recorder.start();
+        player.on(dashjs.MediaPlayer.events.STREAM_INITIALIZED, () => {
+            representations = player.getBitrateInfoListFor('video').map(r =>
+                ({quality_index: r.qualityIndex, bitrate_bps: r.bitrate, width: r.width, height: r.height}));
+            if (player.getTracksFor('audio').length) recorder.issues.push('audio_track_not_modeled_by_simulator');
+            player.setQualityFor('video', 0);
+        });
+        player.on(dashjs.MediaPlayer.events.QUALITY_CHANGE_RENDERED, e => {
+            if (e.mediaType === 'video' && e.newQuality !== 0) recorder.issues.push('quality_was_not_lowest');
+        });
+        player.on(dashjs.MediaPlayer.events.ERROR, () => recorder.issues.push('dash_player_error'));
+        document.addEventListener('visibilitychange', () => {
+            if (recorder.active && document.hidden) recorder.issues.push('background_tab');
+        });
+        player.initialize(el('video'), url.href, true);
+        timer = setInterval(() => {recorder.sample(); if (!recorder.active) finish();}, 100);
+        el('start').disabled = true; el('case').disabled = true; el('stop').disabled = false;
+        el('status').textContent = 'Recording. Keep this tab visible. Seeking and pauses invalidate the comparison.';
+    } catch (e) {
+        if (recorder?.active) {recorder.stop(false); finish();}
+        el('status').textContent = e.message;
+    }
+};
+el('stop').onclick = () => {recorder.stop(false); player.pause(); finish();};
+el('save').onclick = () => {
+    const capture = recorder.export();
+    capture.network_setup_evidence = el('evidence').value.trim();
+    capture.player_version = player.getVersion();
+    capture.representations = representations;
+    capture.user_agent = navigator.userAgent;
+    capture.player_settings = player.getSettings();
+    const blob = new Blob([JSON.stringify(capture, null, 2)], {type: 'application/json'});
+    const url = URL.createObjectURL(blob), a = document.createElement('a');
+    a.href = url; a.download = 'player-capture.json'; a.click(); URL.revokeObjectURL(url);
+};
+</script>
+</html>
