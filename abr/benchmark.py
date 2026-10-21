@@ -14,9 +14,14 @@ from .media import Media
 from .env import StreamingEnv, StreamConfig
 
 
-def evaluate(env, *, baseline='lowest', seed=0):
-    if baseline not in {'lowest', 'highest', 'throughput'}:
+def evaluate(env, *, baseline='lowest', seed=0, policy=None, policy_metadata=None):
+    if baseline not in {'lowest', 'highest', 'throughput', 'model'}:
         raise ValueError("Unknown diagnostic baseline")
+    if baseline == 'model':
+        if not callable(policy) or not isinstance(policy_metadata, dict):
+            raise ValueError("Model replay requires a policy and explicit artifact metadata")
+    elif policy is not None or policy_metadata is not None:
+        raise ValueError("Policy supplied for a diagnostic baseline")
     episodes = []
     for index, trace in enumerate(env.dataset.splits[env.split]):
         obs, _ = env.reset(seed=seed, options={'trace_index': index})
@@ -30,6 +35,10 @@ def evaluate(env, *, baseline='lowest', seed=0):
                     estimate = 0.85 * len(samples) / np.sum(1 / np.maximum(samples, 1e-12))
                     eligible = np.flatnonzero(obs['candidates'][:, 0] <= estimate)
                     action = int(eligible[-1]) if len(eligible) else 0
+            if baseline == 'model':
+                action = policy(obs, env.config)
+                if isinstance(action, (bool, np.bool_)) or not isinstance(action, (int, np.integer)):
+                    raise ValueError("Policy must return an integer candidate index")
             action = int(action)
             obs, reward, terminated, truncated, info = env.step(action)
             total_reward += reward
@@ -48,6 +57,7 @@ def evaluate(env, *, baseline='lowest', seed=0):
     return {'provenance': {**env.provenance(), 'source_sha256': digest.hexdigest(),
                            'python': platform.python_version(), 'seed': seed, 'split': env.split,
                            'baseline': baseline, 'history_length': env.history_length,
+                           'policy_metadata': policy_metadata,
                            'versions': {x: importlib.metadata.version(x) for x in ('numpy', 'gymnasium')}},
             'episodes': episodes,
             'completion_rate': float(np.mean([x['completed'] for x in episodes]))}

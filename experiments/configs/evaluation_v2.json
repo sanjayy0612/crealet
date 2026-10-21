@@ -49,5 +49,15 @@
   },
   "tolerance_status": "provisional engineering thresholds, not established equivalence bounds; review on calibration cases and freeze before independent validation",
   "freeze_blockers": ["packaged_video_and_measured_quality_tables", "independent_collection_groups", "real_player_capture_and_controlled_network_evidence", "baseline_implementations", "target_hardware", "primary_reference_and_acceptance_margins"],
-  "publication_rules": "Separate implementation, reproduction, simulation findings and real-player evidence. Report negative results and limitations. No novelty or improvement claim before experiments."
+  "publication_rules": "Separate implementation, reproduction, simulation findings and real-player evidence. Report negative results and limitations. No novelty or improvement claim before experiments.",
+  "candidate_model_status": {
+    "implementation": "dense and GRU candidate scorers constructed; no ABR training yet",
+    "default_parameters": {
+      "small_dense_candidate_scorer": 10849,
+      "small_gru_candidate_scorer": 14305
+    },
+    "shared_contract": "observation v2 + public streaming context; variable candidate count; uncalibrated scores",
+    "training_method": "not implemented; architecture does not require PPO",
+    "evidence": "architecture/integration tests only; no streaming improvement or novelty established"
+  }
 }

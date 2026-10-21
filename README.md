@@ -9,6 +9,7 @@ conditions. This is a research hypothesis, not a demonstrated result.
 
 - Finite VOD and low-latency live application-level environment.
 - Measured trace imports, reproducible diagnostic replay and player-capture tools.
+- Small dense and GRU decision architectures implemented; weights are untrained.
 - Draft evaluation protocol; no model training or novel performance result yet.
 - Real-player validation still pending packaged media and a controlled network.
 
@@ -28,8 +29,8 @@ python -m abr.validate_player --help
 
 Runtime dependencies are NumPy and Gymnasium. Tests require pytest; JavaScript
 recorder checks also use Node.js when available. No Torch or Stable-Baselines3 is
-required for this environment foundation. Choose model dependencies when model
-implementation starts.
+required for this environment foundation. Install `requirements-model.txt` to
+construct and test the optional PyTorch models.
 
 ```python
 from abr import StreamingEnv, StreamConfig, QoEWeights
@@ -41,6 +42,7 @@ from abr import StreamingEnv, StreamConfig, QoEWeights
 - `abr/trace_import.py`: auditable trace conversions.
 - `abr/benchmark.py`: diagnostic baseline evaluation, with no training.
 - `abr/validate_player.py`: simulator/player timing comparison.
+- `abr/models/`: small candidate scorers, input adapter, checkpoints and inference.
 - `experiments/configs/evaluation_v2.json`: draft evaluation protocol.
 - `experiments/validation/`: independent browser capture page.
 - `tests/`: environment, import, and telemetry checks.
@@ -281,3 +283,93 @@ does not establish environment equivalence. The tool always keeps that broader
 claim false. Its recorder tests use analytical media-event fixtures; they are not
 actual DASH playback validation. No real-browser playback result or V2 trained
 model is claimed in this update.
+
+
+## First decision-model architectures (untrained)
+
+Two original project models now implement the same decision interface. They do
+not use Laya weights, language tokenizers, pretrained encoders, or PPO. Both score
+the available bitrate candidates in one forward pass. Neither has been trained
+on streaming outcomes. A score is not a probability, calibrated confidence, or
+an established estimate of future return.
+
+```text
+History [8,5] -> dense network OR masked GRUCell -> 48 features --+
+Player state [5] + public streaming context [10] -> 32 features -+-> fusion -> 48
+Candidate-set mean/min/max [9] --------------------------------+       |
+                                                          concatenate each
+                                                          candidate [3]
+                                                               |
+                                                    shared 51 -> 32 -> 1 scorer
+                                                               |
+                                                    raw scores -> argmax
+```
+
+| Component | Dense baseline | GRU variant |
+| --- | --- | --- |
+| History encoder | Flatten 8x5 -> 48 -> 48, SiLU | GRUCell: 4 inputs -> 48 hidden, mask-controlled updates |
+| Player encoder | 15 -> 32, SiLU | Same |
+| Fusion | 89 -> 48, SiLU | Same |
+| Candidate scorer | 51 -> 32 -> 1, SiLU between linear layers | Same |
+| Trainable parameters | 10,849 | 14,305 |
+
+The GRU reads oldest to newest and skips padded history rows. It re-encodes the
+finite window for each decision; it does not maintain a hidden state between
+calls. This prevents episode leakage and gives both variants the same finite
+history. The dense variant sees the validity flag directly. ModelConfig can
+change widths and history length, which changes the parameter count.
+
+The public context vector is streaming mode, target live latency, buffer limit,
+startup threshold, resume threshold, catchup enabled, minimum playback rate,
+maximum playback rate, catchup gain, and latency deadband. In VOD, irrelevant live
+fields use fixed neutral values. Context comes from StreamConfig, not future
+network data. Current observations still use the environment v2 schema.
+
+Each candidate supplies nominal Mbps, estimated MB, and duration seconds. The
+shared scorer supports a variable number of candidates. Mean/min/max pooling is
+independent of candidate order and lets scoring depend on the available ladder.
+Batching pads missing candidates and masks them out of pooling and action
+selection. This interface support does not prove transfer to unseen ladders.
+
+`make_batch` validates observation values and shapes. Scaling uses fixed units
+and log1p for nonnegative magnitudes; nothing is fitted on validation/test data.
+The low-level tensor forward expects the validated nonnegative feature contract.
+The model has no access to traces, true future live sizes or environment internals.
+Future training must specify its reward objective, discounting, and data protocol;
+raw model outputs are not yet defined as trained action values.
+
+```bash
+python -m pip install -r requirements-model.txt
+python -m abr.models init --kind dense --seed 0 --output runs/dense-initial.npz
+python -m abr.models init --kind gru --seed 0 --output runs/gru-initial.npz
+python -m abr.models inspect --checkpoint runs/gru-initial.npz
+python -m pytest -q
+```
+
+Artifacts use NPZ numerical arrays plus JSON metadata, loaded with pickle disabled.
+They record architecture, observation/feature versions, source hash, parameter
+count, initialization seed and PyTorch version. Loading rejects incompatible
+source or feature contracts and changed fixed scaling constants. This construction
+milestone only saves and loads artifacts labeled `training_status: untrained`.
+Regenerate initialization artifacts after model-source changes. Model files belong
+under ignored `runs/`; do not confuse them with trained checkpoints.
+
+An explicit untrained rollout can check plumbing on training/validation fixtures:
+
+```bash
+python -m abr.models rollout --checkpoint runs/gru-initial.npz --dataset data/audited.json --media data/packaged-media.json --mode live --allow-untrained --output runs/gru-integration.json
+```
+
+Without `--allow-untrained`, the command refuses to evaluate initial random weights.
+The command excludes the final test split. Reports include raw outcomes and the
+artifact's untrained status, model-source hash and file checksum. Successful
+playback on an easy fixture only checks integration. It does not demonstrate
+quality, generalization, lower computation, or a research contribution.
+
+Model tests are skipped when optional PyTorch is absent; install both developer
+and model requirements for the full suite. The tests check candidate permutation
+and padding behavior, temporal order, absence of persistent hidden state, gradient
+flow, serialization, and VOD/live rollouts. The synthetic regression target used
+in one gradient test is not an ABR training algorithm. Next work is to select and
+implement training and establish measured baselines; real-player validation and
+packaged-media quality measurements remain pending.
