@@ -1,20 +1,55 @@
 # ABR Decision Engine
 
-Independent research project for small adaptive bitrate (ABR) decision models.
-The objective is to reduce measured inference cost while preserving streaming
-quality and controlling stalls under unseen network, video, ladder and live-timing
-conditions. This is a research hypothesis, not a demonstrated result.
+This project aims to build a **small, streaming-specific decision model**. Like
+the decision interface used by [Laya](https://github.com/NandhaKishorM/laya),
+it takes a state and a set of allowed choices and returns one choice in a single
+forward pass. Here the state is numeric network and player history, and the
+choices are the available video representations. The model is intended to run
+at each adaptive bitrate (ABR) decision point in a video player. It is not a
+port of Laya's language encoder or its weights.
+
+The research question is whether this specialized model can make good bitrate
+decisions with low measured inference cost across unseen network, video, ladder,
+and live-timing conditions. Playback quality, stalls, and live delay must be
+measured separately from model size and speed. No such result has been shown yet.
 
 ## Current status
 
 - Finite VOD and low-latency live application-level environment.
 - Measured trace imports, reproducible diagnostic replay and player-capture tools.
 - Small dense and GRU decision architectures implemented; weights are untrained.
+- No training loop, trained streaming policy, calibrated decision probabilities,
+  or real-player policy integration yet.
 - Draft evaluation protocol; no model training or novel performance result yet.
 - Real-player validation still pending packaged media and a controlled network.
 
 This repository contains no legacy PPO model, Flask inference server, historical
 checkpoints or legacy training scripts. All future work belongs here.
+
+## Project goal and prior work
+
+The intended product is a bounded decision engine: **recent measurements +
+player state + candidate representations -> one representation**. The same
+interface can score a different number of candidates without changing the
+output layer. A streaming player would gather the inputs before each segment
+request, run the model, then use the selected representation. A single forward
+pass means the model does not generate text or search through outputs. It does
+not imply accurate choices, low latency on every device, or calibrated
+probabilities; those need training and measurement.
+
+Laya is useful as an interface reference for typed, single-pass choices, but
+its pretrained text encoder is unnecessary for the current numeric observations.
+[Pensieve](https://web.mit.edu/pensieve/content/pensieve-sigcomm17.pdf) already
+trained a neural ABR policy, so a learned bitrate selector alone is not a novel
+claim. The proposed contribution must be established by a specific, measured
+advantage over strong streaming baselines. The [research note](docs/research/decision_model_and_training_environment.md)
+compares the relevant systems and explains the training-data limits.
+
+The current dense and GRU models are small candidate scorers, not miniature
+copies of Laya or Pensieve. Their outputs are raw, untrained scores. Training
+must define what those scores mean (for example, policy logits or estimated
+action value). Applying softmax would not by itself make them reliable
+probabilities that a choice is safe or optimal.
 
 ## Development
 
@@ -145,6 +180,55 @@ can attribute playback of an earlier selected segment to a later action.
 Decisions have unequal elapsed times. A later RL design must explicitly choose
 per-decision discounting or elapsed-time discounting (a semi-Markov model).
 V2 does not make that training choice yet.
+
+### Is this environment suitable for training?
+
+**Yes, for an initial segment-level policy in a finite, trace-driven task.**
+`reset()` returns the first observation; `step(representation_index)` advances
+the network, source, and player clocks and returns the next observation, reward,
+termination flags, and measurements. Repeated calls create an action-dependent
+sequence of decisions. The replay runs in simulated time and can run faster than
+wall time. Live mode uses explicit part *tables* at simulated production
+times, but the action is still chosen once per segment. This is online-style
+interaction with a simulator, not a feed of current internet conditions.
+
+The environment should not be rewritten merely to make it "real-time." First
+train and evaluate a segment-level policy against measured, provenance-tracked
+network traces and packaged video metadata. Controlled-capacity traces are the
+cleaner replay input when available; observed throughput from another player's
+requests may depend on that player's actions and cannot automatically be treated
+as the capacity every candidate would have received. Keep training, validation,
+and test sessions separate. The included synthetic dataset is an engineering
+fixture, not evidence of real-world generalization.
+
+Before trusting learned-policy results, close these specific gaps:
+
+1. Collect or audit trace, RTT, and packaged video/part-size data. Record the
+   collection process and split by independent network sessions and source
+   videos. Supply a range of ladders and live timing conditions.
+2. Compare simulator startup, stalls, timing, and live latency with an actual
+   player under controlled network conditions. The current browser page captures
+   playback telemetry for this check; it does not export a complete per-request
+   training stream or impose network conditions.
+3. Choose an explicit training target and algorithm, record transitions with
+   action and elapsed time, and retain incomplete/timeout episodes. A simple
+   supervised imitation run can check training plumbing, but only learning from
+   a teacher does not establish an improvement over that teacher. An RL method
+   can optimize the specified QoE reward through simulator interaction, subject
+   to simulator bias.
+4. Benchmark learned policies against implemented BOLA, robust MPC, a documented
+   live controller, and a reproduced learned reference. Report playback metrics
+   and batch-one inference cost on fixed hardware. Test on held-out groups.
+5. For a claim about deployment, add a separate player adapter that measures
+   requests and playback, forms the same observation contract, invokes the
+   policy before each request, and logs actions and outcomes. Validate the
+   measurement mapping and run controlled player trials before using field data
+   for training or claiming real-time performance.
+
+If the intended controller must react *within* a segment to each live part, or
+must handle late joins, request cancellation, or continuously arriving media,
+the action and episode contracts need a separately versioned extension. The
+current segment-boundary environment cannot test those behaviors.
 
 ### Measured inputs and reproducible diagnostics
 
