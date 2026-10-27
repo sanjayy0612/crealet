@@ -5,13 +5,15 @@ import json
 from pathlib import Path
 import numpy as np
 import torch
-from .network import CandidateScorer, ModelConfig, FEATURE_VERSION
+from .network import FEATURE_VERSION
+from .factory import build_model
 
 
 def source_hash():
     digest = hashlib.sha256()
-    for path in sorted(Path(__file__).parent.glob('*.py')):
-        digest.update(path.name.encode() + path.read_bytes())
+    root = Path(__file__).parent
+    for path in sorted(root.rglob('*.py')):
+        digest.update(path.relative_to(root).as_posix().encode() + path.read_bytes())
     return digest.hexdigest()
 
 
@@ -44,7 +46,7 @@ def load_model(path, *, device='cpu'):
             raise ValueError('Model source differs from checkpoint; regenerate or explicitly migrate it')
         # Building a model must not consume the caller's CPU random state.
         with torch.random.fork_rng(devices=[]):
-            model = CandidateScorer(ModelConfig(**metadata['model_config']))
+            model = build_model(metadata['model_config'])
         state = model.state_dict()
         if set(archive.files) != set(state) | {'__metadata__'}:
             raise ValueError('Checkpoint tensor keys do not match architecture')

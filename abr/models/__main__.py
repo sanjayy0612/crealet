@@ -4,7 +4,7 @@ import hashlib
 import json
 from pathlib import Path
 import torch
-from .network import CandidateScorer, ModelConfig
+from .factory import build_model, MODEL_KINDS
 from .checkpoint import load_model, save_initial_model
 from .policy import DecisionPolicy
 
@@ -13,7 +13,7 @@ def main():
     p = argparse.ArgumentParser(description=__doc__)
     sub = p.add_subparsers(dest='command', required=True)
     init = sub.add_parser('init', help='Initialize random weights, explicitly marked untrained')
-    init.add_argument('--kind', choices=['dense', 'gru'], default='gru')
+    init.add_argument('--kind', choices=MODEL_KINDS, default='gru')
     init.add_argument('--history', type=int, default=8)
     init.add_argument('--seed', type=int, default=0)
     init.add_argument('--output', required=True)
@@ -36,7 +36,7 @@ def main():
                 raise ValueError('Seed must be nonnegative')
             with torch.random.fork_rng(devices=[]):
                 torch.random.default_generator.manual_seed(args.seed)
-                model = CandidateScorer(ModelConfig(kind=args.kind, history_length=args.history))
+                model = build_model({'kind': args.kind, 'history_length': args.history})
             metadata = save_initial_model(model, args.output, seed=args.seed)
             print(json.dumps({'output': args.output, **metadata}, indent=2))
             return

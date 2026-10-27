@@ -12,7 +12,9 @@ class DecisionPolicy:
     def scores(self, observation, stream_config):
         device = next(self.model.parameters()).device
         batch = make_batch([observation], [stream_config], self.model.config, device=device)
-        scores = self.model(batch)[0].cpu().numpy().copy()
+        output = self.model(batch)
+        logits = output[0] if isinstance(output, tuple) else output
+        scores = logits[0].cpu().numpy().copy()
         if not np.isfinite(scores).all():
             raise ValueError('Model produced non-finite candidate scores')
         return scores

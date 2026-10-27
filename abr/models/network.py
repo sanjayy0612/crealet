@@ -6,6 +6,8 @@ across calls or episodes. A masked step cannot update its history representation
 from dataclasses import dataclass
 import torch
 from torch import nn
+from .gru import MaskedGRUEncoder
+from .features import register_scaling, scale_player, scale_candidates
 
 FEATURE_VERSION = 1
 
@@ -32,7 +34,7 @@ class CandidateScorer(nn.Module):
         self.config = config or ModelConfig()
         c = self.config
         if c.kind == 'gru':
-            self.history_encoder = nn.GRUCell(4, c.history_width)
+            self.history_encoder = MaskedGRUEncoder(4, c.history_width)
         else:
             self.history_encoder = nn.Sequential(nn.Linear(c.history_length * 5, c.history_width),
                 nn.SiLU(), nn.Linear(c.history_width, c.history_width), nn.SiLU())
@@ -42,9 +44,7 @@ class CandidateScorer(nn.Module):
         self.scorer = nn.Sequential(nn.Linear(c.history_width + 3, c.scorer_width),
                                     nn.SiLU(), nn.Linear(c.scorer_width, 1))
         # Fixed physical unit scaling. Nothing is fit to validation or test data.
-        self.register_buffer('player_scale', torch.tensor([10.,10.,1.,1.,1., 1.,10.,10.,10.,10.,1.,1.,1.,1.,1.]))
-        self.register_buffer('player_log', torch.tensor([1,1,0,0,1, 0,1,1,1,1,0,0,0,1,1], dtype=torch.bool))
-        self.register_buffer('candidate_scale', torch.tensor([1.,1.,10.]))
+        register_scaling(self)
 
     def forward(self, batch):
         history, player, candidates, mask = (batch[k] for k in ('history', 'player', 'candidates', 'candidate_mask'))
@@ -59,15 +59,11 @@ class CandidateScorer(nn.Module):
         valid = history[..., 4:5]
         values = torch.log1p(history[..., :4] * valid)
         if c.kind == 'gru':
-            encoded = history.new_zeros((len(history), c.history_width))
-            for t in range(c.history_length):
-                updated = self.history_encoder(values[:, t], encoded)
-                encoded = torch.where(valid[:, t].bool(), updated, encoded)
+            encoded = self.history_encoder(values, valid)
         else:
             encoded = self.history_encoder(torch.cat((values, valid), dim=-1).flatten(1))
-        scaled = player / self.player_scale
-        state = self.state_encoder(torch.where(self.player_log, torch.log1p(scaled), scaled))
-        features = torch.log1p(candidates / self.candidate_scale)
+        state = self.state_encoder(scale_player(self, player))
+        features = scale_candidates(self, candidates)
         valid_features = features.masked_fill(~mask[..., None], 0.)
         mean = valid_features.sum(1) / mask.sum(1, keepdim=True)
         minimum = features.masked_fill(~mask[..., None], float('inf')).amin(1)
