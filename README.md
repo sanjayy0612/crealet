@@ -17,7 +17,7 @@ measured separately from model size and speed. No such result has been shown yet
 
 - Finite VOD and low-latency live application-level environment.
 - Measured trace imports, reproducible diagnostic replay and player-capture tools.
-- Small dense and GRU decision architectures implemented; weights are untrained.
+- Dense, GRU, and ABR-CandidateTransformer v1 architectures implemented; weights are untrained.
 - No training loop, trained streaming policy, calibrated decision probabilities,
   or real-player policy integration yet.
 - Draft evaluation protocol; no model training or novel performance result yet.
@@ -371,7 +371,25 @@ model is claimed in this update.
 
 ## First decision-model architectures (untrained)
 
-Two original project models now implement the same decision interface. They do
+The dense/GRU models below remain comparison baselines. The new
+[ABR-CandidateTransformer v1](abr/models/README.md) jointly processes numeric
+history, player state/configuration, and candidates using two 64-wide transformer
+layers with four attention heads. Its shared policy head returns candidate logits;
+its separate value head reads the contextualized state token for future
+actor-critic training. The default model has **77,826 trainable parameters**.
+There is no ABR training loop yet, and neither head has learned streaming behavior.
+
+```bash
+python -m abr.models init --kind candidate_transformer --seed 0 --output runs/transformer-initial.npz
+python -m abr.models inspect --checkpoint runs/transformer-initial.npz
+```
+
+GRU-specific recurrent code lives in `abr/models/gru/`; dense/GRU shared scoring
+remains in `abr/models/network.py`. Their public construction APIs and parameter
+counts are preserved. Model source hashing now covers nested Python modules;
+initialization artifacts from earlier source versions must be regenerated.
+
+The two original baseline models implement the same decision interface. They do
 not use Laya weights, language tokenizers, pretrained encoders, or PPO. Both score
 the available bitrate candidates in one forward pass. Neither has been trained
 on streaming outcomes. A score is not a probability, calibrated confidence, or
