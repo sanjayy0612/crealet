@@ -37,6 +37,26 @@ For this finite stream, use the final return when playback completes. The enviro
 - Schulman et al., [Proximal Policy Optimization Algorithms](https://arxiv.org/abs/1707.06347) (2017): PPO alternates environment sampling and optimization of a clipped surrogate objective, with multiple minibatch epochs per sample batch.
 - Fujimoto, Meger, and Precup, [Off-Policy Deep Reinforcement Learning without Exploration](https://arxiv.org/abs/1812.02900) (2019): offline RL faces extrapolation error from actions outside the logged dataset's support; this is why offline training is not the default when a simulator can generate experience.
 
-## Limits and next experiment
+## Recorded training results
 
-The new architecture is currently untrained, and the repository does not yet contain a training loop. First implement PPO with clear episode/truncation handling, then compare it to the current baselines on validation traces. Vary one factor at a time (for example, reward weights or rollout length). Do not tune on test traces. The simulator's synthetic fixtures are engineering checks, not evidence of generalization to measured networks.
+The PPO loop is implemented in [`abr/models/train_ppo.py`](../../abr/models/train_ppo.py). It samples candidate actions from the policy, uses `gamma=1` for the finite episode reward, normalizes the critic loss by return scale, and selects checkpoints by validation completion rate and then reward. Truncated episodes from trace exhaustion or request timeout end without bootstrapping. The checkpoint records its training data hash and hyperparameters.
+
+The available run used the built-in **synthetic VOD fixture**, not measured network data. The final sweep used five policy seeds (7–11), one fixed dataset seed (7), 50 PPO updates per run, and 16 episodes per update. It saw about 190,380 environment decisions across the five runs. Test traces were not used to select these revised checkpoints.
+
+The validation gate was: mean reward must match or beat the throughput baseline, and completion rate must be no lower. All five revised runs passed. The throughput baseline scored 124.39 with 100% completion on these eight validation traces; the model median reward was 172.17. Individual results:
+
+| Policy seed | Best update | Validation reward | Completed | Rebuffer time | Mean bitrate |
+| ---: | ---: | ---: | ---: | ---: | ---: |
+| 7 | 49 | 175.50 | 100% | 4.21 s | 1,598 kbps |
+| 8 | 25 | 172.17 | 100% | 4.22 s | 1,547 kbps |
+| 9 | 43 | 166.56 | 100% | 7.65 s | 1,617 kbps |
+| 10 | 44 | 164.60 | 100% | 7.97 s | 1,645 kbps |
+| 11 | 34 | 174.09 | 100% | 4.97 s | 1,591 kbps |
+
+For context, the throughput baseline's validation rebuffer time was 2.90 s and mean bitrate was 1,228 kbps. PPO earned more reward by choosing higher bitrates, with more stalls. The reward encodes a bitrate proxy and configured penalties; these numbers do not establish better viewer-perceived quality.
+
+The earlier small-rollout setup (four episodes per update, without critic-loss normalization) passed the same reward/completion gate in only two of five seeds. The revised rollout and loss scaling made this synthetic result repeatable across the five seeds.
+
+The selected validation checkpoint is [`runs/ppo-revised-seed-7/candidate_transformer_ppo.npz`](../../runs/ppo-revised-seed-7/candidate_transformer_ppo.npz). Per-seed validation numbers and checkpoint paths are in [`runs/ppo-revised-seed-sweep.json`](../../runs/ppo-revised-seed-sweep.json). An earlier test-split report exists at [`runs/ppo-synthetic-50/test_metrics.json`](../../runs/ppo-synthetic-50/test_metrics.json); it belongs to the earlier seed-7 checkpoint, not the revised selected model, and must not be presented as final evidence for the revised model.
+
+**Conclusion:** PPO now clears the stated first gate on the synthetic validation set. This is enough to show the training loop works and finds a repeatable policy for this fixture. It is not evidence of generalization to measured networks, live streams, other videos, or real viewers. The next useful step is to train and evaluate on audited, independently collected traces and compare stall/quality tradeoffs using measured video quality.
