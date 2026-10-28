@@ -1,8 +1,8 @@
 # Decision model structure
 
-All architectures are currently untrained. Construction and diagnostic rollout
-check wiring, not policy quality. PyTorch is optional for the simulator; install
-`requirements-model.txt` to use these modules.
+Model construction starts with random, untrained weights. The optional PPO
+trainer below can write trained checkpoints. PyTorch is optional for the
+simulator; install `requirements-model.txt` to use these modules.
 
 ```text
 abr/models/
@@ -83,10 +83,27 @@ Live rollouts additionally need packaged part metadata via `--media`, as with th
 existing models. Rollouts are restricted to train/validation splits. Loading checks
 model configuration, tensor keys/shapes/dtypes, finite weights, fixed scaling,
 parameter count, and a source hash covering all nested model Python modules.
-Older artifacts require regeneration after source changes. Artifacts remain
-explicitly labeled `training_status: untrained`.
+Older artifacts require regeneration after source changes. Checkpoints record
+whether they are `untrained` or `trained` and include training metadata.
 
-The value head is included for eventual actor-critic training; deployment policy
-selection uses only logits. Defining returns, discounting, truncation handling,
-and a training algorithm is future work. The current outputs are neither trained
-returns nor calibrated correctness/safety probabilities.
+The value head supports actor-critic training; deployment policy selection uses
+only logits. The value output is a learned estimate of future reward. Candidate
+scores are policy scores, not calibrated correctness or safety probabilities.
+
+## PPO training
+
+The first training loop uses complete episodes and the finite episode reward
+(`gamma=1`). With no dataset argument it trains on the built-in synthetic
+engineering fixture; this is useful for plumbing and early experiments, not for
+claims about real networks.
+
+```bash
+python -m abr.models.train_ppo --updates 50 --episodes-per-update 16 --seed 7 --output runs/ppo
+python -m abr.models.train_ppo --dataset data/audited.json --updates 50 --seed 7 --output runs/ppo-measured
+```
+
+The trainer checks validation traces after each update, keeps the best checkpoint
+by completion rate and then reward, and writes `training_metrics.json`. The test
+split is not used for training or selection. Timeout and trace-exhaustion episodes
+end without critic bootstrapping; their reward and completion failure remain in
+the report.
