@@ -2,8 +2,18 @@
   "schema_version": 1,
   "protocol_id": "abr-v2-small-decision-model-01",
   "status": "draft",
-  "research_question": "Can a small decision model retain streaming quality and control stalls under unseen network groups, videos, bitrate ladders and live timing, with lower measured inference cost?",
+  "project_goal": "Build and train a small streaming-specific, single-pass decision model that maps measured network/player state and available representations to one bitrate choice at each segment request",
+  "design_inspiration": "Laya-like bounded decision interface; numeric streaming encoder and learned candidate scorer, not a port of Laya's text encoder or weights",
+  "research_question": "Can this streaming-specific decision model preserve or improve playback outcomes under unseen network groups, videos, bitrate ladders and live timing while meeting a measured batch-one inference-cost target?",
   "novelty_status": "unproven; small recurrent models and candidate scoring are baselines, not novelty claims",
+  "environment_training_scope": {
+    "supported_now": "Finite trace-driven, segment-boundary Gym interaction for VOD and finite low-latency live; simulated clocks advance through each action and return the next observation, reward and elapsed time",
+    "not_supported_now": "Live network collection, wall-clock player control, per-part bitrate actions, late live joins, request cancellation or unbounded streams",
+    "trace_caution": "Observed goodput can depend on the collecting policy; do not interpret it as action-independent capacity without validation",
+    "next_gate": "Audit measured traces and packaged media, then validate simulator timing against controlled real-player captures before relying on trained-policy comparisons",
+    "training_contract_needed": "Define score meaning, objective, discounting for unequal elapsed decisions, transition logging, truncation handling and checkpoint provenance before policy training",
+    "deployment_gate": "Implement and validate a player-side measurement and decision adapter; browser timing capture alone is not a training feed or deployed policy"
+  },
   "tasks": ["vod", "finite_low_latency_live"],
   "candidate_models": ["small_dense_candidate_scorer", "small_gru_candidate_scorer"],
   "training_seeds": [0, 1, 2, 3, 4],
@@ -11,6 +21,7 @@
     "diagnostic": ["lowest", "highest", "harmonic_throughput"],
     "conventional": ["BOLA_for_vod", "robust_MPC_for_vod", "documented_live_controller"],
     "learned": ["reproduced_learned_reference"],
+    "comparison_note": "Laya is an interface inspiration, not a trained streaming baseline; compare playback to ABR controllers and inference cost to a specified learned ABR reference",
     "implementation_status": "Only diagnostic baselines exist in V2; other baselines require implementation and verification"
   },
   "split_rules": {
