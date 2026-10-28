@@ -35,12 +35,29 @@ def save_initial_model(model, path, *, seed):
     return metadata
 
 
+def save_trained_model(model, path, *, training_metadata):
+    """Save a trained state with the same strict, pickle-free format."""
+    if not isinstance(training_metadata, dict):
+        raise ValueError('training_metadata must be a dictionary')
+    metadata = {'format_version': 1, 'observation_version': 2, 'feature_version': FEATURE_VERSION,
+                'model_config': asdict(model.config), 'training_status': 'trained',
+                'training': training_metadata, 'parameter_count': model.parameter_count,
+                'model_source_sha256': source_hash(), 'torch_version': str(torch.__version__)}
+    arrays = {name: value.detach().cpu().numpy() for name, value in model.state_dict().items()}
+    arrays['__metadata__'] = np.frombuffer(json.dumps(metadata, sort_keys=True).encode(), dtype=np.uint8)
+    target = Path(path)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    with target.open('wb') as file:
+        np.savez_compressed(file, **arrays)
+    return metadata
+
+
 def load_model(path, *, device='cpu'):
     with np.load(path, allow_pickle=False) as archive:
         metadata = json.loads(archive['__metadata__'].tobytes().decode())
         if (metadata.get('format_version') != 1 or metadata.get('observation_version') != 2
                 or metadata.get('feature_version') != FEATURE_VERSION
-                or metadata.get('training_status') != 'untrained'):
+                or metadata.get('training_status') not in {'untrained', 'trained'}):
             raise ValueError('Unsupported checkpoint or feature contract')
         if metadata.get('model_source_sha256') != source_hash():
             raise ValueError('Model source differs from checkpoint; regenerate or explicitly migrate it')
