@@ -26,6 +26,11 @@ conditions remains unproven.
 - A local native MSE player connects the frozen model to actual video requests
   and decoding under HTTP trace pacing. See
   [policy playback](experiments/validation/POLICY_PLAYER.md).
+- A follow-up DQN controller with an explicit observed-throughput filter raises
+  reserved-trace bitrate from 300 to 736 kbps with zero stalls. Browser checks
+  also completed without stalls at higher bitrates. A matching simple rule
+  produces the same choices; a neural advantage remains unproven. See the
+  [filtered-controller report](runs/dqn-safe/training_report.md).
 - Draft evaluation protocol; broad generalization and novel performance are
   not established by the initial replay run.
 - Production-player integration and broad simulator/player calibration remain

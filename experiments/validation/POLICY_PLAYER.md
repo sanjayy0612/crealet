@@ -15,12 +15,19 @@ Open `http://127.0.0.1:8787`. Choose a policy and a connection and start playbac
 Reload to start a new session. Save measurements after playback. Video is muted
 and has no audio track. Seeking and user pauses are excluded from the experiment.
 
+The default checkpoint is the newer `runs/dqn-safe/` controller. Its recorded
+observed-throughput filter applies to DQN choices and is identified in the page
+and capture metadata. For the latest two-case verification, use `--port 8788`
+on the server, then run
+`node scripts/capture_policy_player.mjs --port=8788 --output=runs/player-safe --policies=dqn`.
+See `runs/dqn-safe/training_report.md` for the matching non-neural baseline.
+
 The server loads the frozen validation-accepted checkpoint once, checks the
 dataset fingerprint, and binds only to loopback. The browser sends its measured
 buffer, previous bitrate, remaining fraction, and eight download measurements.
 The server builds nominal-size candidates using the same input contract as the
-trainer. The model receives no future trace information. There is no bitrate
-override or hidden fallback. The throughput baseline uses the same harmonic
+trainer. The model receives no future trace information. A checkpoint's recorded
+action filter constrains DQN choices during playback. The throughput baseline uses the same harmonic
 mean and 0.85 safety factor as `abr.benchmark`.
 
 The actual media payloads stay in the ignored `artifacts/player-media/` cache.

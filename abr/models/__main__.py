@@ -7,6 +7,7 @@ import torch
 from .factory import build_model, MODEL_KINDS
 from .checkpoint import load_model, save_initial_model
 from .policy import DecisionPolicy
+from .safety import ActionSafety
 
 
 def main():
@@ -56,7 +57,9 @@ def main():
                            config=StreamConfig(**cfg), split=args.split, history=model.config.history_length)
         artifact = {**metadata, 'checkpoint_sha256': hashlib.sha256(Path(args.checkpoint).read_bytes()).hexdigest(),
                     'purpose': 'UNTRAINED architecture integration test; no policy quality claim'}
-        report = evaluate(env, baseline='model', seed=args.seed, policy=DecisionPolicy(model), policy_metadata=artifact)
+        safety = metadata.get('training', {}).get('safety_filter')
+        report = evaluate(env, baseline='model', seed=args.seed,
+                          policy=DecisionPolicy(model, safety=ActionSafety(**safety) if safety else None), policy_metadata=artifact)
         output = Path(args.output)
         output.parent.mkdir(parents=True, exist_ok=True)
         output.write_text(json.dumps(report, indent=2, allow_nan=False) + '\n')

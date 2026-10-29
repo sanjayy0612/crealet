@@ -1,0 +1,70 @@
+{
+  "all_captures_valid": true,
+  "cases": {
+    "dqn-measured": {
+      "capture_checks": {
+        "native_capture": true,
+        "checkpoint_matches": true,
+        "dataset_matches": true,
+        "trace_matches": true,
+        "visible_samples": true,
+        "real_decoded_frames": true,
+        "segment_bytes_match": true,
+        "segment_choices_match_server": true,
+        "recorded_filter_respected": true,
+        "stall_seconds_match_events": true,
+        "complete_has_all_segments": true,
+        "complete_has_full_media": true,
+        "complete_transport_finished": true,
+        "independent_validator_agrees": true
+      },
+      "capture_valid": true,
+      "completed": true,
+      "error": null,
+      "raw_waiting_event_count": 0,
+      "positive_duration_stall_events": 0,
+      "independent_stall_seconds": 0.0,
+      "meets_absolute_targets": true,
+      "independent_completed_playback_metrics": {
+        "startup_s": 0.9095,
+        "rebuffer_s": 0.0,
+        "stall_events": 0,
+        "played_s": 193.76,
+        "wall_time_s": 194.66980000000447
+      }
+    },
+    "dqn-outage": {
+      "capture_checks": {
+        "native_capture": true,
+        "checkpoint_matches": true,
+        "dataset_matches": true,
+        "trace_matches": true,
+        "visible_samples": true,
+        "real_decoded_frames": true,
+        "segment_bytes_match": true,
+        "segment_choices_match_server": true,
+        "recorded_filter_respected": true,
+        "stall_seconds_match_events": true,
+        "complete_has_all_segments": true,
+        "complete_has_full_media": true,
+        "complete_transport_finished": true,
+        "independent_validator_agrees": true
+      },
+      "capture_valid": true,
+      "completed": true,
+      "error": null,
+      "raw_waiting_event_count": 0,
+      "positive_duration_stall_events": 0,
+      "independent_stall_seconds": 0.0,
+      "meets_absolute_targets": true,
+      "independent_completed_playback_metrics": {
+        "startup_s": 1.1126999999955296,
+        "rebuffer_s": 0.0,
+        "stall_events": 0,
+        "played_s": 193.76,
+        "wall_time_s": 194.8746000000015
+      }
+    }
+  },
+  "note": "Native waiting/playing transitions can have identical timestamps. Raw waiting-event counts include those; positive-duration counts exclude them. Incomplete baseline playback is a policy outcome, not a complete-video result."
+}

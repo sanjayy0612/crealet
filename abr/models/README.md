@@ -129,6 +129,27 @@ It is an initial realistic replay check, not evidence for other videos, current
 networks, or real-player performance. See
 `data/realistic_envivio/README.md` for sources and limitations.
 
+## DQN with an observed-throughput filter
+
+The follow-up DQN experiment uses `--safety-filter --buffer-reserve-s 12
+--throughput-factor .65`. Until the buffer contains 12 seconds and there is a
+valid goodput sample, only the lowest representation is allowed. After that,
+the allowed set includes representations below 65% of the harmonic mean of
+past observed goodput, plus the lowest representation. This heuristic cannot
+guarantee stall-free playback on an unforeseen outage.
+
+The filter applies to random exploration, greedy action selection, and the
+online network's next-action selection in the Double DQN target. Playback uses
+the same filter. The checkpoint records the filter settings, and the player and
+rollout CLI read them explicitly. Raw Q scores are not a standalone filtered
+policy; callers constructing `DecisionPolicy` must pass `ActionSafety` from the
+checkpoint's `training.safety_filter` metadata.
+
+The reported system is **DQN plus the explicit filter**. The trainer also
+evaluates a non-neural rule that picks the highest allowed representation. This
+comparison is required before attributing an improvement to learned weights.
+See `runs/dqn-safe/training_report.md`.
+
 ## PPO training
 
 The first training loop uses complete episodes and the finite episode reward

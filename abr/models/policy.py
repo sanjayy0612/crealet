@@ -2,11 +2,13 @@
 import numpy as np
 import torch
 from .inputs import make_batch
+from .safety import allowed_actions
 
 
 class DecisionPolicy:
-    def __init__(self, model):
+    def __init__(self, model, *, safety=None):
         self.model = model.eval()
+        self.safety = safety
 
     @torch.no_grad()
     def scores(self, observation, stream_config):
@@ -20,4 +22,5 @@ class DecisionPolicy:
         return scores
 
     def __call__(self, observation, stream_config):
-        return int(self.scores(observation, stream_config).argmax())
+        scores = self.scores(observation, stream_config)
+        return int(np.where(allowed_actions(observation, self.safety), scores, -np.inf).argmax())

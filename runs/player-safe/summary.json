@@ -1,0 +1,30 @@
+[
+  {
+    "name": "dqn-measured",
+    "done": true,
+    "completed": true,
+    "error": null,
+    "startup_s": 0.9095,
+    "rebuffer_s": 0,
+    "stall_events": 0,
+    "played_s": 193.76,
+    "wall_time_s": 194.67180000000448,
+    "mean_played_bitrate_kbps": 1002.1646481328563,
+    "dropped_frames": 1,
+    "total_frames": 4842
+  },
+  {
+    "name": "dqn-outage",
+    "done": true,
+    "completed": true,
+    "error": null,
+    "startup_s": 1.1126999999955296,
+    "rebuffer_s": 0,
+    "stall_events": 0,
+    "played_s": 193.76,
+    "wall_time_s": 194.87510000000148,
+    "mean_played_bitrate_kbps": 712.5920726672176,
+    "dropped_frames": 2,
+    "total_frames": 4842
+  }
+]

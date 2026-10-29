@@ -1,0 +1,22 @@
+[
+  {
+    "name": "dqn-measured",
+    "Browser": "Chrome/156.0.8078.73",
+    "File-Path-Style": "posix",
+    "Protocol-Version": "1.3",
+    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.0.0 Safari/537.36",
+    "V8-Version": "15.6.75.25",
+    "WebKit-Version": "537.36 (@2f9a11097447f226133bc1a31c787291a5eeab98)",
+    "webSocketDebuggerUrl": "ws://127.0.0.1:64865/devtools/browser/31807929-960d-496c-bb2e-b4ac240d703d"
+  },
+  {
+    "name": "dqn-outage",
+    "Browser": "Chrome/156.0.8078.73",
+    "File-Path-Style": "posix",
+    "Protocol-Version": "1.3",
+    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.0.0 Safari/537.36",
+    "V8-Version": "15.6.75.25",
+    "WebKit-Version": "537.36 (@2f9a11097447f226133bc1a31c787291a5eeab98)",
+    "webSocketDebuggerUrl": "ws://127.0.0.1:64882/devtools/browser/7f01f380-b92e-45c4-afcf-ae4a8b72503b"
+  }
+]

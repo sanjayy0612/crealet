@@ -22,6 +22,7 @@ from .checkpoint import load_model, save_trained_model
 from .dueling_dqn import DuelingDoubleDQN
 from .inputs import make_batch
 from .policy import DecisionPolicy
+from .safety import ActionSafety, allowed_actions, constrained_argmax
 
 
 def copy_observation(observation):
@@ -33,8 +34,8 @@ def checkpoint_eligible(validation, max_startup_s=None):
                 and (max_startup_s is None or all(e['startup_s'] <= max_startup_s for e in validation['episodes'])))
 
 
-def evaluate_policy(env, model, *, stall_limits_s=None):
-    policy = DecisionPolicy(model)
+def evaluate_policy(env, model, *, stall_limits_s=None, safety=None):
+    policy = DecisionPolicy(model, safety=safety)
     rewards, completions, stalls, bitrates = [], [], [], []
     episodes = []
     for index, _trace in enumerate(env.dataset.splits[env.split]):
@@ -89,7 +90,7 @@ def baseline_summary(report):
                          for item in report['episodes']]}
 
 
-def learn_batch(online, target, optimizer, replay, batch_size, config, device, gamma):
+def learn_batch(online, target, optimizer, replay, batch_size, config, device, gamma, safety=None):
     items = random.sample(replay, batch_size)
     observations = [item[0] for item in items]
     actions = torch.tensor([item[1] for item in items], dtype=torch.long, device=device)
@@ -102,7 +103,7 @@ def learn_batch(online, target, optimizer, replay, batch_size, config, device, g
     q_values = online(current_batch).gather(1, actions[:, None]).squeeze(1)
     with torch.no_grad():
         # Double DQN: online network selects the next action; target network scores it.
-        next_actions = online(next_batch).argmax(dim=1)
+        next_actions = constrained_argmax(online(next_batch), next_observations, safety)
         next_q = target(next_batch).gather(1, next_actions[:, None]).squeeze(1)
         targets = rewards + gamma * (1. - dones) * next_q
     loss = nn.functional.smooth_l1_loss(q_values, targets)
@@ -130,6 +131,10 @@ def main():
     parser.add_argument('--learn-every', type=int, default=4)
     parser.add_argument('--target-update-steps', type=int, default=250)
     parser.add_argument('--evaluate-every', type=int, default=10)
+    parser.add_argument('--safety-filter', action='store_true',
+                        help='Filter exploration, greedy actions and bootstrap targets using past goodput and a buffer reserve')
+    parser.add_argument('--buffer-reserve-s', type=float, default=12.)
+    parser.add_argument('--throughput-factor', type=float, default=.65)
     parser.add_argument('--stall-tolerance-s', type=float, default=0.,
                         help='Allowed rebuffer seconds above the throughput baseline on each validation trace')
     parser.add_argument('--max-rebuffer-s', type=float, default=None,
@@ -171,6 +176,8 @@ def main():
     media = Media.load(args.media) if args.media else None
     config = StreamConfig(mode=args.mode)
     weights = QoEWeights(rebuffer=args.rebuffer_penalty)
+    safety = ActionSafety(args.buffer_reserve_s, args.throughput_factor) if args.safety_filter else None
+    safety_metadata = None if safety is None else asdict(safety)
     train_env = StreamingEnv(dataset, media=media, split='train', config=config, weights=weights)
     validation_env = StreamingEnv(dataset, media=media, split='validation', config=config, weights=weights)
     validation_baseline_reports = {
@@ -209,11 +216,11 @@ def main():
                           (args.epsilon_start - args.epsilon_end) * global_steps /
                           args.epsilon_decay_steps)
             if rng.random() < epsilon:
-                action = int(rng.integers(len(observation['candidates'])))
+                action = int(rng.choice(np.flatnonzero(allowed_actions(observation, safety))))
             else:
                 batch = make_batch([observation], [config], online.config, device=device)
                 with torch.no_grad():
-                    action = int(online(batch)[0].argmax().item())
+                    action = int(constrained_argmax(online(batch), [observation], safety)[0].item())
 
             current = copy_observation(observation)
             next_observation, reward, terminated, truncated, _info = train_env.step(action)
@@ -229,7 +236,7 @@ def main():
             if len(replay) >= max(args.warmup, args.batch_size) and global_steps % args.learn_every == 0:
                 online.train()
                 learn_batch(online, target, optimizer, replay, args.batch_size,
-                            config, device, args.gamma)
+                            config, device, args.gamma, safety)
                 gradient_steps += 1
                 if gradient_steps % args.target_update_steps == 0:
                     target.load_state_dict(online.state_dict())
@@ -237,7 +244,7 @@ def main():
 
         if episode_number % args.evaluate_every == 0 or episode_number == args.episodes:
             online.eval()
-            validation = evaluate_policy(validation_env, online, stall_limits_s=stall_limits_s)
+            validation = evaluate_policy(validation_env, online, stall_limits_s=stall_limits_s, safety=safety)
             record = {'episode': episode_number, 'environment_steps': global_steps,
                       'gradient_steps': gradient_steps, 'epsilon': epsilon,
                       'train_reward': float(episode_reward), 'completed': bool(terminated),
@@ -258,6 +265,7 @@ def main():
                     'replay_capacity': args.replay_capacity, 'warmup': args.warmup,
                     'best_validation': validation,
                     'config': asdict(config), 'weights': asdict(weights),
+                    'safety_filter': safety_metadata,
                     'max_startup_s': args.max_startup_s, 'max_rebuffer_s': args.max_rebuffer_s,
                     'stall_constraint': {'baseline': 'throughput per validation trace',
                                          'tolerance_s': args.stall_tolerance_s,
@@ -277,6 +285,7 @@ def main():
                     'replay_capacity': args.replay_capacity, 'warmup': args.warmup,
                     'best_validation': validation,
                     'config': asdict(config), 'weights': asdict(weights),
+                    'safety_filter': safety_metadata,
                     'max_startup_s': args.max_startup_s, 'max_rebuffer_s': args.max_rebuffer_s,
                     'stall_constraint': {'baseline': 'throughput per validation trace',
                                          'tolerance_s': args.stall_tolerance_s,
@@ -286,17 +295,25 @@ def main():
     selected_checkpoint = output_dir / 'dueling_double_dqn_feasible.npz' if best_feasible_key is not None else None
     diagnostic_checkpoint = selected_checkpoint or checkpoint
     best_model, metadata = load_model(diagnostic_checkpoint, device=device)
-    validation_report = evaluate_policy(validation_env, best_model, stall_limits_s=stall_limits_s)
+    validation_report = evaluate_policy(validation_env, best_model, stall_limits_s=stall_limits_s, safety=safety)
     test_env = StreamingEnv(dataset, media=media, split='test', config=config, weights=weights)
-    test_report = evaluate_policy(test_env, best_model)
+    test_report = evaluate_policy(test_env, best_model, safety=safety)
     test_baselines = {name: baseline_summary(baseline_report(dataset, media, 'test', config, name, weights))
                       for name in ('lowest', 'highest', 'throughput')}
+    filter_baselines = {}
+    if safety is not None:
+        for split in ('validation', 'test'):
+            report = evaluate(StreamingEnv(dataset, media=media, split=split, config=config, weights=weights),
+                              baseline='model', policy=lambda obs, cfg: int(np.flatnonzero(allowed_actions(obs, safety))[-1]),
+                              policy_metadata={'kind': 'highest_allowed_without_learning', 'safety_filter': safety_metadata})
+            filter_baselines[split] = baseline_summary(report)
     result = {'training': {'algorithm': 'Dueling Double DQN', 'seed': args.seed,
                            'data_seed': data_seed, 'episodes': args.episodes,
                            'environment_steps': global_steps, 'gradient_steps': gradient_steps,
                            'dataset_sha256': dataset.fingerprint,
                            'synthetic_fixture': not bool(args.dataset),
                            'config': asdict(config), 'weights': asdict(weights),
+                           'safety_filter': safety_metadata,
                            'max_rebuffer_s': args.max_rebuffer_s,
                            'max_startup_s': args.max_startup_s,
                            'stall_constraint': {'baseline': 'throughput per validation trace',
@@ -308,6 +325,8 @@ def main():
               'best_validation': validation_report, 'validation_baselines': validation_baselines,
               'best_feasible_validation': best_feasible_validation,
               'heldout_test': test_report, 'test_baselines': test_baselines,
+              'highest_allowed_baseline': filter_baselines,
+              'unfiltered_validation': evaluate_policy(validation_env, best_model) if safety is not None else None,
               'history': history}
     metrics_path = output_dir / 'training_metrics.json'
     metrics_path.write_text(json.dumps(result, indent=2) + '\n')

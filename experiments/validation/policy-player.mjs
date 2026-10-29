@@ -86,6 +86,8 @@ async function run() {
         window.runStatus = {started: true, done: false, visibility: document.visibilityState};
         event('start');
         context = await post('/session', {policy: el('policy').value, split: el('split').value, trace_index: Number(el('trace').value)});
+        if (context.policy === 'dqn' && context.safety_filter)
+            el('policy').selectedOptions[0].textContent = 'DQN + observed-speed filter';
         source = new MediaSource();
         video.src = URL.createObjectURL(source);
         await new Promise(resolve => source.addEventListener('sourceopen', resolve, {once: true}));

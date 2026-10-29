@@ -1,5 +1,6 @@
 """Audit capture integrity separately from whether a policy met playback targets."""
 import hashlib
+import argparse
 import json
 from pathlib import Path
 
@@ -31,11 +32,18 @@ def event_stalls(events, end_s):
 
 
 def main():
-    output = Path('runs/player-hard')
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--directory', default='runs/player-hard')
+    parser.add_argument('--checkpoint', default='runs/dqn-hard/dueling_double_dqn_feasible.npz')
+    parser.add_argument('--cases', default=','.join(CASES))
+    args = parser.parse_args()
+    output = Path(args.directory)
     dataset = Dataset.load('data/hard_envivio/dataset.json')
-    checkpoint_sha = hashlib.sha256(Path('runs/dqn-hard/dueling_double_dqn_feasible.npz').read_bytes()).hexdigest()
+    checkpoint_sha = hashlib.sha256(Path(args.checkpoint).read_bytes()).hexdigest()
     results = {}
     for name, trace_index in CASES.items():
+        if name not in args.cases.split(','):
+            continue
         data = json.loads((output / (name + '.json')).read_text())
         ctx, metrics = data['context'], data['metrics']
         segments = data['segments']
@@ -55,6 +63,8 @@ def main():
             'real_decoded_frames': metrics['total_frames'] > 0,
             'segment_bytes_match': all(s['bytes'] == dataset.video.sizes_bytes[s['segment_index'], s['action']] for s in segments),
             'segment_choices_match_server': all(s['action'] == decisions[i]['action'] for i, s in enumerate(segments)),
+            'recorded_filter_respected': ctx['policy'] != 'dqn' or not ctx.get('safety_filter') or all(
+                d.get('filter_applied') and d['action'] in d.get('allowed_actions', []) for d in decisions),
             'stall_seconds_match_events': abs(stalls - metrics['rebuffer_s']) < .02,
             'complete_has_all_segments': not data['completed'] or len(segments) == len(dataset.video.durations_s),
             'complete_has_full_media': not data['completed'] or abs(metrics['played_s'] - dataset.video.durations_s.sum()) < .2,
@@ -69,7 +79,7 @@ def main():
                          'independent_stall_seconds': stalls,
                          'meets_absolute_targets': bool(data['completed'] and metrics['startup_s'] <= 3 and metrics['rebuffer_s'] <= 8),
                          'independent_completed_playback_metrics': independent}
-    report = {'all_captures_valid': all(r['capture_valid'] for r in results.values()), 'cases': results,
+    report = {'all_captures_valid': bool(results) and all(r['capture_valid'] for r in results.values()), 'cases': results,
               'note': 'Native waiting/playing transitions can have identical timestamps. Raw waiting-event counts include those; positive-duration counts exclude them. Incomplete baseline playback is a policy outcome, not a complete-video result.'}
     (output / 'verification.json').write_text(json.dumps(report, indent=2) + '\n')
     print(json.dumps(report, indent=2))

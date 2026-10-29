@@ -7,7 +7,8 @@ import {join} from 'node:path';
 
 const smoke = process.argv.includes('--smoke');
 const serverPort = Number(process.argv.find(x => x.startsWith('--port='))?.split('=')[1] || 8787);
-const out = smoke ? 'runs/player-hard-smoke' : 'runs/player-hard';
+const outputArg = process.argv.find(x => x.startsWith('--output='))?.slice('--output='.length);
+const out = outputArg || (smoke ? 'runs/player-hard-smoke' : 'runs/player-hard');
 const health = await fetch(`http://127.0.0.1:${serverPort}/config`, {signal: AbortSignal.timeout(5000)});
 if (!health.ok) throw Error('Player server is unavailable');
 await mkdir(out, {recursive: true});
@@ -60,13 +61,16 @@ async function connect(url) {
     };
 }
 
-const cases = smoke ? [{name: 'decode-smoke', policy: 'lowest', split: 'validation', trace: 2}] : [
+let cases = smoke ? [{name: 'decode-smoke', policy: 'lowest', split: 'validation', trace: 2}] : [
     {name: 'dqn-measured', policy: 'dqn', split: 'test', trace: 0},
     {name: 'throughput-measured', policy: 'throughput', split: 'test', trace: 0},
     {name: 'dqn-outage', policy: 'dqn', split: 'test', trace: 2},
     {name: 'throughput-outage', policy: 'throughput', split: 'test', trace: 2},
     {name: 'highest-outage', policy: 'highest', split: 'test', trace: 2}
 ];
+const policies = process.argv.find(x => x.startsWith('--policies='))?.slice('--policies='.length).split(',');
+if (!smoke && policies) cases = cases.filter(c => policies.includes(c.policy));
+if (!cases.length) throw Error('No matching playback cases');
 const connections = [];
 try {
     const browserInfo = [];

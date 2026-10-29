@@ -1,7 +1,7 @@
 """Local MSE player, frozen policy inference, and paced HTTP trace replay.
 
 This is an application-level test server, not a packet-level network emulator.
-Run: python -m abr.player_server --checkpoint runs/dqn-hard/dueling_double_dqn_feasible.npz
+Run: python -m abr.player_server --checkpoint runs/dqn-safe/dueling_double_dqn_feasible.npz
 """
 import argparse
 from dataclasses import asdict
@@ -23,6 +23,7 @@ from .models.checkpoint import load_model
 from .models.inputs import make_batch
 from .models.policy import DecisionPolicy
 from .models.train_dueling_dqn import checkpoint_eligible
+from .models.safety import ActionSafety, allowed_actions
 from .transport import Replay
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -51,8 +52,9 @@ class PlayerApp:
         torch.set_num_threads(1)
         self.dataset = dataset
         self.model, self.metadata = load_model(checkpoint)
-        self.policy = DecisionPolicy(self.model)
         training = self.metadata['training']
+        safety = training.get('safety_filter')
+        self.policy = DecisionPolicy(self.model, safety=ActionSafety(**safety) if safety else None)
         self.config = StreamConfig(**training['config'])
         if self.config.mode != 'vod':
             raise ValueError('This player supports finite VOD only')
@@ -94,6 +96,7 @@ class PlayerApp:
                 'durations_s': self.dataset.video.durations_s.tolist(), 'representations': self.reps,
                 'dataset_sha256': self.dataset.fingerprint, 'checkpoint_sha256': self.checkpoint_sha256,
                 'checkpoint_episode': self.metadata['training']['episode'],
+                'safety_filter': self.metadata['training'].get('safety_filter'),
                 'source_commit': self.index['source_commit'],
                 'network_method': 'HTTP body pacing from finite trace, 16 KiB chunks; assumed per-request RTT; includes init requests; no packet/radio emulation'}
 
@@ -144,6 +147,8 @@ class Handler(BaseHTTPRequestHandler):
                 make_batch([observation], [self.app.config], self.app.model.config)
                 action = select_action(session['policy'], observation, self.app.config, self.app.policy)
             result = {'action': action, 'bitrate_kbps': float(ladder[action]),
+                      'filter_applied': session['policy'] == 'dqn' and self.app.policy.safety is not None,
+                      'allowed_actions': np.flatnonzero(allowed_actions(observation, self.app.policy.safety if session['policy'] == 'dqn' else None)).tolist(),
                       'decision_ms': (time.perf_counter() - start) * 1000}
             session['decisions'].append({'segment_index': index, 'state': observation['state'].tolist(), **result})
             self.respond(result)
@@ -218,7 +223,7 @@ class Handler(BaseHTTPRequestHandler):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--checkpoint', default='runs/dqn-hard/dueling_double_dqn_feasible.npz')
+    parser.add_argument('--checkpoint', default='runs/dqn-safe/dueling_double_dqn_feasible.npz')
     parser.add_argument('--dataset', default='data/hard_envivio/dataset.json')
     parser.add_argument('--media-dir', default='artifacts/player-media')
     parser.add_argument('--port', type=int, default=8787)
