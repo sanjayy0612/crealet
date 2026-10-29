@@ -35,6 +35,8 @@ For this finite stream, use the final return when playback completes. The enviro
 
 - Mao, Netravali, and Alizadeh, [Neural Adaptive Video Streaming with Pensieve](https://web.mit.edu/pensieve/) (SIGCOMM 2017 project and paper links): trace-driven ABR policy learned through reinforcement learning from observed outcomes.
 - Schulman et al., [Proximal Policy Optimization Algorithms](https://arxiv.org/abs/1707.06347) (2017): PPO alternates environment sampling and optimization of a clipped surrogate objective, with multiple minibatch epochs per sample batch.
+- Wang et al., [Dueling Network Architectures for Deep Reinforcement Learning](https://proceedings.mlr.press/v48/wangf16.html) (ICML 2016): separates state value and per-action advantage estimates.
+- van Hasselt, Guez, and Silver, [Deep Reinforcement Learning with Double Q-Learning](https://ojs.aaai.org/index.php/AAAI/article/view/10295) (AAAI 2016): uses one network to select the next action and another to score it, reducing Q-value overestimation.
 - Fujimoto, Meger, and Precup, [Off-Policy Deep Reinforcement Learning without Exploration](https://arxiv.org/abs/1812.02900) (2019): offline RL faces extrapolation error from actions outside the logged dataset's support; this is why offline training is not the default when a simulator can generate experience.
 
 ## Recorded training results
@@ -60,3 +62,19 @@ The earlier small-rollout setup (four episodes per update, without critic-loss n
 The selected validation checkpoint is [`runs/ppo-revised-seed-7/candidate_transformer_ppo.npz`](../../runs/ppo-revised-seed-7/candidate_transformer_ppo.npz). Per-seed validation numbers and checkpoint paths are in [`runs/ppo-revised-seed-sweep.json`](../../runs/ppo-revised-seed-sweep.json). An earlier test-split report exists at [`runs/ppo-synthetic-50/test_metrics.json`](../../runs/ppo-synthetic-50/test_metrics.json); it belongs to the earlier seed-7 checkpoint, not the revised selected model, and must not be presented as final evidence for the revised model.
 
 **Conclusion:** PPO now clears the stated first gate on the synthetic validation set. This is enough to show the training loop works and finds a repeatable policy for this fixture. It is not evidence of generalization to measured networks, live streams, other videos, or real viewers. The next useful step is to train and evaluate on audited, independently collected traces and compare stall/quality tradeoffs using measured video quality.
+
+## Dueling Double DQN comparison
+
+The separate [`DuelingDoubleDQN`](../../abr/models/dueling_dqn.py) keeps the numeric Transformer encoder but changes its output to Q-values. A state-value head estimates `V(s)`. A candidate head estimates `A(s,a)`, the extra value of selecting each bitrate. The model combines them as `Q(s,a) = V(s) + A(s,a) - mean(valid A)`. The [trainer](../../abr/models/train_dueling_dqn.py) uses a replay buffer and target network. For the Double DQN target, the online network selects the next action and the target network evaluates it. Deployment picks the valid bitrate with the largest Q-value.
+
+For a fair first comparison, DQN and PPO each used five policy seeds and the same synthetic data seed, reward weights, and training/validation traces. Each run used about 38,000 environment decisions. DQN trained for 800 episodes; PPO trained for 50 updates of 16 episodes. The same validation gate was used: reward at least equal to the throughput baseline and completion no lower. Both methods passed in all five seeds.
+
+| Method | Median validation reward | Median rebuffer time | Completion gate |
+| --- | ---: | ---: | --- |
+| Throughput baseline | 124.39 | 2.90 s | 100% |
+| PPO | 172.17 | 4.97 s | Passed 5/5 seeds |
+| Dueling Double DQN | 170.10 | 5.48 s | Passed 5/5 seeds |
+
+DQN was close to PPO on this simulator, but its median reward was slightly lower and median rebuffer time slightly higher. Both learned policies traded some stall time for higher bitrate under the current reward. The weights still encode only a simulator proxy, not measured viewer preference.
+
+The DQN seed-by-seed metrics and checkpoint paths are in [`runs/dueling-dqn-seed-sweep.json`](../../runs/dueling-dqn-seed-sweep.json). The seed-11 checkpoint had the highest DQN validation reward and is available at [`runs/dueling-dqn-equal-seed-11/dueling_double_dqn.npz`](../../runs/dueling-dqn-equal-seed-11/dueling_double_dqn.npz). The test split was not used for this comparison or checkpoint selection. Results remain synthetic-only and need replication on audited traces.

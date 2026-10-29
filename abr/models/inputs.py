@@ -4,6 +4,7 @@ import torch
 from ..env import StreamConfig
 from .network import ModelConfig
 from .candidate_transformer import CandidateTransformerConfig
+from .dueling_dqn import DuelingDoubleDQNConfig
 
 
 def context(config: StreamConfig):
@@ -16,7 +17,8 @@ def context(config: StreamConfig):
         config.latency_deadband_s if live and config.catchup else 0.], dtype=np.float32)
 
 
-def make_batch(observations, stream_configs, model_config: ModelConfig | CandidateTransformerConfig, *, device='cpu'):
+def make_batch(observations, stream_configs,
+               model_config: ModelConfig | CandidateTransformerConfig | DuelingDoubleDQNConfig, *, device='cpu'):
     """Batch variable candidate counts by padding. No traces, video sizes or env internals.
 
     Player vector = raw state[5] plus public context[10]. Candidate and history
@@ -47,6 +49,6 @@ def make_batch(observations, stream_configs, model_config: ModelConfig | Candida
             'player': torch.tensor(np.stack([r[1] for r in records]), device=device),
             'candidates': torch.tensor(candidates, device=device),
             'candidate_mask': torch.tensor(mask, device=device)}
-    if model_config.kind == 'candidate_transformer':
+    if model_config.kind in {'candidate_transformer', 'dueling_double_dqn'}:
         batch['history_mask'] = batch['history'][..., 4].bool()
     return batch

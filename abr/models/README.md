@@ -7,6 +7,7 @@ simulator; install `requirements-model.txt` to use these modules.
 ```text
 abr/models/
   candidate_transformer.py   Transformer configuration, projections, encoder, policy/value heads
+  dueling_dqn.py            Candidate Q-values with dueling value/advantage streams
   gru/
     history.py               Legacy masked GRU history encoder; no persistent state
     __init__.py              GRU encoder export
@@ -17,6 +18,7 @@ abr/models/
   policy.py                  Deployment-style argmax selection (ignores value head)
   checkpoint.py              Versioned, source-checked NPZ serialization
   __main__.py                init / inspect / diagnostic rollout CLI
+  train_dueling_dqn.py       Double-DQN replay training loop
 ```
 
 ## ABR-CandidateTransformer v1
@@ -89,6 +91,22 @@ whether they are `untrained` or `trained` and include training metadata.
 The value head supports actor-critic training; deployment policy selection uses
 only logits. The value output is a learned estimate of future reward. Candidate
 scores are policy scores, not calibrated correctness or safety probabilities.
+
+## Dueling Double DQN variant
+
+`DuelingDoubleDQN` uses the same numeric Transformer encoder. One head estimates
+the value of the current state; another estimates each bitrate's advantage over
+the other valid bitrates. Their combined output is a Q-value per candidate. The
+trainer uses replay memory and a target network; Double DQN uses the online model
+to choose the next action and the target model to score it.
+
+```bash
+python -m abr.models.train_dueling_dqn --episodes 800 --seed 7 --data-seed 7 --output runs/dqn
+```
+
+As with PPO, the default dataset is synthetic. Supply `--dataset` for measured
+traces. This algorithm has not been shown to outperform PPO; compare them on the
+same data, reward weights, and held-out traces.
 
 ## PPO training
 
