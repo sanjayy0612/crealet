@@ -8,3 +8,15 @@ data/
 artifacts/
 *.egg-info/
 .env
+
+# Keep the first realistic VOD training input and its reviewable run artifacts.
+!runs/
+runs/*
+!runs/dqn-envivio/
+runs/dqn-envivio/*
+!runs/dqn-envivio/training_metrics.json
+!runs/dqn-envivio/training_report.md
+!runs/dqn-envivio/dueling_double_dqn_feasible.npz
+!data/
+!data/realistic_envivio/
+!data/realistic_envivio/**

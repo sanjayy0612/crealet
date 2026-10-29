@@ -11,16 +11,21 @@ port of Laya's language encoder or its weights.
 The research question is whether this specialized model can make good bitrate
 decisions with low measured inference cost across unseen network, video, ladder,
 and live-timing conditions. Playback quality, stalls, and live delay must be
-measured separately from model size and speed. No such result has been shown yet.
+measured separately from model size and speed. Broad performance across unseen
+conditions remains unproven.
 
 ## Current status
 
 - Finite VOD and low-latency live application-level environment.
 - Measured trace imports, reproducible diagnostic replay and player-capture tools.
-- Dense, GRU, and ABR-CandidateTransformer v1 architectures implemented; weights are untrained.
-- No training loop, trained streaming policy, calibrated decision probabilities,
-  or real-player policy integration yet.
-- Draft evaluation protocol; no model training or novel performance result yet.
+- Dense, GRU, and ABR-CandidateTransformer v1 architectures implemented.
+- PPO and Dueling Double DQN training loops are available. The initial DQN
+  training run now uses one real DASH VOD ladder/segment-size table and eight
+  measured Ghent 4G traces; see `data/realistic_envivio/` and its run report.
+- The training result is a simulator result. Player integration and calibration
+  remain pending.
+- Draft evaluation protocol; broad generalization and novel performance are
+  not established by the initial replay run.
 - Real-player validation still pending packaged media and a controlled network.
 
 This repository contains no legacy PPO model, Flask inference server, historical
@@ -203,9 +208,9 @@ fixture, not evidence of real-world generalization.
 
 Before trusting learned-policy results, close these specific gaps:
 
-1. Collect or audit trace, RTT, and packaged video/part-size data. Record the
-   collection process and split by independent network sessions and source
-   videos. Supply a range of ladders and live timing conditions.
+1. Expand the initial one-video/eight-trace sample. The current VOD example
+   uses published Envivio DASH segment sizes and older Ghent 4G measurements;
+   it does not cover other videos, modern networks, or live timing conditions.
 2. Compare simulator startup, stalls, timing, and live latency with an actual
    player under controlled network conditions. The current browser page captures
    playback telemetry for this check; it does not export a complete per-request

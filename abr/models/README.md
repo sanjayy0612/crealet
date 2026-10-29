@@ -101,12 +101,25 @@ trainer uses replay memory and a target network; Double DQN uses the online mode
 to choose the next action and the target model to score it.
 
 ```bash
-python -m abr.models.train_dueling_dqn --episodes 800 --seed 7 --data-seed 7 --output runs/dqn
+python -m abr.models.train_dueling_dqn \
+  --dataset data/realistic_envivio/dataset.json \
+  --episodes 400 --seed 7 \
+  --output runs/dqn-envivio
 ```
 
-As with PPO, the default dataset is synthetic. Supply `--dataset` for measured
-traces. This algorithm has not been shown to outperform PPO; compare them on the
-same data, reward weights, and held-out traces.
+For each validation trace, checkpoint selection uses that trace's throughput
+baseline stall time as a hard ceiling. By default, the DQN must complete every
+validation episode and stay at or below the baseline stall time on every trace.
+`--stall-tolerance-s` can add a measured tolerance. The trainer keeps an
+unconstrained candidate for diagnosis, but marks it unaccepted if no checkpoint
+passes the limit. It evaluates the accepted checkpoint on the held-out test
+traces after selection. Test results do not choose a checkpoint. Reports show
+the bitrate selected for each segment.
+
+The example input is one DASH video ladder and eight historical Ghent 4G traces.
+It is an initial realistic replay check, not evidence for other videos, current
+networks, or real-player performance. See
+`data/realistic_envivio/README.md` for sources and limitations.
 
 ## PPO training
 

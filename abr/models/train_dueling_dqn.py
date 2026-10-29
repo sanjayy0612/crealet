@@ -27,14 +27,17 @@ def copy_observation(observation):
     return {key: np.array(value, copy=True) for key, value in observation.items()}
 
 
-def evaluate_policy(env, model):
+def evaluate_policy(env, model, *, stall_limits_s=None):
     policy = DecisionPolicy(model)
     rewards, completions, stalls, bitrates = [], [], [], []
+    episodes = []
     for index, _trace in enumerate(env.dataset.splits[env.split]):
         observation, _ = env.reset(options={'trace_index': index})
         total_reward = 0.
+        selected_bitrates = []
         while True:
             action = policy(observation, env.config)
+            selected_bitrates.append(float(observation['candidates'][action, 0] * 1000.))
             observation, reward, terminated, truncated, _info = env.step(action)
             total_reward += reward
             if terminated or truncated:
@@ -44,10 +47,36 @@ def evaluate_policy(env, model):
         completions.append(float(terminated))
         stalls.append(metrics['rebuffer_s'])
         bitrates.append(metrics['mean_played_bitrate_kbps'])
+        limit = None if stall_limits_s is None else float(stall_limits_s[_trace.name])
+        episodes.append({'trace': _trace.name, 'completed': bool(terminated),
+                         'reward': float(total_reward), 'rebuffer_s': float(metrics['rebuffer_s']),
+                         'stall_limit_s': limit,
+                         'within_stall_limit': None if limit is None else bool(metrics['rebuffer_s'] <= limit + 1e-9),
+                         'mean_played_bitrate_kbps': float(metrics['mean_played_bitrate_kbps']),
+                         'selected_bitrates_kbps': selected_bitrates})
     return {'mean_reward': float(np.mean(rewards)),
             'completion_rate': float(np.mean(completions)),
             'mean_rebuffer_s': float(np.mean(stalls)),
-            'mean_played_bitrate_kbps': float(np.mean(bitrates))}
+            'max_rebuffer_s': float(np.max(stalls)),
+            'mean_played_bitrate_kbps': float(np.mean(bitrates)),
+            'stall_constraint_met': None if stall_limits_s is None else all(x['within_stall_limit'] for x in episodes),
+            'episodes': episodes}
+
+
+def baseline_report(dataset, media, split, config, name):
+    report = evaluate(StreamingEnv(dataset, media=media, split=split, config=config), baseline=name)
+    return report
+
+
+def baseline_summary(report):
+    return {'mean_reward': float(np.mean([item['reward'] for item in report['episodes']])),
+            'completion_rate': float(report['completion_rate']),
+            'mean_rebuffer_s': float(np.mean([item['metrics']['rebuffer_s'] for item in report['episodes']])),
+            'episodes': [{'trace': item['trace'], 'completed': bool(item['completed']),
+                          'reward': float(item['reward']),
+                          'rebuffer_s': float(item['metrics']['rebuffer_s']),
+                          'mean_played_bitrate_kbps': float(item['metrics']['mean_played_bitrate_kbps'])}
+                         for item in report['episodes']]}
 
 
 def learn_batch(online, target, optimizer, replay, batch_size, config, device, gamma):
@@ -91,6 +120,8 @@ def main():
     parser.add_argument('--learn-every', type=int, default=4)
     parser.add_argument('--target-update-steps', type=int, default=250)
     parser.add_argument('--evaluate-every', type=int, default=10)
+    parser.add_argument('--stall-tolerance-s', type=float, default=0.,
+                        help='Allowed rebuffer seconds above the throughput baseline on each validation trace')
     parser.add_argument('--seed', type=int, default=0)
     parser.add_argument('--data-seed', type=int,
                         help='Synthetic dataset seed; fix it to compare training seeds')
@@ -103,6 +134,8 @@ def main():
         parser.error('episode, replay, warmup, batch and update counts must be positive')
     if not 0 < args.gamma <= 1 or not 0 <= args.epsilon_end <= args.epsilon_start <= 1:
         parser.error('gamma must be in (0,1] and epsilon values must satisfy 0 <= end <= start <= 1')
+    if not np.isfinite(args.stall_tolerance_s) or args.stall_tolerance_s < 0:
+        parser.error('--stall-tolerance-s must be finite and nonnegative')
     if args.device.startswith('cuda') and not torch.cuda.is_available():
         parser.error('CUDA was requested but is unavailable')
 
@@ -117,6 +150,15 @@ def main():
     config = StreamConfig(mode=args.mode)
     train_env = StreamingEnv(dataset, media=media, split='train', config=config)
     validation_env = StreamingEnv(dataset, media=media, split='validation', config=config)
+    validation_baseline_reports = {
+        name: baseline_report(dataset, media, 'validation', config, name)
+        for name in ('lowest', 'highest', 'throughput')
+    }
+    validation_baselines = {name: baseline_summary(report)
+                            for name, report in validation_baseline_reports.items()}
+    validation_throughput = validation_baseline_reports['throughput']
+    stall_limits_s = {item['trace']: float(item['metrics']['rebuffer_s']) + args.stall_tolerance_s
+                      for item in validation_throughput['episodes']}
 
     online = DuelingDoubleDQN().to(device)
     target = DuelingDoubleDQN(online.config).to(device)
@@ -126,6 +168,8 @@ def main():
     replay = deque(maxlen=args.replay_capacity)
     global_steps = gradient_steps = 0
     best_key = None
+    best_feasible_key = None
+    best_feasible_validation = None
     history = []
     output_dir = Path(args.output)
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -169,10 +213,11 @@ def main():
 
         if episode_number % args.evaluate_every == 0 or episode_number == args.episodes:
             online.eval()
-            validation = evaluate_policy(validation_env, online)
+            validation = evaluate_policy(validation_env, online, stall_limits_s=stall_limits_s)
             record = {'episode': episode_number, 'environment_steps': global_steps,
                       'gradient_steps': gradient_steps, 'epsilon': epsilon,
                       'train_reward': float(episode_reward), 'completed': bool(terminated),
+                      'checkpoint_eligible': bool(validation['completion_rate'] == 1.0 and validation['stall_constraint_met']),
                       'validation': validation}
             history.append(record)
             key = (validation['completion_rate'], validation['mean_reward'])
@@ -187,30 +232,59 @@ def main():
                     'validation_split': 'validation', 'gamma': args.gamma,
                     'learning_rate': args.learning_rate, 'batch_size': args.batch_size,
                     'replay_capacity': args.replay_capacity, 'warmup': args.warmup,
-                    'best_validation': validation})
+                    'best_validation': validation,
+                    'stall_constraint': {'baseline': 'throughput per validation trace',
+                                         'tolerance_s': args.stall_tolerance_s,
+                                         'limits_s': stall_limits_s,
+                                         'met': validation['stall_constraint_met']}})
+            if record['checkpoint_eligible'] and (best_feasible_key is None or key > best_feasible_key):
+                best_feasible_key = key
+                best_feasible_validation = validation
+                save_trained_model(online, output_dir / 'dueling_double_dqn_feasible.npz', training_metadata={
+                    'algorithm': 'Dueling Double DQN', 'seed': args.seed,
+                    'data_seed': data_seed, 'episode': episode_number,
+                    'environment_steps': global_steps, 'gradient_steps': gradient_steps,
+                    'training_dataset_sha256': dataset.fingerprint,
+                    'training_data': 'synthetic engineering fixture' if not args.dataset else str(args.dataset),
+                    'validation_split': 'validation', 'gamma': args.gamma,
+                    'learning_rate': args.learning_rate, 'batch_size': args.batch_size,
+                    'replay_capacity': args.replay_capacity, 'warmup': args.warmup,
+                    'best_validation': validation,
+                    'stall_constraint': {'baseline': 'throughput per validation trace',
+                                         'tolerance_s': args.stall_tolerance_s,
+                                         'limits_s': stall_limits_s, 'met': True}})
             print(json.dumps(record), flush=True)
 
-    best_model, metadata = load_model(checkpoint, device=device)
-    validation_report = evaluate_policy(validation_env, best_model)
-    validation_baselines = {}
-    for name in ('lowest', 'highest', 'throughput'):
-        report = evaluate(StreamingEnv(dataset, media=media, split='validation', config=config), baseline=name)
-        validation_baselines[name] = {
-            'mean_reward': float(np.mean([item['reward'] for item in report['episodes']])),
-            'completion_rate': report['completion_rate']}
+    selected_checkpoint = output_dir / 'dueling_double_dqn_feasible.npz' if best_feasible_key is not None else None
+    diagnostic_checkpoint = selected_checkpoint or checkpoint
+    best_model, metadata = load_model(diagnostic_checkpoint, device=device)
+    validation_report = evaluate_policy(validation_env, best_model, stall_limits_s=stall_limits_s)
+    test_env = StreamingEnv(dataset, media=media, split='test', config=config)
+    test_report = evaluate_policy(test_env, best_model)
+    test_baselines = {name: baseline_summary(baseline_report(dataset, media, 'test', config, name))
+                      for name in ('lowest', 'highest', 'throughput')}
     result = {'training': {'algorithm': 'Dueling Double DQN', 'seed': args.seed,
                            'data_seed': data_seed, 'episodes': args.episodes,
                            'environment_steps': global_steps, 'gradient_steps': gradient_steps,
                            'dataset_sha256': dataset.fingerprint,
-                           'synthetic_fixture': not bool(args.dataset)},
-              'best_checkpoint': str(checkpoint), 'checkpoint_metadata': metadata,
+                           'synthetic_fixture': not bool(args.dataset),
+                           'stall_constraint': {'baseline': 'throughput per validation trace',
+                                                'tolerance_s': args.stall_tolerance_s,
+                                                'limits_s': stall_limits_s,
+                                                'feasible_checkpoint_found': best_feasible_key is not None}},
+              'accepted_checkpoint': None if selected_checkpoint is None else str(selected_checkpoint),
+              'diagnostic_checkpoint': str(diagnostic_checkpoint), 'checkpoint_metadata': metadata,
               'best_validation': validation_report, 'validation_baselines': validation_baselines,
+              'best_feasible_validation': best_feasible_validation,
+              'heldout_test': test_report, 'test_baselines': test_baselines,
               'history': history}
     metrics_path = output_dir / 'training_metrics.json'
     metrics_path.write_text(json.dumps(result, indent=2) + '\n')
-    print(json.dumps({'checkpoint': str(checkpoint), 'metrics': str(metrics_path),
-                      'best_validation': validation_report,
-                      'validation_baselines': validation_baselines}, indent=2), flush=True)
+    print(json.dumps({'candidate_checkpoint': str(checkpoint), 'metrics': str(metrics_path),
+                      'accepted_checkpoint': None if selected_checkpoint is None else str(selected_checkpoint),
+                      'stall_constraint_met': validation_report['stall_constraint_met'],
+                      'best_validation': {key: value for key, value in validation_report.items() if key != 'episodes'},
+                      'heldout_test': {key: value for key, value in test_report.items() if key != 'episodes'}}, indent=2), flush=True)
 
 
 if __name__ == '__main__':

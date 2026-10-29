@@ -1,0 +1,12 @@
+{
+  "video": "https://raw.githubusercontent.com/hongzimao/pensieve/master/video_server/Manifest.mpd",
+  "video_repository": "https://github.com/hongzimao/pensieve",
+  "video_git_tree_sha": "1120bb173958dc9bc9f2ebff1a8fe688b6f4e93c",
+  "video_mpd_sha256": "8f186d5bf6ccb319fafd973c84f182de47d4ccc3cd15a492fe93d1b60a88c95c",
+  "segments": "Exact Git blob size for every selected DASH video segment; bytes only, no media payload retained.",
+  "trace_collection": "Ghent 4G/LTE logs measured 2015-12-16 through 2016-02-04; route-session files are split independently.",
+  "trace_archive": "https://users.ugent.be/~jvdrhoof/dataset-4g/logs/logs_all.zip",
+  "trace_index": "https://users.ugent.be/~jvdrhoof/dataset-4g/logs/",
+  "rtt": "0.08 s assumed by existing Ghent importer; RTT was not present in source logs.",
+  "limitations": "Small historical 4G sample; observed HTTP goodput can depend on the source download workload. Application-level replay only."
+}
