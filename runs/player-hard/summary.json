@@ -1,0 +1,72 @@
+[
+  {
+    "name": "dqn-measured",
+    "done": true,
+    "completed": true,
+    "error": null,
+    "startup_s": 1.0486999999955295,
+    "rebuffer_s": 0,
+    "stall_events": 0,
+    "played_s": 193.76,
+    "wall_time_s": 194.81179999999702,
+    "mean_played_bitrate_kbps": 299.87613542526816,
+    "dropped_frames": 4,
+    "total_frames": 4842
+  },
+  {
+    "name": "throughput-measured",
+    "done": true,
+    "completed": false,
+    "error": "signal timed out",
+    "startup_s": 3.9132999999970197,
+    "rebuffer_s": 4.229700000002964,
+    "stall_events": 1,
+    "played_s": 187.8829,
+    "wall_time_s": 196.02559999999403,
+    "mean_played_bitrate_kbps": 1318.8632328375222,
+    "dropped_frames": 1,
+    "total_frames": 4695
+  },
+  {
+    "name": "dqn-outage",
+    "done": true,
+    "completed": true,
+    "error": null,
+    "startup_s": 4.37859999999404,
+    "rebuffer_s": 0,
+    "stall_events": 1,
+    "played_s": 193.76,
+    "wall_time_s": 198.1408999999985,
+    "mean_played_bitrate_kbps": 299.87613542526816,
+    "dropped_frames": 20,
+    "total_frames": 4842
+  },
+  {
+    "name": "throughput-outage",
+    "done": true,
+    "completed": true,
+    "error": null,
+    "startup_s": 2.0487999999970197,
+    "rebuffer_s": 0.802300000004478,
+    "stall_events": 5,
+    "played_s": 193.76,
+    "wall_time_s": 196.615299999997,
+    "mean_played_bitrate_kbps": 1172.711349665107,
+    "dropped_frames": 21,
+    "total_frames": 4842
+  },
+  {
+    "name": "highest-outage",
+    "done": true,
+    "completed": false,
+    "error": "Playback exceeded the declared wall-time budget",
+    "startup_s": 8.39660000000149,
+    "rebuffer_s": 125.67860000000152,
+    "stall_events": 19,
+    "played_s": 75.9508,
+    "wall_time_s": 210.0126000000015,
+    "mean_played_bitrate_kbps": 4295.709795756668,
+    "dropped_frames": 20,
+    "total_frames": 1897
+  }
+]

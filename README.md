@@ -19,17 +19,20 @@ conditions remains unproven.
 - Finite VOD and low-latency live application-level environment.
 - Measured trace imports, reproducible diagnostic replay and player-capture tools.
 - Dense, GRU, and ABR-CandidateTransformer v1 architectures implemented.
-- PPO and Dueling Double DQN training loops are available. The initial DQN
-  training run now uses one real DASH VOD ladder/segment-size table and eight
-  measured Ghent 4G traces; see `data/realistic_envivio/` and its run report.
-- The training result is a simulator result. Player integration and calibration
-  remain pending.
+- PPO and Dueling Double DQN training loops are available. The first VOD pilot
+  uses Envivio DASH segment sizes and eight Ghent 4G logs. A harder experiment
+  adds fourteen measured Norway mobile sessions and four labelled controlled
+  outage cases; see `data/hard_envivio/` and `runs/dqn-hard/training_report.md`.
+- A local native MSE player connects the frozen model to actual video requests
+  and decoding under HTTP trace pacing. See
+  [policy playback](experiments/validation/POLICY_PLAYER.md).
 - Draft evaluation protocol; broad generalization and novel performance are
   not established by the initial replay run.
-- Real-player validation still pending packaged media and a controlled network.
+- Production-player integration and broad simulator/player calibration remain
+  pending; the local experiment uses one silent video and application-level pacing.
 
-This repository contains no legacy PPO model, Flask inference server, historical
-checkpoints or legacy training scripts. All future work belongs here.
+Recorded experiment checkpoints and raw reports are kept under `runs/`.
+Large video payloads remain in the ignored `artifacts/` cache.
 
 ## Project goal and prior work
 

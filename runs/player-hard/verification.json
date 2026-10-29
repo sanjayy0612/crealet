@@ -1,0 +1,149 @@
+{
+  "all_captures_valid": true,
+  "cases": {
+    "dqn-measured": {
+      "capture_checks": {
+        "native_capture": true,
+        "checkpoint_matches": true,
+        "dataset_matches": true,
+        "trace_matches": true,
+        "visible_samples": true,
+        "real_decoded_frames": true,
+        "segment_bytes_match": true,
+        "segment_choices_match_server": true,
+        "stall_seconds_match_events": true,
+        "complete_has_all_segments": true,
+        "complete_has_full_media": true,
+        "complete_transport_finished": true,
+        "independent_validator_agrees": true
+      },
+      "capture_valid": true,
+      "completed": true,
+      "error": null,
+      "raw_waiting_event_count": 0,
+      "positive_duration_stall_events": 0,
+      "independent_stall_seconds": 0.0,
+      "meets_absolute_targets": true,
+      "independent_completed_playback_metrics": {
+        "startup_s": 1.0486999999955295,
+        "rebuffer_s": 0.0,
+        "stall_events": 0,
+        "played_s": 193.76,
+        "wall_time_s": 194.80959999999405
+      }
+    },
+    "throughput-measured": {
+      "capture_checks": {
+        "native_capture": true,
+        "checkpoint_matches": true,
+        "dataset_matches": true,
+        "trace_matches": true,
+        "visible_samples": true,
+        "real_decoded_frames": true,
+        "segment_bytes_match": true,
+        "segment_choices_match_server": true,
+        "stall_seconds_match_events": true,
+        "complete_has_all_segments": true,
+        "complete_has_full_media": true,
+        "complete_transport_finished": true,
+        "independent_validator_agrees": true
+      },
+      "capture_valid": true,
+      "completed": false,
+      "error": "signal timed out",
+      "raw_waiting_event_count": 1,
+      "positive_duration_stall_events": 1,
+      "independent_stall_seconds": 4.230499999999978,
+      "meets_absolute_targets": false,
+      "independent_completed_playback_metrics": null
+    },
+    "dqn-outage": {
+      "capture_checks": {
+        "native_capture": true,
+        "checkpoint_matches": true,
+        "dataset_matches": true,
+        "trace_matches": true,
+        "visible_samples": true,
+        "real_decoded_frames": true,
+        "segment_bytes_match": true,
+        "segment_choices_match_server": true,
+        "stall_seconds_match_events": true,
+        "complete_has_all_segments": true,
+        "complete_has_full_media": true,
+        "complete_transport_finished": true,
+        "independent_validator_agrees": true
+      },
+      "capture_valid": true,
+      "completed": true,
+      "error": null,
+      "raw_waiting_event_count": 1,
+      "positive_duration_stall_events": 0,
+      "independent_stall_seconds": 0.0,
+      "meets_absolute_targets": false,
+      "independent_completed_playback_metrics": {
+        "startup_s": 4.3785,
+        "rebuffer_s": 0.0,
+        "stall_events": 0,
+        "played_s": 193.76,
+        "wall_time_s": 198.14019999999553
+      }
+    },
+    "throughput-outage": {
+      "capture_checks": {
+        "native_capture": true,
+        "checkpoint_matches": true,
+        "dataset_matches": true,
+        "trace_matches": true,
+        "visible_samples": true,
+        "real_decoded_frames": true,
+        "segment_bytes_match": true,
+        "segment_choices_match_server": true,
+        "stall_seconds_match_events": true,
+        "complete_has_all_segments": true,
+        "complete_has_full_media": true,
+        "complete_transport_finished": true,
+        "independent_validator_agrees": true
+      },
+      "capture_valid": true,
+      "completed": true,
+      "error": null,
+      "raw_waiting_event_count": 5,
+      "positive_duration_stall_events": 4,
+      "independent_stall_seconds": 0.802200000002979,
+      "meets_absolute_targets": true,
+      "independent_completed_playback_metrics": {
+        "startup_s": 2.0487999999970197,
+        "rebuffer_s": 0.802200000002979,
+        "stall_events": 4,
+        "played_s": 193.76,
+        "wall_time_s": 196.61369999999553
+      }
+    },
+    "highest-outage": {
+      "capture_checks": {
+        "native_capture": true,
+        "checkpoint_matches": true,
+        "dataset_matches": true,
+        "trace_matches": true,
+        "visible_samples": true,
+        "real_decoded_frames": true,
+        "segment_bytes_match": true,
+        "segment_choices_match_server": true,
+        "stall_seconds_match_events": true,
+        "complete_has_all_segments": true,
+        "complete_has_full_media": true,
+        "complete_transport_finished": true,
+        "independent_validator_agrees": true
+      },
+      "capture_valid": true,
+      "completed": false,
+      "error": "Playback exceeded the declared wall-time budget",
+      "raw_waiting_event_count": 19,
+      "positive_duration_stall_events": 19,
+      "independent_stall_seconds": 125.67939999999855,
+      "meets_absolute_targets": false,
+      "independent_completed_playback_metrics": null
+    }
+  },
+  "note": "Native waiting/playing transitions can have identical timestamps. Raw waiting-event counts include those; positive-duration counts exclude them. Incomplete baseline playback is a policy outcome, not a complete-video result."
+}

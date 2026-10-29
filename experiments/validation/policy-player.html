@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ABR policy playback experiment</title>
+<style>
+body{font:16px system-ui;max-width:920px;margin:32px auto;padding:0 20px;line-height:1.5;background:#f5f7fa;color:#18242d}video{width:100%;background:#101820;border-radius:8px}label{display:inline-block;margin:12px 18px 12px 0}select,button{font:inherit;padding:8px}pre{white-space:pre-wrap;background:white;padding:18px;border-radius:8px}small{color:#475569}
+</style>
+<h1>ABR policy playback experiment</h1>
+<p>Play the same video using DQN or a simple bitrate rule. Each run has its own network trace replay.</p>
+<label>Policy <select id="policy"></select></label>
+<label>Split <select id="split"></select></label>
+<label>Connection <select id="trace"></select></label>
+<button id="start" disabled>Start playback</button>
+<button id="save" disabled>Save measurements</button>
+<video id="video" muted playsinline></video>
+<pre id="status">Loading experiment settings…</pre>
+<small>Local research player: video only, native browser decoding, HTTP pacing. Keep playback uninterrupted. Reload to start another run.</small>
+<script type="module" src="/policy-player.mjs"></script>
+</html>

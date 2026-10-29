@@ -116,6 +116,14 @@ passes the limit. It evaluates the accepted checkpoint on the held-out test
 traces after selection. Test results do not choose a checkpoint. Reports show
 the bitrate selected for each segment.
 
+The harder follow-up run also sets `--max-rebuffer-s 8 --max-startup-s 3`.
+The stall ceiling on each validation trace is the smaller of the absolute limit
+and that trace's throughput-baseline stalls. `--rebuffer-penalty 12` charges
+12 reward units per stall second, identically for DQN and all baselines. These
+are declared experimental limits, not universal quality-of-experience standards.
+See `runs/dqn-hard/training_report.md` for the outcome and
+`experiments/validation/POLICY_PLAYER.md` for the native browser connection.
+
 The example input is one DASH video ladder and eight historical Ghent 4G traces.
 It is an initial realistic replay check, not evidence for other videos, current
 networks, or real-player performance. See

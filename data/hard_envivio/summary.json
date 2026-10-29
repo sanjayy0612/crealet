@@ -1,0 +1,186 @@
+{
+  "dataset_sha256": "4f23c519ca62350bd2c52fafa3463f006f198cae4f6a2da9fab738bbe08aef82",
+  "splits": {
+    "train": [
+      {
+        "trace": "bus.ljansbakken-oslo-2010-09-28_1407CEST",
+        "duration_s": 494.669,
+        "mean_kbps": 2582.918064402661,
+        "reported_interval_discrepancies": 0,
+        "zero_intervals": 0
+      },
+      {
+        "trace": "bus.ljansbakken-oslo-2010-09-29_0852CEST",
+        "duration_s": 1364.168,
+        "mean_kbps": 2539.9250590836323,
+        "reported_interval_discrepancies": 0,
+        "zero_intervals": 0
+      },
+      {
+        "trace": "bus.ljansbakken-oslo-2010-09-29_1622CEST",
+        "duration_s": 1081.833,
+        "mean_kbps": 1729.166849227191,
+        "reported_interval_discrepancies": 0,
+        "zero_intervals": 0
+      },
+      {
+        "trace": "bus.ljansbakken-oslo-2010-09-29_1823CEST",
+        "duration_s": 786.6339999999999,
+        "mean_kbps": 2258.872197235309,
+        "reported_interval_discrepancies": 0,
+        "zero_intervals": 0
+      },
+      {
+        "trace": "car.snaroya-smestad-2011-02-14_2032CET",
+        "duration_s": 436.03099999999995,
+        "mean_kbps": 1651.5527932646994,
+        "reported_interval_discrepancies": 0,
+        "zero_intervals": 1
+      },
+      {
+        "trace": "car.snaroya-smestad-2011-02-14_2051CET",
+        "duration_s": 423.80499999999995,
+        "mean_kbps": 1715.1913356378527,
+        "reported_interval_discrepancies": 0,
+        "zero_intervals": 0
+      },
+      {
+        "trace": "tram.jernbanetorget-ljabru-2010-11-23_1515CET",
+        "duration_s": 1510.659,
+        "mean_kbps": 659.9239245918502,
+        "reported_interval_discrepancies": 1,
+        "zero_intervals": 0
+      },
+      {
+        "trace": "tram.jernbanetorget-ljabru-2010-12-09_1222CET",
+        "duration_s": 1189.8129999999999,
+        "mean_kbps": 715.0114782743171,
+        "reported_interval_discrepancies": 1,
+        "zero_intervals": 0
+      },
+      {
+        "trace": "tram.jernbanetorget-ljabru-2010-12-09_1310CET",
+        "duration_s": 1296.047,
+        "mean_kbps": 702.8661460579747,
+        "reported_interval_discrepancies": 1,
+        "zero_intervals": 0
+      },
+      {
+        "trace": "tram.jernbanetorget-ljabru-2010-12-16_1100CET",
+        "duration_s": 1272.197,
+        "mean_kbps": 752.8236586000439,
+        "reported_interval_discrepancies": 1,
+        "zero_intervals": 0
+      },
+      {
+        "trace": "controlled-train-0",
+        "duration_s": 500,
+        "capacity_kbps": [
+          3500,
+          650,
+          0,
+          1500,
+          2500
+        ],
+        "intervals_s": [
+          30,
+          45,
+          4,
+          121,
+          300
+        ],
+        "kind": "synthetic controlled stress case"
+      },
+      {
+        "trace": "controlled-train-1",
+        "duration_s": 500,
+        "capacity_kbps": [
+          2200,
+          450,
+          0,
+          1800,
+          900
+        ],
+        "intervals_s": [
+          50,
+          50,
+          6,
+          94,
+          300
+        ],
+        "kind": "synthetic controlled stress case"
+      }
+    ],
+    "validation": [
+      {
+        "trace": "train.oslo-vestby-2011-02-11_1618CET",
+        "duration_s": 2202.317,
+        "mean_kbps": 885.7283124999715,
+        "reported_interval_discrepancies": 104,
+        "zero_intervals": 0
+      },
+      {
+        "trace": "train.oslo-vestby-2011-02-14_0644CET",
+        "duration_s": 2712.047,
+        "mean_kbps": 1287.3682026897027,
+        "reported_interval_discrepancies": 169,
+        "zero_intervals": 0
+      },
+      {
+        "trace": "controlled-validation-0",
+        "duration_s": 500,
+        "capacity_kbps": [
+          3000,
+          450,
+          0,
+          2600,
+          1200
+        ],
+        "intervals_s": [
+          35,
+          35,
+          4,
+          126,
+          300
+        ],
+        "kind": "synthetic controlled stress case"
+      }
+    ],
+    "test": [
+      {
+        "trace": "ferry.nesoddtangen-oslo-2010-09-20_1542CEST",
+        "duration_s": 1161.944,
+        "mean_kbps": 1418.1908181461413,
+        "reported_interval_discrepancies": 1,
+        "zero_intervals": 0
+      },
+      {
+        "trace": "ferry.nesoddtangen-oslo-2010-09-21_1001CEST",
+        "duration_s": 1202.46,
+        "mean_kbps": 1171.1747184937544,
+        "reported_interval_discrepancies": 1,
+        "zero_intervals": 0
+      },
+      {
+        "trace": "controlled-test-0",
+        "duration_s": 500,
+        "capacity_kbps": [
+          2500,
+          550,
+          0,
+          1800,
+          1400
+        ],
+        "intervals_s": [
+          55,
+          45,
+          6,
+          94,
+          300
+        ],
+        "kind": "synthetic controlled stress case"
+      }
+    ]
+  },
+  "excluded": []
+}
