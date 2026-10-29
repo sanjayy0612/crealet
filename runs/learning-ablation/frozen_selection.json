@@ -1,0 +1,60 @@
+{
+  "selection_basis": "median original validation reward across seeds7,11; acceptance limits unchanged",
+  "selected_variant": "queue",
+  "validation": {
+    "baseline": {
+      "median_validation_reward": 93.0072626671427,
+      "median_validation_bitrate_kbps": 687.8866629951115,
+      "all_have_eligible_checkpoints": true
+    },
+    "credit": {
+      "median_validation_reward": 89.61617970391443,
+      "median_validation_bitrate_kbps": 660.3088255541992,
+      "all_have_eligible_checkpoints": true
+    },
+    "queue": {
+      "median_validation_reward": 93.15107614728458,
+      "median_validation_bitrate_kbps": 690.1203512475938,
+      "all_have_eligible_checkpoints": true
+    }
+  },
+  "checkpoints": [
+    {
+      "variant": "baseline",
+      "seed": 7,
+      "path": "runs/learning-ablation/baseline-seed-7/accepted.npz",
+      "sha256": "5567f45b1e335142188f931d626f68777d2e1abac4ea13adb146adf000e63470"
+    },
+    {
+      "variant": "baseline",
+      "seed": 11,
+      "path": "runs/learning-ablation/baseline-seed-11/accepted.npz",
+      "sha256": "4fd60a062809b9c6878150e3d1c438e5fbb9ba1a6f255e9e41aa1c95ad0b5b0e"
+    },
+    {
+      "variant": "credit",
+      "seed": 7,
+      "path": "runs/learning-ablation/credit-seed-7/accepted.npz",
+      "sha256": "e1446f304fa05729a34449c2b07f10865509e60933e963349a8b8bda468a3746"
+    },
+    {
+      "variant": "credit",
+      "seed": 11,
+      "path": "runs/learning-ablation/credit-seed-11/accepted.npz",
+      "sha256": "b0d4a84a05f8b3a682dfd16462719bcfad6e48e8d40fb589e7f58a9ff2d1c17a"
+    },
+    {
+      "variant": "queue",
+      "seed": 7,
+      "path": "runs/learning-ablation/queue-seed-7/accepted.npz",
+      "sha256": "0ef53b35af964079a05ee1582e8c03bf7b885dd9b1fa724f5d3754949cfbf45a"
+    },
+    {
+      "variant": "queue",
+      "seed": 11,
+      "path": "runs/learning-ablation/queue-seed-11/accepted.npz",
+      "sha256": "f649fb2a2a53b30ec7e87eec6fec8b6a2b1599e826032ac42e4b7971662c1cdf"
+    }
+  ],
+  "fresh_results_used_for_selection": false
+}

@@ -1,7 +1,7 @@
 """Local MSE player, frozen policy inference, and paced HTTP trace replay.
 
 This is an application-level test server, not a packet-level network emulator.
-Run: python -m abr.player_server --checkpoint runs/dqn-safe/dueling_double_dqn_feasible.npz
+Run: python -m abr.player_server --checkpoint runs/learning-ablation/baseline-seed-7/accepted.npz
 """
 import argparse
 from dataclasses import asdict
@@ -52,6 +52,8 @@ class PlayerApp:
         torch.set_num_threads(1)
         self.dataset = dataset
         self.model, self.metadata = load_model(checkpoint)
+        if getattr(self.model.config, 'queue_features', False):
+            raise ValueError('Queue-summary research checkpoints require the offline QueueObservation adapter; native deployment is not enabled')
         training = self.metadata['training']
         safety = training.get('safety_filter')
         self.policy = DecisionPolicy(self.model, safety=ActionSafety(**safety) if safety else None)
@@ -223,7 +225,7 @@ class Handler(BaseHTTPRequestHandler):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--checkpoint', default='runs/dqn-safe/dueling_double_dqn_feasible.npz')
+    parser.add_argument('--checkpoint', default='runs/learning-ablation/baseline-seed-7/accepted.npz')
     parser.add_argument('--dataset', default='data/hard_envivio/dataset.json')
     parser.add_argument('--media-dir', default='artifacts/player-media')
     parser.add_argument('--port', type=int, default=8787)

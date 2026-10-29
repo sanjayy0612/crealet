@@ -31,6 +31,10 @@ conditions remains unproven.
   also completed without stalls at higher bitrates. A matching simple rule
   produces the same choices; a neural advantage remains unproven. See the
   [filtered-controller report](runs/dqn-safe/training_report.md).
+- A six-run comparison of earlier reward credit and queue-summary inputs did
+  not beat the filtered rule. Two additional measured sessions caused request
+  timeouts, exposing a reliability gap. See the
+  [learning comparison](runs/learning-ablation/report.md).
 - Draft evaluation protocol; broad generalization and novel performance are
   not established by the initial replay run.
 - Production-player integration and broad simulator/player calibration remain

@@ -15,7 +15,9 @@ Open `http://127.0.0.1:8787`. Choose a policy and a connection and start playbac
 Reload to start a new session. Save measurements after playback. Video is muted
 and has no audio track. Seeking and user pauses are excluded from the experiment.
 
-The default checkpoint is the newer `runs/dqn-safe/` controller. Its recorded
+The default checkpoint is the current-source baseline reproduction under
+`runs/learning-ablation/baseline-seed-7/`, whose weights exactly match the
+accepted `runs/dqn-safe/` controller. Its recorded
 observed-throughput filter applies to DQN choices and is identified in the page
 and capture metadata. For the latest two-case verification, use `--port 8788`
 on the server, then run

@@ -90,7 +90,7 @@ def baseline_summary(report):
                          for item in report['episodes']]}
 
 
-def learn_batch(online, target, optimizer, replay, batch_size, config, device, gamma, safety=None):
+def learn_batch(online, target, optimizer, replay, batch_size, config, device, gamma, safety=None, *, diagnostics=False):
     items = random.sample(replay, batch_size)
     observations = [item[0] for item in items]
     actions = torch.tensor([item[1] for item in items], dtype=torch.long, device=device)
@@ -111,6 +111,14 @@ def learn_batch(online, target, optimizer, replay, batch_size, config, device, g
     loss.backward()
     nn.utils.clip_grad_norm_(online.parameters(), 1.)
     optimizer.step()
+    if diagnostics:
+        errors = (q_values.detach() - targets).abs()
+        terminal = dones.bool()
+        return {'loss': float(loss.detach()), 'mean_abs_td_error': float(errors.mean()),
+                'q_mean': float(q_values.detach().mean()), 'q_abs_max': float(q_values.detach().abs().max()),
+                'target_mean': float(targets.mean()),
+                'terminal_abs_td_error': float(errors[terminal].mean()) if terminal.any() else None,
+                'nonterminal_abs_td_error': float(errors[~terminal].mean()) if (~terminal).any() else None}
     return float(loss.detach())
 
 

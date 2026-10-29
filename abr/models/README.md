@@ -150,6 +150,16 @@ evaluates a non-neural rule that picks the highest allowed representation. This
 comparison is required before attributing an improvement to learned weights.
 See `runs/dqn-safe/training_report.md`.
 
+## Queue-summary research extension
+
+The optional `queue_features=True` configuration appends four player-observable
+queue-summary values to the state input. It is an offline research extension,
+with explicit input validation and checkpoint serialization. It is evaluated
+separately from reward-credit shaping in `abr.learning_experiment`; it does not
+silently change the ordinary observation contract. The native player rejects
+this research input extension. See `runs/learning-ablation/report.md` for the
+six-run result and the additional-session failures.
+
 ## PPO training
 
 The first training loop uses complete episodes and the finite episode reward

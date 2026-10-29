@@ -19,10 +19,13 @@ class CandidateTransformerConfig:
     attention_heads: int = 4
     feedforward_size: int = 128
     dropout: float = 0.0
+    queue_features: bool = False
 
     def __post_init__(self):
         if self.kind != 'candidate_transformer':
             raise ValueError('Expected candidate_transformer kind')
+        if not isinstance(self.queue_features, bool):
+            raise ValueError('queue_features must be boolean')
         for value in (self.history_length, self.hidden_size, self.layers,
                       self.attention_heads, self.feedforward_size):
             if isinstance(value, bool) or not isinstance(value, int) or value < 1:
@@ -39,7 +42,7 @@ class CandidateTransformer(nn.Module):
         self.config = config or CandidateTransformerConfig()
         c = self.config
         self.history_projection = nn.Linear(5, c.hidden_size)
-        self.state_projection = nn.Linear(15, c.hidden_size)
+        self.state_projection = nn.Linear(19 if c.queue_features else 15, c.hidden_size)
         self.candidate_projection = nn.Linear(3, c.hidden_size)
         self.history_positions = nn.Parameter(torch.empty(c.history_length, c.hidden_size))
         nn.init.normal_(self.history_positions, std=0.02)
@@ -63,7 +66,7 @@ class CandidateTransformer(nn.Module):
             batch[k] for k in ('history', 'player', 'candidates', 'candidate_mask', 'history_mask'))
         c = self.config
         if (history.ndim != 3 or history.shape[1:] != (c.history_length, 5)
-                or player.shape != (history.shape[0], 15)
+                or player.shape != (history.shape[0], self.state_projection.in_features)
                 or candidates.ndim != 3 or candidates.shape[0] != history.shape[0]
                 or candidates.shape[-1] != 3 or candidates.shape[1] < 1
                 or mask.shape != candidates.shape[:2] or mask.dtype != torch.bool

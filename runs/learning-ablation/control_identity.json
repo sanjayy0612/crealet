@@ -1,0 +1,9 @@
+{
+  "previous_artifact": "runs/dqn-safe/dueling_double_dqn_feasible.npz",
+  "current_artifact": "runs/learning-ablation/baseline-seed-7/accepted.npz",
+  "arrays_checked": 46,
+  "all_tensors_exactly_equal": true,
+  "previous_file_sha256": "9b8b0b0d49a37a0c9d25ef201231d98a1d9728292f7ceb560ed71b0c11e19ff7",
+  "current_file_sha256": "5567f45b1e335142188f931d626f68777d2e1abac4ea13adb146adf000e63470",
+  "note": "Independent seeded baseline rerun; historical artifact untouched."
+}

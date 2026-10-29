@@ -16,6 +16,7 @@ class DuelingDoubleDQNConfig:
     attention_heads: int = 4
     feedforward_size: int = 128
     dropout: float = 0.0
+    queue_features: bool = False
 
     def __post_init__(self):
         if self.kind != 'dueling_double_dqn':
@@ -23,7 +24,7 @@ class DuelingDoubleDQNConfig:
         CandidateTransformerConfig(
             history_length=self.history_length, hidden_size=self.hidden_size,
             layers=self.layers, attention_heads=self.attention_heads,
-            feedforward_size=self.feedforward_size, dropout=self.dropout)
+            feedforward_size=self.feedforward_size, dropout=self.dropout, queue_features=self.queue_features)
 
 
 class DuelingDoubleDQN(CandidateTransformer):
@@ -42,7 +43,7 @@ class DuelingDoubleDQN(CandidateTransformer):
             layers=config.layers,
             attention_heads=config.attention_heads,
             feedforward_size=config.feedforward_size,
-            dropout=config.dropout)
+            dropout=config.dropout, queue_features=config.queue_features)
         super().__init__(base_config)
         # The former policy head is the per-action advantage stream.
         self.advantage_head = self.policy_head
@@ -54,7 +55,7 @@ class DuelingDoubleDQN(CandidateTransformer):
             batch[k] for k in ('history', 'player', 'candidates', 'candidate_mask', 'history_mask'))
         c = self.config
         if (history.ndim != 3 or history.shape[1:] != (c.history_length, 5)
-                or player.shape != (history.shape[0], 15)
+                or player.shape != (history.shape[0], self.state_projection.in_features)
                 or candidates.ndim != 3 or candidates.shape[0] != history.shape[0]
                 or candidates.shape[-1] != 3 or candidates.shape[1] < 1
                 or mask.shape != candidates.shape[:2] or mask.dtype != torch.bool

@@ -55,6 +55,9 @@ def main():
         cfg['mode'] = args.mode
         env = StreamingEnv(Dataset.load(args.dataset), media=Media.load(args.media) if args.media else None,
                            config=StreamConfig(**cfg), split=args.split, history=model.config.history_length)
+        if getattr(model.config, 'queue_features', False):
+            from ..learning_features import QueueObservation
+            env = QueueObservation(env)
         artifact = {**metadata, 'checkpoint_sha256': hashlib.sha256(Path(args.checkpoint).read_bytes()).hexdigest(),
                     'purpose': 'UNTRAINED architecture integration test; no policy quality claim'}
         safety = metadata.get('training', {}).get('safety_filter')

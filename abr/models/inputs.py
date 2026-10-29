@@ -28,7 +28,11 @@ def make_batch(observations, stream_configs,
         raise ValueError('Provide equally sized nonempty observation/config lists')
     records = []
     for obs, cfg in zip(observations, stream_configs):
-        if not isinstance(cfg, StreamConfig) or set(obs) != {'history', 'state', 'candidates'}:
+        expected = {'history', 'state', 'candidates'}
+        queue_features = getattr(model_config, 'queue_features', False)
+        if queue_features:
+            expected.add('queue')
+        if not isinstance(cfg, StreamConfig) or set(obs) != expected:
             raise ValueError('Expected observation v2 and explicit StreamConfig')
         arrays = {k: np.array(obs[k], dtype=np.float32, copy=True) for k in obs}
         h, s, a = (arrays[k] for k in ('history', 'state', 'candidates'))
@@ -38,7 +42,10 @@ def make_batch(observations, stream_configs,
             raise ValueError('Observation values must be finite and nonnegative')
         if not np.isin(h[:, 4], [0., 1.]).all() or s[3] > 1 or (a <= 0).any():
             raise ValueError('History mask, remaining fraction, or candidate metadata is invalid (terminal observation?)')
-        records.append((h, np.r_[s, context(cfg)], a))
+        if queue_features and arrays['queue'].shape != (4,):
+            raise ValueError('Expected four observable queue-summary features')
+        player = np.r_[s, context(cfg), arrays['queue']] if queue_features else np.r_[s, context(cfg)]
+        records.append((h, player, a))
     maximum = max(len(a) for _, _, a in records)
     candidates = np.zeros((len(records), maximum, 3), dtype=np.float32)
     mask = np.zeros((len(records), maximum), dtype=bool)

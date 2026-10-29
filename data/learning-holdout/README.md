@@ -1,0 +1,1 @@
+Two additional measured sessions from the original Norway HSDPA host, predeclared before model selection. Same ferry route as previous tests; video and 80ms assumed RTT unchanged. Raw bytes and URLs/checksums retained. Only the test split is used from this file; existing train/validation sessions are included solely for Dataset schema compatibility.
