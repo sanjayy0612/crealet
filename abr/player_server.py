@@ -25,6 +25,7 @@ from .models.policy import DecisionPolicy
 from .models.train_dueling_dqn import checkpoint_eligible
 from .models.safety import ActionSafety, allowed_actions
 from .transport import Replay
+from .recovery import RecoveryConfig
 
 ROOT = Path(__file__).resolve().parents[1]
 POLICIES = ('dqn', 'highest_allowed', 'throughput', 'lowest', 'highest')
@@ -65,7 +66,7 @@ def experimental_replay(dataset, config, replay_dataset=None, max_buffer_s=None)
 
 
 class PlayerApp:
-    def __init__(self, dataset, checkpoint, media_dir, *, replay_dataset=None, max_buffer_s=None):
+    def __init__(self, dataset, checkpoint, media_dir, *, replay_dataset=None, max_buffer_s=None, recovery=None):
         torch.set_num_threads(1)
         self.dataset = dataset
         self.model, self.metadata = load_model(checkpoint)
@@ -86,6 +87,7 @@ class PlayerApp:
         self.training_config = asdict(self.config)
         self.dataset, self.config = experimental_replay(dataset, self.config, replay_dataset, max_buffer_s)
         self.experimental_overrides = {'max_buffer_s': max_buffer_s} if max_buffer_s is not None else {}
+        self.recovery = recovery
         self.checkpoint_sha256 = hashlib.sha256(Path(checkpoint).read_bytes()).hexdigest()
         self.media_dir = Path(media_dir)
         self.index = json.loads((self.media_dir / 'index.json').read_text())
@@ -112,14 +114,15 @@ class PlayerApp:
         token = uuid.uuid4().hex
         trace = traces[index]
         self.sessions[token] = {'policy': policy, 'trace': trace, 'start': time.monotonic(),
-                                'requests': [], 'decisions': [], 'lock': threading.Lock()}
+                                'requests': [], 'decisions': [], 'lock': threading.Lock(), 'cancel': threading.Event()}
         return {'session': token, 'policy': policy, 'trace': trace.name, 'split': split,
                 'trace_sha256': trace.fingerprint, 'trace_source': trace.source,
                 'trace_semantics': trace.semantics, 'config': asdict(self.config),
                 'durations_s': self.dataset.video.durations_s.tolist(), 'representations': self.reps,
                 'dataset_sha256': self.dataset.fingerprint, 'checkpoint_sha256': self.checkpoint_sha256,
                 'training_dataset_sha256': self.training_dataset_sha256, 'training_config': self.training_config,
-                'experimental_overrides': self.experimental_overrides, 'request_recovery': False,
+                'experimental_overrides': self.experimental_overrides,
+                'request_recovery': False if self.recovery is None else asdict(self.recovery),
                 'checkpoint_episode': self.metadata['training']['episode'],
                 'safety_filter': self.metadata['training'].get('safety_filter'),
                 'source_commit': self.index['source_commit'],
@@ -155,6 +158,13 @@ class Handler(BaseHTTPRequestHandler):
             request = json.loads(self.rfile.read(length))
             if self.path == '/session':
                 return self.respond(self.app.create_session(request))
+            if self.path == '/cancel':
+                session = self.app.sessions[request['session']]
+                session['cancel'].set()
+                if not session['lock'].acquire(timeout=2.):
+                    return self.respond({'error': 'Cancellation acknowledgement timed out'}, 409)
+                session['lock'].release()
+                return self.respond({'cancelled': True})
             if self.path != '/decide':
                 return self.respond({'error': 'Not found'}, 404)
             session = self.app.sessions[request['session']]
@@ -192,7 +202,8 @@ class Handler(BaseHTTPRequestHandler):
             return self.respond({'requests': list(session['requests']), 'decisions': list(session['decisions']),
                                  'in_flight': session['lock'].locked()})
         static = {'/': ('policy-player.html', 'text/html'),
-                  '/policy-player.mjs': ('policy-player.mjs', 'text/javascript')}
+                  '/policy-player.mjs': ('policy-player.mjs', 'text/javascript'),
+                  '/request-recovery.mjs': ('request-recovery.mjs', 'text/javascript')}
         if route.path in static:
             name, kind = static[route.path]
             return self.respond((ROOT / 'experiments/validation' / name).read_bytes(), kind=kind)
@@ -206,13 +217,20 @@ class Handler(BaseHTTPRequestHandler):
             return self.respond({'error': 'Unknown session or media'}, 404)
         if not session['lock'].acquire(blocking=False):
             return self.respond({'error': 'One media request per session required'}, 409)
-        row = {'file': name, 'start_s': time.monotonic() - session['start'], 'bytes_sent': 0, 'complete': False}
+        session['cancel'].clear()
+        row = {'file': name, 'request_id': len(session['requests']) + 1,
+               'start_s': time.monotonic() - session['start'], 'bytes_sent': 0, 'complete': False}
         try:
+            if row['start_s'] >= float(session['trace'].durations_s.sum()):
+                return self.respond({'error': 'Trace exhausted'}, 410)
             replay = Replay(session['trace'], row['start_s'])
             deadline = row['start_s'] + self.app.config.request_timeout_s
             rtt = replay.rtt_s
             elapsed, ok = replay.wait(rtt, deadline)
-            time.sleep(elapsed)
+            if session['cancel'].wait(elapsed):
+                row['error'] = 'cancelled'
+                self.close_connection = True
+                return
             if not ok:
                 return self.respond({'error': 'Trace exhausted'}, 410)
             body = (self.app.media_dir / name).read_bytes()
@@ -221,13 +239,17 @@ class Handler(BaseHTTPRequestHandler):
             self.send_header('Content-Length', str(len(body)))
             self.send_header('Cache-Control', 'no-store')
             self.send_header('X-Assumed-RTT-S', str(rtt))
+            self.send_header('X-Request-ID', str(row['request_id']))
             self.end_headers()
             self.wfile.flush()
             replay = Replay(session['trace'], time.monotonic() - session['start'])
             for offset in range(0, len(body), 16384):
                 block = body[offset:offset + 16384]
                 transfer = replay.transfer(len(block), deadline)
-                time.sleep(max(0., session['start'] + replay.time_s - time.monotonic()))
+                if session['cancel'].wait(max(0., session['start'] + replay.time_s - time.monotonic())):
+                    row['error'] = 'cancelled'
+                    self.close_connection = True
+                    break
                 sent = int(round(transfer.bytes_received))
                 self.wfile.write(block[:sent])
                 self.wfile.flush()
@@ -254,10 +276,12 @@ def main():
     parser.add_argument('--port', type=int, default=8787)
     parser.add_argument('--replay-dataset', help='Research-only traces; video must exactly match training media')
     parser.add_argument('--experimental-max-buffer-s', type=float, help='Explicit frozen-model buffer-cap experiment')
+    parser.add_argument('--enable-request-recovery', action='store_true', help='Opt-in bounded native VOD recovery')
     args = parser.parse_args()
     app = PlayerApp(Dataset.load(args.dataset), args.checkpoint, args.media_dir,
                     replay_dataset=Dataset.load(args.replay_dataset) if args.replay_dataset else None,
-                    max_buffer_s=args.experimental_max_buffer_s)
+                    max_buffer_s=args.experimental_max_buffer_s,
+                    recovery=RecoveryConfig() if args.enable_request_recovery else None)
     server = ThreadingHTTPServer(('127.0.0.1', args.port), Handler)
     server.daemon_threads = True
     server.app = app

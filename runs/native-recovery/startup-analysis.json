@@ -1,0 +1,37 @@
+[
+  {
+    "trace": "prefetch-ferry-2011-01-29_1800CET",
+    "smallest_first_segment_bytes": 181801.0,
+    "service_in_first3_s_bytes": 8037.9394930498775,
+    "minimum_startup_s_even_zero_overhead": 29.180655432468157,
+    "startup_target_impossible_for_current_assets": true
+  },
+  {
+    "trace": "prefetch-ferry-2011-01-31_1830CET",
+    "smallest_first_segment_bytes": 181801.0,
+    "service_in_first3_s_bytes": 692091.6783216784,
+    "minimum_startup_s_even_zero_overhead": 0.6036737871155886,
+    "startup_target_impossible_for_current_assets": false
+  },
+  {
+    "trace": "prefetch-ferry-2011-02-01_0629CET",
+    "smallest_first_segment_bytes": 181801.0,
+    "service_in_first3_s_bytes": 640593.9425393883,
+    "minimum_startup_s_even_zero_overhead": 0.6516848627424432,
+    "startup_target_impossible_for_current_assets": false
+  },
+  {
+    "trace": "prefetch-ferry-2011-02-01_0740CET",
+    "smallest_first_segment_bytes": 181801.0,
+    "service_in_first3_s_bytes": 8912.420670897553,
+    "minimum_startup_s_even_zero_overhead": 8.131823762376237,
+    "startup_target_impossible_for_current_assets": true
+  },
+  {
+    "trace": "fresh-ferry-2010-09-21_1622CEST",
+    "smallest_first_segment_bytes": 181801.0,
+    "service_in_first3_s_bytes": 936535.4725274725,
+    "minimum_startup_s_even_zero_overhead": 0.5720257234626418,
+    "startup_target_impossible_for_current_assets": false
+  }
+]

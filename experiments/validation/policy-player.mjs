@@ -1,3 +1,5 @@
+import {downloadSegment} from './request-recovery.mjs';
+
 const el = id => document.getElementById(id);
 const video = el('video');
 const pause = ms => new Promise(resolve => setTimeout(resolve, ms));
@@ -37,12 +39,14 @@ async function run() {
     const clock = performance.now();
     const t = () => (performance.now() - clock) / 1000;
     const capture = {schema_version: 1, origin: 'native_mse_policy_capture', events: [], samples: [], segments: [],
+                     download_attempts: [], initializations: [],
                      completed: false, user_agent: navigator.userAgent, time_origin: performance.timeOrigin};
     const abort = new AbortController();
     const wallLimit = Number(params.get('wall_limit_s') || 300);
     capture.wall_limit_s = wallLimit;
     let started = false, startup = null, stallStart = null, stallSeconds = 0, stallEvents = 0, finalized = false;
-    let timer, context, source, sourceBuffer, codec, lastAction = null;
+    let timer, context, source, sourceBuffer, codec, lastAction = null, installedAction = null;
+    let liveDownload = null, startupTargetExceeded = false;
     const history = Array.from({length: 8}, () => [0, 0, 0, 0, 0]);
     const initializations = new Map();
     const event = type => {
@@ -80,6 +84,9 @@ async function run() {
         capture.metrics = {startup_s: startup, rebuffer_s: stallSeconds, stall_events: stallEvents,
                            played_s: video.currentTime, wall_time_s: finishedAt,
                            mean_played_bitrate_kbps: video.currentTime > 0 ? integral / video.currentTime : 0,
+                           received_media_bytes: capture.download_attempts.reduce((n, a) => n + a.bytes_received, 0),
+                           discarded_media_bytes: capture.download_attempts.filter(a => a.outcome !== 'complete').reduce((n, a) => n + a.bytes_received, 0),
+                           request_retries: capture.download_attempts.filter(a => a.attempt > 0).length,
                            dropped_frames: quality.droppedVideoFrames, total_frames: quality.totalVideoFrames};
         if (context) capture.transport_audit = await fetch(`/audit?session=${context.session}`).then(r => r.json());
         window.playbackResult = capture;
@@ -116,43 +123,64 @@ async function run() {
                 finish(false, 'Playback exceeded the declared wall-time budget');
                 return;
             }
+            if (!started && t() > 3 && !startupTargetExceeded) {
+                event('startup_target_exceeded'); startupTargetExceeded = true;
+            }
             const row = {t_s: t(), media_time_s: video.currentTime, buffer_s: bufferSeconds(), ready_state: video.readyState,
+                         current_download_bytes: liveDownload?.bytes_received || 0,
                          visibility: document.visibilityState};
             capture.samples.push(row);
             window.runStatus = {done: false, started: true, ...row, segments: capture.segments.length};
             el('status').textContent = `${context.policy} · ${context.trace}\n${video.currentTime.toFixed(1)} / ${total.toFixed(1)} s · buffer ${row.buffer_s.toFixed(1)} s · ${capture.segments.length} segments`;
+            if (!started) el('status').textContent += `\nLoading video: ${(row.current_download_bytes / 1024).toFixed(1)} KiB received.` +
+                (startupTargetExceeded ? ' Startup has exceeded the 3-second test target.' : '');
         }, 100);
         for (let index = 0; index < context.durations_s.length; index++) {
             const stepStart = performance.now();
             const decision = await post('/decide', {session: context.session, segment_index: index, history,
                 state: [bufferSeconds(), 0, 1, 1 - index / context.durations_s.length,
                         lastAction === null ? 0 : context.representations[lastAction].bitrate_kbps / 1000]});
-            const {action, bitrate_kbps, decision_ms} = decision;
-            const rep = context.representations[action];
+            const {action: policyAction, decision_ms} = decision;
             const duration = context.durations_s[index];
             while (bufferSeconds() + duration > context.config.max_buffer_s + .01) {abort.signal.throwIfAborted(); await pause(50);}
-            const desiredCodec = `video/mp4; codecs="${rep.codec}"`;
-            if (lastAction !== action) {
-                if (codec !== desiredCodec) {sourceBuffer.changeType(desiredCodec); codec = desiredCodec;}
-                if (!initializations.has(action)) {
-                    const r = await fetch(`/media/${context.session}/${rep.id}/Header.m4s`, {signal: AbortSignal.any([abort.signal, AbortSignal.timeout(30000)])});
-                    if (!r.ok) throw Error(`Initialization HTTP ${r.status}`);
-                    initializations.set(action, await r.arrayBuffer());
-                }
-                await appendOperation(sourceBuffer, () => sourceBuffer.appendBuffer(initializations.get(action)));
-            }
             const requestStart = performance.now();
-            const response = await fetch(`/media/${context.session}/${rep.id}/${index + 1}.m4s`, {signal: AbortSignal.any([abort.signal, AbortSignal.timeout(30000)])});
-            if (!response.ok) throw Error(`Media HTTP ${response.status}`);
-            const headersAt = performance.now();
-            const body = await response.arrayBuffer();
+            const result = await downloadSegment({session: context.session, segmentIndex: index,
+                action: policyAction, duration, representations: context.representations,
+                timeoutS: context.config.request_timeout_s, recovery: context.request_recovery,
+                signal: abort.signal, getBuffer: bufferSeconds,
+                ensureInit: async (action, signal) => {
+                    if (installedAction === action) return;
+                    const rep = context.representations[action];
+                    const desiredCodec = `video/mp4; codecs="${rep.codec}"`;
+                    if (codec !== desiredCodec) {sourceBuffer.changeType(desiredCodec); codec = desiredCodec;}
+                    if (!initializations.has(action)) {
+                        const r = await fetch(`/media/${context.session}/${rep.id}/Header.m4s`, {signal});
+                        if (!r.ok) throw Error(`Initialization HTTP ${r.status}`);
+                        const body = await r.arrayBuffer();
+                        initializations.set(action, body);
+                        capture.initializations.push({action, bytes: body.byteLength, received_at_s: t()});
+                    }
+                    await appendOperation(sourceBuffer, () => sourceBuffer.appendBuffer(initializations.get(action)));
+                    installedAction = action;
+                },
+                cancelRequest: async () => {
+                    const r = await fetch('/cancel', {method: 'POST', headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({session: context.session}), signal: AbortSignal.timeout(5000)});
+                    if (!r.ok) throw Error('Server did not acknowledge request cancellation');
+                },
+                onProgress: row => {liveDownload = row;},
+                onAttempt: row => capture.download_attempts.push({segment_index: index, recorded_at_s: t(), ...row})});
+            const {body, action} = result;
+            const bitrate_kbps = context.representations[action].bitrate_kbps;
             const receivedAt = performance.now();
-            const bodySeconds = Math.max((receivedAt - headersAt) / 1000, .000001);
+            const bodySeconds = Math.max(result.body_s, .000001);
             await appendOperation(sourceBuffer, () => sourceBuffer.appendBuffer(body));
             history.shift();
-            history.push([body.byteLength * 8 / bodySeconds / 1e6, (receivedAt - stepStart) / 10000,
-                          0, (headersAt - requestStart) / 10000, 1]);
-            capture.segments.push({segment_index: index, action, bitrate_kbps, decision_ms, bytes: body.byteLength,
+            const receivedBytes = result.attempts.reduce((n, a) => n + a.bytes_received, 0);
+            history.push([receivedBytes * 8 / bodySeconds / 1e6, (receivedAt - stepStart) / 10000,
+                          0, result.header_s / 10, 1]);
+            capture.segments.push({segment_index: index, policy_action: policyAction, action, bitrate_kbps, decision_ms, bytes: body.byteLength,
+                                   attempts: result.attempts,
                                    received_at_s: t(), body_s: bodySeconds,
                                    request_s: (receivedAt - requestStart) / 1000, buffer_s: bufferSeconds()});
             lastAction = action;

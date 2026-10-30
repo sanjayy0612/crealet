@@ -15,6 +15,12 @@ Open `http://127.0.0.1:8787`. Choose a policy and a connection and start playbac
 Reload to start a new session. Save measurements after playback. Video is muted
 and has no audio track. Seeking and user pauses are excluded from the experiment.
 
+Bounded native recovery is now available with `--enable-request-recovery`.
+It streams progress, cancels slow bodies, retries the same segment at lowest
+quality, and appends only complete responses. Recovery is opt-in; weights and
+the default cap remain unchanged. See [native recovery and measured startup
+limits](../../docs/native-recovery.md) for the frozen 60-second experiment.
+
 The default checkpoint is the current-source baseline reproduction under
 `runs/learning-ablation/baseline-seed-7/`, whose weights exactly match the
 accepted `runs/dqn-safe/` controller. Its recorded

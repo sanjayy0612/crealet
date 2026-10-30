@@ -1,0 +1,82 @@
+[
+  {
+    "name": "recovery-on-slow-first-dqn",
+    "Browser": "Chrome/156.0.8078.74",
+    "File-Path-Style": "posix",
+    "Protocol-Version": "1.3",
+    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.0.0 Safari/537.36",
+    "V8-Version": "15.6.75.25",
+    "WebKit-Version": "537.36 (@d331de35ca8ab1358c7a17e4bd41627d55eaef51)",
+    "webSocketDebuggerUrl": "ws://127.0.0.1:56285/devtools/browser/86e1f199-222a-456a-82d5-7bc0634a37f5"
+  },
+  {
+    "name": "recovery-on-slow-first-highest-allowed",
+    "Browser": "Chrome/156.0.8078.74",
+    "File-Path-Style": "posix",
+    "Protocol-Version": "1.3",
+    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.0.0 Safari/537.36",
+    "V8-Version": "15.6.75.25",
+    "WebKit-Version": "537.36 (@d331de35ca8ab1358c7a17e4bd41627d55eaef51)",
+    "webSocketDebuggerUrl": "ws://127.0.0.1:56304/devtools/browser/d6565d60-f499-4f78-8b08-c178c1a3af80"
+  },
+  {
+    "name": "recovery-on-slow-start-dqn",
+    "Browser": "Chrome/156.0.8078.74",
+    "File-Path-Style": "posix",
+    "Protocol-Version": "1.3",
+    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.0.0 Safari/537.36",
+    "V8-Version": "15.6.75.25",
+    "WebKit-Version": "537.36 (@d331de35ca8ab1358c7a17e4bd41627d55eaef51)",
+    "webSocketDebuggerUrl": "ws://127.0.0.1:56328/devtools/browser/e8761d25-097c-45a5-80d3-f7f8aa6e0031"
+  },
+  {
+    "name": "recovery-on-slow-start-highest-allowed",
+    "Browser": "Chrome/156.0.8078.74",
+    "File-Path-Style": "posix",
+    "Protocol-Version": "1.3",
+    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.0.0 Safari/537.36",
+    "V8-Version": "15.6.75.25",
+    "WebKit-Version": "537.36 (@d331de35ca8ab1358c7a17e4bd41627d55eaef51)",
+    "webSocketDebuggerUrl": "ws://127.0.0.1:56349/devtools/browser/d34814fd-ebe5-41ad-b762-dd0341d0e061"
+  },
+  {
+    "name": "recovery-on-hard-dqn",
+    "Browser": "Chrome/156.0.8078.74",
+    "File-Path-Style": "posix",
+    "Protocol-Version": "1.3",
+    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.0.0 Safari/537.36",
+    "V8-Version": "15.6.75.25",
+    "WebKit-Version": "537.36 (@d331de35ca8ab1358c7a17e4bd41627d55eaef51)",
+    "webSocketDebuggerUrl": "ws://127.0.0.1:56369/devtools/browser/cb3b3991-dc23-4628-8c8a-2b4c0832b3f3"
+  },
+  {
+    "name": "recovery-on-hard-highest-allowed",
+    "Browser": "Chrome/156.0.8078.74",
+    "File-Path-Style": "posix",
+    "Protocol-Version": "1.3",
+    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.0.0 Safari/537.36",
+    "V8-Version": "15.6.75.25",
+    "WebKit-Version": "537.36 (@d331de35ca8ab1358c7a17e4bd41627d55eaef51)",
+    "webSocketDebuggerUrl": "ws://127.0.0.1:56393/devtools/browser/8c092072-7b11-4ef7-b7c1-7077a57a267b"
+  },
+  {
+    "name": "recovery-off-hard-dqn",
+    "Browser": "Chrome/156.0.8078.74",
+    "File-Path-Style": "posix",
+    "Protocol-Version": "1.3",
+    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.0.0 Safari/537.36",
+    "V8-Version": "15.6.75.25",
+    "WebKit-Version": "537.36 (@d331de35ca8ab1358c7a17e4bd41627d55eaef51)",
+    "webSocketDebuggerUrl": "ws://127.0.0.1:56425/devtools/browser/154ccf1d-4ce1-4904-b6fc-b2802e63b69d"
+  },
+  {
+    "name": "recovery-off-hard-highest-allowed",
+    "Browser": "Chrome/156.0.8078.74",
+    "File-Path-Style": "posix",
+    "Protocol-Version": "1.3",
+    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.0.0 Safari/537.36",
+    "V8-Version": "15.6.75.25",
+    "WebKit-Version": "537.36 (@d331de35ca8ab1358c7a17e4bd41627d55eaef51)",
+    "webSocketDebuggerUrl": "ws://127.0.0.1:56448/devtools/browser/315d2c42-cfc7-4884-898a-2ccfc0aec77d"
+  }
+]

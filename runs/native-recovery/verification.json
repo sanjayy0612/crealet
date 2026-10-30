@@ -1,0 +1,17 @@
+{
+  "tests_passed": 148,
+  "existing_gymnasium_warnings": 2,
+  "native_cases": 8,
+  "recovery_on_completed": 6,
+  "recovery_on_total": 6,
+  "recovery_off_completed": 0,
+  "recovery_off_total": 2,
+  "real_retries_observed": 6,
+  "all_capture_audits_pass": true,
+  "frozen_checkpoint_and_capture_sources_match": true,
+  "same_original_event_clock_used": true,
+  "startup_impossibility_recomputed": true,
+  "native_recovery_opt_in": true,
+  "default_buffer_cap_changed": false,
+  "model_retrained": false
+}

@@ -1,5 +1,9 @@
 # VOD request recovery
 
+This document records the initial simulator milestone. The later
+[native recovery implementation](native-recovery.md) is now available as an
+opt-in feature; the measurements below remain the original simulator results.
+
 The simulator can now restart a stalled segment request without ending the video
 at the first timeout. Recovery is optional and separate from bitrate selection.
 Existing environments keep their original behavior unless explicitly enabled.

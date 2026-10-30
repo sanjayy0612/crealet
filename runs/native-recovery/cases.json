@@ -1,0 +1,66 @@
+[
+  {
+    "name": "recovery-on-slow-first-dqn",
+    "policy": "dqn",
+    "split": "test",
+    "trace": 0,
+    "port": 8851,
+    "wall_limit_s": 240
+  },
+  {
+    "name": "recovery-on-slow-first-highest-allowed",
+    "policy": "highest_allowed",
+    "split": "test",
+    "trace": 0,
+    "port": 8851,
+    "wall_limit_s": 240
+  },
+  {
+    "name": "recovery-on-slow-start-dqn",
+    "policy": "dqn",
+    "split": "test",
+    "trace": 3,
+    "port": 8851,
+    "wall_limit_s": 240
+  },
+  {
+    "name": "recovery-on-slow-start-highest-allowed",
+    "policy": "highest_allowed",
+    "split": "test",
+    "trace": 3,
+    "port": 8851,
+    "wall_limit_s": 240
+  },
+  {
+    "name": "recovery-on-hard-dqn",
+    "policy": "dqn",
+    "split": "test",
+    "trace": 4,
+    "port": 8851,
+    "wall_limit_s": 240
+  },
+  {
+    "name": "recovery-on-hard-highest-allowed",
+    "policy": "highest_allowed",
+    "split": "test",
+    "trace": 4,
+    "port": 8851,
+    "wall_limit_s": 240
+  },
+  {
+    "name": "recovery-off-hard-dqn",
+    "policy": "dqn",
+    "split": "test",
+    "trace": 4,
+    "port": 8850,
+    "wall_limit_s": 240
+  },
+  {
+    "name": "recovery-off-hard-highest-allowed",
+    "policy": "highest_allowed",
+    "split": "test",
+    "trace": 4,
+    "port": 8850,
+    "wall_limit_s": 240
+  }
+]

@@ -8,10 +8,10 @@ The project includes a streaming simulator, PPO and Dueling Double DQN trainers,
 recorded experiments, and a local browser player. It does not yet show an advantage
 for the learned policy over the simple bitrate rule used in the comparisons.
 
-![How the ABR Decision Engine works: measured inputs, frozen DQN, bitrate selection, segment download, and playback feedback. Optional VOD recovery is simulator-only.](docs/images/abr-working.png)
+![How the ABR Decision Engine works: measured inputs, frozen DQN, bitrate selection, segment download, and playback feedback. Optional VOD recovery is supported in the simulator and native player.](docs/images/abr-working-native.png)
 
 The illustration shows the current workflow, not a benchmark or a player screenshot.
-Its [generation prompt](docs/images/abr-working.prompt.txt) is included.
+Its [original prompt](docs/images/abr-working.prompt.txt) and [native-label edit](docs/images/abr-working-native.prompt.txt) are included.
 
 ## Current results
 
@@ -24,6 +24,7 @@ Its [generation prompt](docs/images/abr-working.prompt.txt) is included.
 | Buffer changes on the earlier failures | Startup threshold 4 s, resume threshold 1 s reduced stalls to **21.02 s and 6.56 s** | One difficult session still failed the stall limit |
 | [Long-stall diagnosis](runs/stall-diagnosis/report.md) | The 30 s buffer contract needs at least **19.11 s of stalls** on the remaining case when startup is limited to 3 s | A PPO/DQN swap alone cannot meet the 8 s target; a 60 s prefetch-cap diagnostic removed stalls on this one session |
 | [Frozen 60 s validation](runs/prefetch-validation/report.md) | Four more sessions, 30 simulator episodes and eight native trials; two new sessions had excessive startup, and two browser runs timed out | Playback gates failed; no retraining or default change. Browser memory and discarded downloads are recorded |
+| [Native recovery](runs/native-recovery/report.md) | All six recovery-on browser runs finished; both recovery-off hard controls timed out. Hard-case stalls were **0.00 s for DQN / 0.15 s for the rule** | Request recovery works on these development cases; 29 s and 8 s startup waits still need smaller startup media |
 
 **Current decision: keep the default buffer settings and the frozen baseline.**
 DQN and the highest-allowed rule chose identical actions in all 54 paired
@@ -35,9 +36,9 @@ The recent experiments require every video to finish, startup to stay at or belo
 also checks the per-validation-trace throughput baseline. Partial-playback metrics
 are retained and explicitly distinguished from full-video results.
 
-The latest regression check passed **143 tests**, with two existing Gymnasium
+The latest regression check passed **148 tests**, with two existing Gymnasium
 warnings about infinite observation-space bounds. See the
-[prefetch validation](runs/prefetch-validation/verification.json).
+[native recovery audit](runs/native-recovery/verification.json).
 
 ## How it works
 
@@ -57,8 +58,9 @@ harmonic mean of recent measured goodput. This is a heuristic, not a stall guara
 Optional VOD request recovery can cancel a slow higher-quality body and retry
 that same segment at the lowest quality. It allows at most four retries per
 segment. Failed bodies are discarded in full; RTT, backoff, bytes and stalls all
-count. **Recovery is implemented in the simulator, not in the browser player.**
-See [request recovery](docs/request-recovery.md).
+count. Recovery is available in the simulator and opt-in in the native player
+with `--enable-request-recovery`. See [native recovery](docs/native-recovery.md)
+and the [initial simulator experiment](docs/request-recovery.md).
 
 ### Model and training
 
@@ -195,10 +197,12 @@ remains a draft; stronger baselines and broader independent data are still neede
 
 ## Next investigation
 
-The [frozen prefetch validation](docs/prefetch-validation.md) did not pass the
-startup/completion gates. Validate bounded request recovery in the native player,
-address slow initial delivery, and specify a target-device memory budget before
-retraining for a larger cap. Keep default settings and weights frozen meanwhile.
+Native recovery now completes the tested request failures. The remaining slow
+startup is infeasible with the current first segment: it is 181,801 bytes, but
+the slow traces supply only about 8–9 KB by the 3-second target. Evaluate a smaller
+independently playable startup unit/representation with actual encoded sizes and
+real decoding. Keep default settings and weights frozen until the full playback
+gates pass, and specify a target-device memory budget before deployment.
 Offline future-service bounds must never become policy inputs.
 
 ## Background

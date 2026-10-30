@@ -68,6 +68,14 @@ runs/prefetch-validation/native/*
 runs/prefetch-validation/post-fix-smoke/*
 !runs/prefetch-validation/post-fix-smoke/*.json
 !runs/prefetch-validation/post-fix-smoke/*.png
+!runs/native-recovery/
+runs/native-recovery/*
+!runs/native-recovery/*.json
+!runs/native-recovery/report.md
+!runs/native-recovery/captures/
+runs/native-recovery/captures/*
+!runs/native-recovery/captures/*.json
+!runs/native-recovery/captures/*.png
 !data/
 data/*
 !data/realistic_envivio/
