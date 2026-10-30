@@ -1,0 +1,19 @@
+Use case: infographic-diagram
+Asset type: repository README architecture illustration, wide landscape, high resolution.
+Primary request: Show how the existing ABR Decision Engine works, as a polished, technically accurate software architecture infographic.
+Style: crisp flat editorial engineering infographic, readable sans-serif type, generous whitespace, restrained blue/teal accents, white or very light background, dark text. No 3D effects, no decorative code, no stock photography, no invented performance charts.
+Composition: clear five-card left-to-right main loop, with directional arrows and a return arrow underneath from Playback buffer to Measured inputs. Supporting offline training band below, and a small opt-in recovery branch near Segment request. Use abundant spacing, large text legible on GitHub, rounded cards and simple meaningful line icons.
+Title, verbatim: "ABR Decision Engine"
+Subtitle, verbatim: "Choose a bitrate. Download a segment. Measure playback. Repeat."
+Five main cards in exact order:
+1 "Measured inputs" with "Recent downloads + player state + bitrate ladder"
+2 "Dueling Double DQN" with "Candidate Transformer" and "2 layers · 4 heads · width 64" and "One Q-value per bitrate"
+3 "Bitrate selection" with "Observed-goodput filter + argmax"
+4 "Segment request" with "Finite network-trace replay"
+5 "Playback buffer" with "Play video + record stalls"
+Feedback return arrow label, verbatim: "New measurements"
+Recovery branch connected ONLY to Segment request, with retry arrow back to that request. Exact title: "Optional VOD recovery"; exact sublines: "Simulator only" and "Cancel slow request → retry lowest quality" and "At most 4 retries per segment". This is opt-in in the simulator, NOT deployed browser behavior.
+Bottom band separate from inference main loop: exact label "Offline training"; show "Replay buffer" → "Online + target networks" → "Frozen checkpoint", then a dashed arrow from Frozen checkpoint UP into Dueling Double DQN. Do not connect playback feedback directly into weight updates. There is no online learning during playback.
+Small bottom metrics strip text: "Measure: completion · startup · stalls · played bitrate · wasted bytes"
+Small footer: "Research prototype · Native browser playback exists · No proven advantage over the simple bitrate rule"
+Constraints: Render all quoted text accurately. Keep network traces attached to transport only, never as future model inputs. Do not imply zero stalls, universal safety, production readiness, or browser recovery. Do not show an LLM, chatbot, tokenizer, or language generation. Prioritize clear flow and legible labels over decoration.

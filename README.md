@@ -1,494 +1,210 @@
 # ABR Decision Engine
 
-This project aims to build a **small, streaming-specific decision model**. Like
-the decision interface used by [Laya](https://github.com/NandhaKishorM/laya),
-it takes a state and a set of allowed choices and returns one choice in a single
-forward pass. Here the state is numeric network and player history, and the
-choices are the available video representations. The model is intended to run
-at each adaptive bitrate (ABR) decision point in a video player. It is not a
-port of Laya's language encoder or its weights.
+A research prototype that chooses video quality from recent download measurements,
+playback state, and the available bitrate ladder. The goal is smooth playback:
+**higher quality is useful only when startup delay and stalls stay acceptable.**
 
-The research question is whether this specialized model can make good bitrate
-decisions with low measured inference cost across unseen network, video, ladder,
-and live-timing conditions. Playback quality, stalls, and live delay must be
-measured separately from model size and speed. Broad performance across unseen
-conditions remains unproven.
+The project includes a streaming simulator, PPO and Dueling Double DQN trainers,
+recorded experiments, and a local browser player. It does not yet show an advantage
+for the learned policy over the simple bitrate rule used in the comparisons.
 
-## Current status
+![How the ABR Decision Engine works: measured inputs, frozen DQN, bitrate selection, segment download, and playback feedback. Optional VOD recovery is simulator-only.](docs/images/abr-working.png)
 
-- Finite VOD and low-latency live application-level environment.
-- Measured trace imports, reproducible diagnostic replay and player-capture tools.
-- Dense, GRU, and ABR-CandidateTransformer v1 architectures implemented.
-- PPO and Dueling Double DQN training loops are available. The first VOD pilot
-  uses Envivio DASH segment sizes and eight Ghent 4G logs. A harder experiment
-  adds fourteen measured Norway mobile sessions and four labelled controlled
-  outage cases; see `data/hard_envivio/` and `runs/dqn-hard/training_report.md`.
-- A local native MSE player connects the frozen model to actual video requests
-  and decoding under HTTP trace pacing. See
-  [policy playback](experiments/validation/POLICY_PLAYER.md).
-- A follow-up DQN controller with an explicit observed-throughput filter raises
-  reserved-trace bitrate from 300 to 736 kbps with zero stalls. Browser checks
-  also completed without stalls at higher bitrates. A matching simple rule
-  produces the same choices; a neural advantage remains unproven. See the
-  [filtered-controller report](runs/dqn-safe/training_report.md).
-- A six-run comparison of earlier reward credit and queue-summary inputs did
-  not beat the filtered rule. Two additional measured sessions caused request
-  timeouts, exposing a reliability gap. See the
-  [learning comparison](runs/learning-ablation/report.md).
-- Draft evaluation protocol; broad generalization and novel performance are
-  not established by the initial replay run.
-- Production-player integration and broad simulator/player calibration remain
-  pending; the local experiment uses one silent video and application-level pacing.
+The illustration shows the current workflow, not a benchmark or a player screenshot.
+Its [generation prompt](docs/images/abr-working.prompt.txt) is included.
 
-Recorded experiment checkpoints and raw reports are kept under `runs/`.
-Large video payloads remain in the ignored `artifacts/` cache.
+## Current results
 
-## Project goal and prior work
+| Experiment | Observed result | What it means |
+| --- | --- | --- |
+| [Filtered DQN](runs/dqn-safe/training_report.md) | Higher bitrate than fixed-lowest on the recorded cases, with zero stalls; a matching rule made the same choices | No learned-policy advantage established |
+| [Learning comparison](runs/learning-ablation/report.md) | Six runs, 720 training episodes; reward-credit and queue-summary changes did not beat the rule | Keep the frozen baseline |
+| [Request recovery](runs/request-recovery/report.md) | Both previously failed videos finished; full-playback stalls were **21.58 s and 9.93 s** | Completion improved, but both missed the 8 s stall limit |
+| [Buffer experiment](runs/buffer-experiment/report.md) | 162 replay episodes; four additional sessions already had zero stalls with default buffers | Larger buffers added startup delay without reducing stalls on those four sessions |
+| Buffer changes on the earlier failures | Startup threshold 4 s, resume threshold 1 s reduced stalls to **21.02 s and 6.56 s** | One difficult session still failed the stall limit |
 
-The intended product is a bounded decision engine: **recent measurements +
-player state + candidate representations -> one representation**. The same
-interface can score a different number of candidates without changing the
-output layer. A streaming player would gather the inputs before each segment
-request, run the model, then use the selected representation. A single forward
-pass means the model does not generate text or search through outputs. It does
-not imply accurate choices, low latency on every device, or calibrated
-probabilities; those need training and measurement.
+**Current decision: keep the default buffer settings and the frozen baseline.**
+DQN and the highest-allowed rule chose identical actions in all 54 paired
+profile/session comparisons in the buffer experiment. Larger resume buffers
+sometimes reduced the number of pauses while increasing total stall duration.
 
-Laya is useful as an interface reference for typed, single-pass choices, but
-its pretrained text encoder is unnecessary for the current numeric observations.
-[Pensieve](https://web.mit.edu/pensieve/content/pensieve-sigcomm17.pdf) already
-trained a neural ABR policy, so a learned bitrate selector alone is not a novel
-claim. The proposed contribution must be established by a specific, measured
-advantage over strong streaming baselines. The [research note](docs/research/decision_model_and_training_environment.md)
-compares the relevant systems and explains the training-data limits.
+The recent experiments require every video to finish, startup to stay at or below
+3 seconds, and total stalls to stay at or below 8 seconds. Training acceptance
+also checks the per-validation-trace throughput baseline. Partial-playback metrics
+are retained and explicitly distinguished from full-video results.
 
-The current dense and GRU models are small candidate scorers, not miniature
-copies of Laya or Pensieve. Their outputs are raw, untrained scores. Training
-must define what those scores mean (for example, policy logits or estimated
-action value). Applying softmax would not by itself make them reliable
-probabilities that a choice is safe or optimal.
+The latest regression check passed **129 tests**, with two existing Gymnasium
+warnings about infinite observation-space bounds. See the
+[experiment audit](runs/buffer-experiment/verification.json).
 
-## Development
+## How it works
+
+1. **Observe:** collect eight recent download rows, five player-state values,
+   public stream settings, and the available representations.
+2. **Score:** the frozen Dueling Double DQN returns one action value per bitrate.
+3. **Filter and choose:** an observed-goodput rule masks higher bitrates before
+   taking the highest remaining score. The lowest bitrate remains available.
+4. **Download and play:** request the selected segment, advance the buffer and
+   playback clocks, and record startup, stalls, played quality, and bytes.
+5. **Repeat:** use the new measurements for the next segment decision.
+
+The default action filter requires at least 12 seconds of buffered video before
+higher bitrates are eligible. It limits their nominal bitrate to 0.65 times the
+harmonic mean of recent measured goodput. This is a heuristic, not a stall guarantee.
+
+Optional VOD request recovery can cancel a slow higher-quality body and retry
+that same segment at the lowest quality. It allows at most four retries per
+segment. Failed bodies are discarded in full; RTT, backoff, bytes and stalls all
+count. **Recovery is implemented in the simulator, not in the browser player.**
+See [request recovery](docs/request-recovery.md).
+
+### Model and training
+
+The current baseline uses a **77,826-parameter Candidate Transformer**:
+
+```text
+History [8,5] ──────────────────────────────┐
+Player state [5] + stream settings [10] ────┼─> 64-wide tokens
+Bitrate candidates [K,3] ──────────────────┘          │
+                                      2 Transformer encoder layers
+                                      4 attention heads, FFN 128
+                                                    │
+                                state value V(s) + candidate advantages A(s,a)
+                                                    │
+                                Q(s,a) = V(s) + A(s,a) - mean(A)
+                                                    │
+                                observed-goodput mask -> argmax -> bitrate
+```
+
+The mean uses valid candidates only. Candidate inputs contain nominal bitrate,
+estimated segment size, and duration. Future trace bandwidth is not a model input.
+Optional queue-summary features are a separate research variant and are not enabled
+in the native player. Dense, GRU and PPO architectures remain available for comparison.
+
+Dueling Double DQN trains from stored transitions. The online network chooses
+the next action; a separate target network scores it for the learning target.
+Training periodically refreshes the target network and evaluates checkpoints
+on validation traces. Playback uses frozen weights and does not update them online.
+The reward uses played log bitrate with explicit penalties, including stalls;
+recent experiments use a rebuffer penalty of 12. Bitrate is a quality proxy,
+not measured visual quality or a human opinion score.
+
+Current browser/recovery experiments load
+[`runs/learning-ablation/baseline-seed-7/accepted.npz`](runs/learning-ablation/baseline-seed-7/accepted.npz).
+Its tensors exactly match the earlier accepted controller; see
+[checkpoint identity](runs/learning-ablation/control_identity.json).
+NPZ checkpoints disable pickle loading and validate model source, shapes and
+feature contracts. Changing model code can require explicit checkpoint migration.
+
+## Run locally
+
+Python 3.12 is the currently verified environment. PyTorch is optional for the
+simulator and required for model training and inference.
 
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
-python -m pip install -r requirements-dev.txt
-python -m pytest -q
-python -m abr.benchmark --help
-python -m abr.validate_player --help
-```
-
-Runtime dependencies are NumPy and Gymnasium. Tests require pytest; JavaScript
-recorder checks also use Node.js when available. No Torch or Stable-Baselines3 is
-required for this environment foundation. Install `requirements-model.txt` to
-construct and test the optional PyTorch models.
-
-```python
-from abr import StreamingEnv, StreamConfig, QoEWeights
-```
-
-## Layout
-
-- `abr/env.py`, `transport.py`, `media.py`, `playback.py`: simulation components.
-- `abr/trace_import.py`: auditable trace conversions.
-- `abr/benchmark.py`: diagnostic baseline evaluation, with no training.
-- `abr/validate_player.py`: simulator/player timing comparison.
-- `abr/models/`: small candidate scorers, input adapter, checkpoints and inference.
-- `experiments/configs/evaluation_v2.json`: draft evaluation protocol.
-- `experiments/validation/`: independent browser capture page.
-- `tests/`: environment, import, and telemetry checks.
-
-The environment and observation contracts retain version 2. Renaming the files
-changes source hashes; regenerate reports and cases in this repository. Dataset
-schemas 1 and 2 remain readable. Raw data, media and generated reports are not
-bundled. `python -m abr.benchmark` is the replacement for the previous
-`python -m abr.benchmark_v2` command.
-
-## Origin
-
-Extracted from the author's `DASH_RL` research work at commit
-`970c67ec015cfc27968b78bb09db243fb95da08a`, from branch
-`abr/trace-driven-rebuild`. This is a fresh repository, not a worktree or submodule.
-The original checkout is left intact. Only the V2 environment and evaluation
-foundation were brought over. The software design references below are citations,
-not statements that their code was copied or their results reproduced.
-
-## Environment design and limits
-
-### What the literature changes in our design
-
-| Primary source | Environment pattern or finding | V2 design response |
-| --- | --- | --- |
-| [Pensieve, SIGCOMM 2017](https://web.mit.edu/pensieve/) and [Sabre implementation](https://github.com/UMass-LIDS/sabre) | Fast replay combines network traces, segment sizes, and player state. Sabre accounts for played quality. | Keep replay fast, but separate transport, media timing, and playback. Use finite traces and count quality when played. |
-| [DASH-IF low-latency design](https://dashif.org/dash.js/pages/usage/low-latency.html) | CMAF parts arrive inside one open segment request. Producer idle time distorts whole-request throughput estimates. Playback rate helps control live delay. | Require explicit part tables, wait for source availability, charge one request RTT, and separate transfer, producer wait, and buffer wait. |
-| [Fugu, NSDI 2020](https://www.usenix.org/conference/nsdi20/presentation/yan) | Real deployment rankings can differ from simulation. Fugu uses deployment data and transmission-time prediction. | Keep simulation results separate from browser/network validation. V2 does not implement Fugu. |
-| [CausalSim, NSDI 2023](https://www.usenix.org/conference/nsdi23/presentation/alomar) | Traces collected under one algorithm can bias replay of another algorithm. | Preserve collection source and session groups. Mark observed goodput as observed goodput. This metadata does not remove causal bias. |
-| [CellReplay, NSDI 2025](https://www.usenix.org/conference/nsdi25/presentation/sentosa) | Cellular behavior depends on workload; accurate packet replay needs more than a throughput series. | Keep a distinct future Linux emulation validation stage. V2 does not recreate CellReplay's packet model. |
-| [SIGCOMM 2021 5G artifact](https://github.com/SIGCOMM21-5G/artifact/tree/main/Video-Streaming) | Published ABR experiments use measured 4G/5G throughput traces and a browser testbed. | Import timestamp/Mbps traces with explicit interval alignment. Do not treat old measured traces as coverage of all current networks. |
-
-The new implementation is original project code. These are design references,
-not claims that we reproduced the papers or matched their results.
-
-### Components and execution
-
-```text
-Trace + collection metadata -> transport.Replay ----+
-Media segment/part tables --> source availability -+-> env.StreamingEnv
-                                                    |       |
-                                              playback.Player
-                                                    |
-                                     observations, reward, raw metrics
-```
-
-- `abr/transport.py`: integrates interval goodput, including outages. A request
-  has one sampled RTT cost. This is a request-delay approximation, without
-  separate forward/reverse propagation of each part. RTT can vary by interval. Trace exhaustion and
-  request timeout stop an incomplete episode. Traces never repeat silently.
-- `abr/media.py`: segment sizes plus optional per-part durations and sizes for
-  every representation. Parts must sum to their segment duration and bytes.
-  Live mode rejects missing part tables. It never silently divides segment
-  sizes into equal parts. Synthetic tables must be labeled as synthetic.
-- `abr/playback.py`: playable-unit queue, separate startup/resume thresholds,
-  stall duration and event count, actual played quality, and final buffer drain.
-- `abr/env.py`: one action selects one segment representation. VOD makes all
-  segments available at reset. Live releases each part at
-  `media_end + encoder_delay - source_age_at_reset`. No part is playable until
-  its transfer completes. A finite event stops producing at the video's end.
-- Live rate control is an optional bounded proportional rule, with a default
-  range 0.95–1.05. It uses latency error and avoids speeding up a depleted
-  buffer. This is a simple test controller, not a reproduction of LoL+.
-- Buffer waits model application backpressure before the next playable unit.
-  They are not a TCP receive-window simulation. The buffer must hold one unit
-  plus the larger startup/resume threshold, preventing a paused-player deadlock.
-
-Default observations contain only past measurements and public candidate
-metadata. They do not contain future network values or true future live sizes.
-`history[H,5]` columns are body goodput in Mbps, request time / 10 seconds,
-producer wait / 10 seconds, request RTT / 10 seconds, and a valid-sample flag.
-`state[5]` is buffer seconds, live latency seconds (zero for VOD), playback rate,
-remaining segment fraction, and previous selected Mbps. `candidates[K,3]` is
-nominal Mbps, estimated segment MB, and segment duration seconds. Default size
-estimates are nominal bitrate times duration. `known_vod_sizes=True` permits
-actual VOD sizes only when those sizes are available to the deployed controller.
-
-Body goodput excludes producer idle time, RTT, and buffer waits. Network outage
-time remains in the body duration. This is simulator instrumentation, not a
-validated browser throughput estimator. A real player needs a separately tested
-estimator from receive timestamps.
-
-### Metrics and reward
-
-Reports retain startup delay, stall time/count/ratio, played media duration,
-played bitrate, switching, received bytes (including incomplete transfers),
-peak buffer, live latency, and playback-rate deviation. Mean live latency is
-weighted by wall time after startup, including stalls. The live edge is source
-media time; camera capture, display, and decode delays are not measured. No
-percentile latency is reported from sparse segment endpoints.
-
-The reward is played-duration-weighted log bitrate minus separate startup,
-stall, played-quality switching, excess live-latency, and rate-deviation terms.
-Weights are explicit `QoEWeights`. Log bitrate is a proxy, not VMAF or measured
-human opinion. Raw metrics remain separate so a reward cannot hide a tradeoff.
-Step logs separate request time, total elapsed time, and playback-tail time.
-The final step includes the playback tail. Reward timing differs from V1 and
-can attribute playback of an earlier selected segment to a later action.
-
-Decisions have unequal elapsed times. A later RL design must explicitly choose
-per-decision discounting or elapsed-time discounting (a semi-Markov model).
-V2 does not make that training choice yet.
-
-### Is this environment suitable for training?
-
-**Yes, for an initial segment-level policy in a finite, trace-driven task.**
-`reset()` returns the first observation; `step(representation_index)` advances
-the network, source, and player clocks and returns the next observation, reward,
-termination flags, and measurements. Repeated calls create an action-dependent
-sequence of decisions. The replay runs in simulated time and can run faster than
-wall time. Live mode uses explicit part *tables* at simulated production
-times, but the action is still chosen once per segment. This is online-style
-interaction with a simulator, not a feed of current internet conditions.
-
-The environment should not be rewritten merely to make it "real-time." First
-train and evaluate a segment-level policy against measured, provenance-tracked
-network traces and packaged video metadata. Controlled-capacity traces are the
-cleaner replay input when available; observed throughput from another player's
-requests may depend on that player's actions and cannot automatically be treated
-as the capacity every candidate would have received. Keep training, validation,
-and test sessions separate. The included synthetic dataset is an engineering
-fixture, not evidence of real-world generalization.
-
-Before trusting learned-policy results, close these specific gaps:
-
-1. Expand the initial one-video/eight-trace sample. The current VOD example
-   uses published Envivio DASH segment sizes and older Ghent 4G measurements;
-   it does not cover other videos, modern networks, or live timing conditions.
-2. Compare simulator startup, stalls, timing, and live latency with an actual
-   player under controlled network conditions. The current browser page captures
-   playback telemetry for this check; it does not export a complete per-request
-   training stream or impose network conditions.
-3. Choose an explicit training target and algorithm, record transitions with
-   action and elapsed time, and retain incomplete/timeout episodes. A simple
-   supervised imitation run can check training plumbing, but only learning from
-   a teacher does not establish an improvement over that teacher. An RL method
-   can optimize the specified QoE reward through simulator interaction, subject
-   to simulator bias.
-4. Benchmark learned policies against implemented BOLA, robust MPC, a documented
-   live controller, and a reproduced learned reference. Report playback metrics
-   and batch-one inference cost on fixed hardware. Test on held-out groups.
-5. For a claim about deployment, add a separate player adapter that measures
-   requests and playback, forms the same observation contract, invokes the
-   policy before each request, and logs actions and outcomes. Validate the
-   measurement mapping and run controlled player trials before using field data
-   for training or claiming real-time performance.
-
-If the intended controller must react *within* a segment to each live part, or
-must handle late joins, request cancellation, or continuously arriving media,
-the action and episode contracts need a separately versioned extension. The
-current segment-boundary environment cannot test those behaviors.
-
-### Measured inputs and reproducible diagnostics
-
-`Dataset.save()` writes schema 2; `Dataset.load()` also accepts schema 1. Trace
-metadata adds `source_group`, `source`, `semantics`, and optional
-`rtt_series_s`. Use a shared group for every window of a collection session;
-if session identity is unknown, group conservatively by collection. This check
-cannot find correlation when group labels are missing or wrong. Schema 2 and
-changed source hashes invalidate earlier experiment provenance; do not silently
-reuse old checkpoints.
-
-`abr.trace_import` supports:
-
-- `load_ghent4g`: the [original six-column interval-byte logs](https://users.ugent.be/~jvdrhoof/dataset-4g/).
-  Rate in kbps = bytes times 8 divided by interval milliseconds. Zero bytes
-  remain outages. These 2015–2016 LTE logs are useful import checks, not a
-  modern-network benchmark. RTT must be an explicit assumption.
-- `load_timestamp_mbps`: timestamp-seconds/Mbps pairs, including the Lumos5G
-  artifact format. The caller must specify `alignment="start"` or `"end"` from
-  the collection/testbed semantics. The importer drops the unbounded endpoint;
-  it does not invent the duration of the last sample.
-- `load_interval_csv`: exact header `duration_s,goodput_kbps,rtt_s` for other
-  audited datasets or controlled experiments.
-
-All importers record the source and raw file checksum. They do not download
-anything. Keep raw data and conversion settings with experiment outputs. Do
-not convert Puffer per-request streaming logs or CellReplay's packet-delay
-artifacts into capacity traces without a separately validated method.
-
-Media JSON uses schema 1 with `video` (the same three video arrays as Dataset),
-`part_durations_s` (`[segment][part]`), `part_sizes_bytes`
-(`[segment][part][representation]`), and `provenance`. Use `Media.save/load` to
-write/read this schema. Part metadata should come from the packaged media.
-The loader validates timing and byte conservation; it does not verify codec,
-random-access, audio/video alignment, or actual CMAF box structure.
-
-```bash
-python -m pytest -q
-python -m abr.benchmark --dataset data/audited.json --mode vod --baseline throughput --output runs/v2-vod.json
-python -m abr.benchmark --dataset data/audited.json --media data/packaged-media.json --mode live --baseline lowest --output runs/v2-live.json
-```
-
-Use `--config path/to/config.json` for `StreamConfig` overrides. Diagnostic
-baselines are lowest, highest, and a harmonic-throughput heuristic. They are
-not claimed to be state-of-the-art controllers. Reports contain raw steps,
-completion/truncation reason, source/config/data/media hashes, and versions.
-Reports do not compare partial and complete episodes as if they were equal.
-
-V2 is a tested application-level foundation. It does not model TCP/QUIC,
-congestion control, packet loss, radio scheduling, CDN behavior, initialization
-fetches, audio, decode,
-request abandonment/retry, live seeking, or an unbounded sliding live window.
-Its live mode models a finite recorded event beginning at media time zero;
-it does not yet implement joining an ongoing stream at an arbitrary segment.
-No real-browser equivalence or decision-engine improvement is established.
-Before model selection, validate packaged media and playback metrics against
-an actual DASH player under controlled network conditions, then include
-multiple independently collected network and video groups in the benchmark.
-
-
-## Evaluation protocol and player validation
-
-The research objective and experiment rules are in
-`experiments/configs/evaluation_v2.json`. They specify VOD and finite live tasks,
-five training seeds, source-group splits, held-out transfer cases, required
-baselines, raw playback/quality/compute metrics, and publication limits. The
-protocol is **draft**: target hardware, measured VMAF tables, independently
-collected benchmark groups, baseline implementations, and primary acceptance
-margins are still missing. Do not call it preregistered or use final test results
-to choose these values. The draft's playback tolerances are initial calibration
-thresholds, not proven equivalence bounds.
-
-Use the independent capture page at `experiments/validation/player.html` for
-initial timing checks. It pins dash.js 4.7.4, holds video quality at index zero,
-disables live catchup, records native playback events, and never calls an
-inference server or loops playback. It exports
-startup/stall events and 100ms buffer, media-clock, rate, and live-latency samples.
-Use this dedicated capture page for the comparison.
-
-1. Package a finite, video-only DASH asset and extract its actual segment/part
-   durations and byte sizes into Dataset/Media JSON. Confirm representation index
-   zero matches the simulator's lowest bitrate. Audio, codecs, container overhead,
-   random-access points, and CMAF packaging require independent inspection.
-2. Configure the external network testbed and record the configuration, start
-   alignment, trace conversion convention, and run ID. This page does not impose
-   network conditions. Browser throttling is not automatically equivalent to
-   interval-goodput replay. Start with constant-rate VOD, then rate steps and
-   outages; verify finite live availability separately.
-3. Run `abr.benchmark` with `--baseline lowest --split validation`. For live
-   timing checks, pass a config with `catchup: false`; the browser's catchup
-   controller differs from V2's proportional rule. Do not use the held-out final
-   test set to calibrate the simulator.
-4. Export a case from a complete diagnostic report:
-
-   ```bash
-   python -m abr.validate_player prepare --report runs/v2-lowest.json --episode 0 --output runs/player-case.json
-   python -m http.server 8080 --bind 127.0.0.1
-   ```
-
-5. Open `http://127.0.0.1:8080/experiments/validation/player.html`. Load the case
-   JSON, enter the packaged manifest URL and external network evidence reference,
-   and start capture. Keep the tab visible. The page uses the pinned CDN script;
-   it needs internet access for that script and CORS permission for remote media.
-   For reproducible offline experiments, host that exact library locally and
-   record its checksum. Capture automatically stops at playback end; manual stop
-   exports an incomplete run. The prepared case contains expected measurements,
-   not the media or network emulator.
-6. Compare the exported raw capture:
-
-   ```bash
-   python -m abr.validate_player compare --case runs/player-case.json --capture runs/player-capture.json --output runs/player-comparison.json
-   ```
-
-The comparison rejects different case identities, missing network evidence,
-pauses, seeks, incomplete playback, non-finite/out-of-order timestamps, and missing
-or sparse live-latency samples. It reports absolute errors for startup, stalls,
-played duration, wall time, stall count, and live latency. Exit 0 means within the
-configured tolerances; exit 1 means a numerical mismatch; exit 2 means invalid
-input. Keep mismatches and explain them; do not widen tolerances using final
-validation/test outcomes.
-
-Native `waiting` after first `playing` starts a stall; a later `playing` ends it.
-Repeated waiting events count as one stall. Initial waiting belongs to startup.
-The browser's event semantics and timing precision differ from an ideal simulator.
-Browser startup includes manifest, initialization, and decode work, which V2 does
-not model. Live latency is integrated over sampled wall time after startup,
-including stalls, and uses the player's estimated source clock. Missing latency
-stays missing. The initial live comparison requires a finite event starting at
-media time zero: normal late joining or automatic live seeks are not supported by
-V2 and must not be hidden by subtracting an arbitrary playback offset.
-
-A matching JSON identity is a declared experiment condition, not independent proof
-that the browser used the claimed bytes or network. Verify the packaging,
-representation mapping, and network artifacts separately. One passing comparison
-does not establish environment equivalence. The tool always keeps that broader
-claim false. Its recorder tests use analytical media-event fixtures; they are not
-actual DASH playback validation. No real-browser playback result or V2 trained
-model is claimed in this update.
-
-
-## First decision-model architectures (untrained)
-
-The dense/GRU models below remain comparison baselines. The new
-[ABR-CandidateTransformer v1](abr/models/README.md) jointly processes numeric
-history, player state/configuration, and candidates using two 64-wide transformer
-layers with four attention heads. Its shared policy head returns candidate logits;
-its separate value head reads the contextualized state token for future
-actor-critic training. The default model has **77,826 trainable parameters**.
-There is no ABR training loop yet, and neither head has learned streaming behavior.
-
-```bash
-python -m abr.models init --kind candidate_transformer --seed 0 --output runs/transformer-initial.npz
-python -m abr.models inspect --checkpoint runs/transformer-initial.npz
-```
-
-GRU-specific recurrent code lives in `abr/models/gru/`; dense/GRU shared scoring
-remains in `abr/models/network.py`. Their public construction APIs and parameter
-counts are preserved. Model source hashing now covers nested Python modules;
-initialization artifacts from earlier source versions must be regenerated.
-
-The two original baseline models implement the same decision interface. They do
-not use Laya weights, language tokenizers, pretrained encoders, or PPO. Both score
-the available bitrate candidates in one forward pass. Neither has been trained
-on streaming outcomes. A score is not a probability, calibrated confidence, or
-an established estimate of future return.
-
-```text
-History [8,5] -> dense network OR masked GRUCell -> 48 features --+
-Player state [5] + public streaming context [10] -> 32 features -+-> fusion -> 48
-Candidate-set mean/min/max [9] --------------------------------+       |
-                                                          concatenate each
-                                                          candidate [3]
-                                                               |
-                                                    shared 51 -> 32 -> 1 scorer
-                                                               |
-                                                    raw scores -> argmax
-```
-
-| Component | Dense baseline | GRU variant |
-| --- | --- | --- |
-| History encoder | Flatten 8x5 -> 48 -> 48, SiLU | GRUCell: 4 inputs -> 48 hidden, mask-controlled updates |
-| Player encoder | 15 -> 32, SiLU | Same |
-| Fusion | 89 -> 48, SiLU | Same |
-| Candidate scorer | 51 -> 32 -> 1, SiLU between linear layers | Same |
-| Trainable parameters | 10,849 | 14,305 |
-
-The GRU reads oldest to newest and skips padded history rows. It re-encodes the
-finite window for each decision; it does not maintain a hidden state between
-calls. This prevents episode leakage and gives both variants the same finite
-history. The dense variant sees the validity flag directly. ModelConfig can
-change widths and history length, which changes the parameter count.
-
-The public context vector is streaming mode, target live latency, buffer limit,
-startup threshold, resume threshold, catchup enabled, minimum playback rate,
-maximum playback rate, catchup gain, and latency deadband. In VOD, irrelevant live
-fields use fixed neutral values. Context comes from StreamConfig, not future
-network data. Current observations still use the environment v2 schema.
-
-Each candidate supplies nominal Mbps, estimated MB, and duration seconds. The
-shared scorer supports a variable number of candidates. Mean/min/max pooling is
-independent of candidate order and lets scoring depend on the available ladder.
-Batching pads missing candidates and masks them out of pooling and action
-selection. This interface support does not prove transfer to unseen ladders.
-
-`make_batch` validates observation values and shapes. Scaling uses fixed units
-and log1p for nonnegative magnitudes; nothing is fitted on validation/test data.
-The low-level tensor forward expects the validated nonnegative feature contract.
-The model has no access to traces, true future live sizes or environment internals.
-Future training must specify its reward objective, discounting, and data protocol;
-raw model outputs are not yet defined as trained action values.
-
-```bash
-python -m pip install -r requirements-model.txt
-python -m abr.models init --kind dense --seed 0 --output runs/dense-initial.npz
-python -m abr.models init --kind gru --seed 0 --output runs/gru-initial.npz
-python -m abr.models inspect --checkpoint runs/gru-initial.npz
+python -m pip install -r requirements-dev.txt -r requirements-model.txt
 python -m pytest -q
 ```
 
-Artifacts use NPZ numerical arrays plus JSON metadata, loaded with pickle disabled.
-They record architecture, observation/feature versions, source hash, parameter
-count, initialization seed and PyTorch version. Loading rejects incompatible
-source or feature contracts and changed fixed scaling constants. This construction
-milestone only saves and loads artifacts labeled `training_status: untrained`.
-Regenerate initialization artifacts after model-source changes. Model files belong
-under ignored `runs/`; do not confuse them with trained checkpoints.
-
-An explicit untrained rollout can check plumbing on training/validation fixtures:
+Replay the recent experiments with the recorded datasets and frozen checkpoint:
 
 ```bash
-python -m abr.models rollout --checkpoint runs/gru-initial.npz --dataset data/audited.json --media data/packaged-media.json --mode live --allow-untrained --output runs/gru-integration.json
+python -m scripts.evaluate_request_recovery
+python -m scripts.prepare_buffer_experiment
+python -m scripts.evaluate_buffer_experiment
 ```
 
-Without `--allow-untrained`, the command refuses to evaluate initial random weights.
-The command excludes the final test split. Reports include raw outcomes and the
-artifact's untrained status, model-source hash and file checksum. Successful
-playback on an easy fixture only checks integration. It does not demonstrate
-quality, generalization, lower computation, or a research contribution.
+The buffer preparation command reuses the committed raw traces. If a raw file
+is missing, it downloads it from the original archive. These commands overwrite
+the corresponding reproducible reports under `runs/`; they do not retrain the model.
 
-Model tests are skipped when optional PyTorch is absent; install both developer
-and model requirements for the full suite. The tests check candidate permutation
-and padding behavior, temporal order, absence of persistent hidden state, gradient
-flow, serialization, and VOD/live rollouts. The synthetic regression target used
-in one gradient test is not an ABR training algorithm. Next work is to select and
-implement training and establish measured baselines; real-player validation and
-packaged-media quality measurements remain pending.
+For an environment-only diagnostic:
+
+```bash
+python -m abr.benchmark --dataset data/hard_envivio/dataset.json --mode vod --split validation --baseline throughput --output runs/local-throughput.json
+```
+
+The separate trainers expose their options through:
+
+```bash
+python -m abr.models.train_dueling_dqn --help
+python -m abr.models.train_ppo --help
+```
+
+### Local browser playback
+
+Download and verify the original media once, then start the local server:
+
+```bash
+python -m scripts.download_player_media
+python -m abr.player_server
+```
+
+Open **http://127.0.0.1:8787**. The player uses native Media Source Extensions
+and real H.264 fragments. Its video cache is about 275 MB under ignored
+`artifacts/player-media/`. Downloading requires network access.
+
+Each session has its own finite trace clock. HTTP bodies are paced in 16 KiB
+chunks, with an assumed RTT. This is application-throughput pacing, not a packet
+or radio emulator. The player is a local video-only research harness. Seeking,
+audio and production DASH integration are outside the current experiment.
+See [player instructions and capture checks](experiments/validation/POLICY_PLAYER.md).
+
+## Data and limits
+
+- The current realistic VOD is one Envivio video, 49 segments and six bitrate
+  levels: 300, 750, 1200, 1850, 2850 and 4300 kbps. Segment byte sizes come from
+  the published media; the local player verifies its cached fragments.
+- `data/hard_envivio/` contains the main Norway HSDPA experiment: fourteen measured
+  sessions grouped by route, plus four explicitly synthetic outage profiles.
+- `data/learning-holdout/` contains the two additional sessions that exposed the
+  request failures. They are now development cases, not untouched final tests.
+- `data/buffer-sessions/` contains four further ferry sessions. Dates and nine
+  buffer profiles were fixed before download/replay. All profiles share these
+  sessions; selecting a winner from them needs separate confirmation.
+- `data/realistic_envivio/` retains the earlier pilot with eight Ghent 4G logs.
+  Both measured collections are old network data, not a modern-network benchmark.
+
+The simulator supports finite VOD and a finite low-latency live event using
+explicit part metadata. The recent training, recovery and buffer evidence is
+**VOD-only**. Traces never repeat. Observed application goodput is not a causal
+capacity model. The simulator omits TCP/QUIC behavior, packet loss, radio scheduling,
+audio and decoding; the native player adds real decoding but has different timing.
+
+One video and a few route groups do not establish broad generalization. There is
+no proven neural advantage, production readiness, or complete simulator/browser
+equivalence. The [evaluation protocol](experiments/configs/evaluation_v2.json)
+remains a draft; stronger baselines and broader independent data are still needed.
+
+## Repository map
+
+| Location | Purpose |
+| --- | --- |
+| `abr/env.py`, `transport.py`, `playback.py`, `media.py` | Finite streaming simulator and playback accounting |
+| `abr/recovery.py` | Optional bounded VOD request recovery |
+| `abr/models/` | Model architectures, checkpoints, inference, PPO and DQN trainers |
+| `abr/benchmark.py`, `trace_import.py`, `validate_player.py` | Replay, trace import and player comparison tools |
+| `abr/player_server.py`, `experiments/validation/` | Local native player and independent capture tooling |
+| `scripts/` | Input preparation, measured experiments and capture audits |
+| `data/`, `runs/` | Selected trace inputs, provenance, frozen checkpoints and reports |
+| `docs/`, `tests/` | Explanations, generated working diagram and verification |
+
+## Next investigation
+
+Diagnose the remaining long-stall session by comparing minimum-quality segment
+arrivals with the service available before its playback buffer empties. Keep this
+an offline diagnostic: future bandwidth must not become a policy input. This can
+show whether the next change belongs in bitrate selection, request recovery or
+the media ladder, before spending more time on training.
+
+## Background
+
+The project was extracted from the author's `DASH_RL` work at commit
+`970c67ec015cfc27968b78bb09db243fb95da08a`. The decision interface was inspired by
+[Laya](https://github.com/NandhaKishorM/laya); no language encoder or weights are used.
+Neural ABR already exists in prior work such as
+[Pensieve](https://web.mit.edu/pensieve/content/pensieve-sigcomm17.pdf). The
+[research note](docs/research/decision_model_and_training_environment.md) records
+the background and evaluation gaps.
