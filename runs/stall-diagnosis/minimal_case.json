@@ -1,0 +1,117 @@
+{
+  "dataset": {
+    "schema_version": 2,
+    "provenance": "One-request diagnostic; other splits are unused schema scaffolding",
+    "video": {
+      "bitrates_kbps": [
+        300.0,
+        750.0,
+        1200.0,
+        1850.0,
+        2850.0,
+        4300.0
+      ],
+      "durations_s": [
+        3.993422222222222,
+        3.993422222222222
+      ],
+      "sizes_bytes": [
+        [
+          124011.0,
+          361565.0,
+          575591.0,
+          938587.0,
+          1499009.0,
+          2147467.0
+        ],
+        [
+          144254.0,
+          378327.0,
+          605884.0,
+          908665.0,
+          1427478.0,
+          2133870.0
+        ]
+      ]
+    },
+    "splits": {
+      "train": [
+        {
+          "name": "unused-train",
+          "durations_s": [
+            1.0
+          ],
+          "bandwidth_kbps": [
+            1.0
+          ],
+          "rtt_s": 0.08,
+          "source_group": null,
+          "source": "unspecified",
+          "semantics": "observed_goodput",
+          "rtt_series_s": null
+        }
+      ],
+      "validation": [
+        {
+          "name": "unused-validation",
+          "durations_s": [
+            2.0
+          ],
+          "bandwidth_kbps": [
+            1.0
+          ],
+          "rtt_s": 0.08,
+          "source_group": null,
+          "source": "unspecified",
+          "semantics": "observed_goodput",
+          "rtt_series_s": null
+        }
+      ],
+      "test": [
+        {
+          "name": "minimal-stall-window",
+          "durations_s": [
+            11.586800018446127,
+            1.0289999999999964,
+            1.0409999999999968,
+            0.44906953978713204
+          ],
+          "bandwidth_kbps": [
+            44.04886435616686,
+            287.1603498542274,
+            262.8242074927954,
+            173.8766355140187
+          ],
+          "rtt_s": 0.08,
+          "source_group": null,
+          "source": "Clipped measured window of fresh-ferry-2010-09-21_1622CEST; no scaling or repetition",
+          "semantics": "observed_goodput",
+          "rtt_series_s": null
+        }
+      ]
+    }
+  },
+  "original_trace": "fresh-ferry-2010-09-21_1622CEST",
+  "original_start_s": 149.98119998155397,
+  "original_segment_index": 38,
+  "config": {
+    "mode": "vod",
+    "max_buffer_s": 30.0,
+    "startup_s": 4.0,
+    "resume_s": 1.0,
+    "request_timeout_s": 30.0,
+    "source_age_s": 3.0,
+    "encoder_delay_s": 0.0,
+    "target_latency_s": 3.0,
+    "catchup": true,
+    "min_rate": 0.95,
+    "max_rate": 1.05,
+    "catchup_gain": 0.03,
+    "latency_deadband_s": 0.1,
+    "control_tick_s": 0.1,
+    "known_vod_sizes": false
+  },
+  "buffer_before_s": 3.993422222222222,
+  "expected_added_stall_s": 10.112446336011796,
+  "restored_state": "One lowest-quality unit buffered; player already started and playing; segment index=1"
+}

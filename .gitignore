@@ -52,6 +52,10 @@ runs/request-recovery/*
 runs/buffer-experiment/*
 !runs/buffer-experiment/*.json
 !runs/buffer-experiment/report.md
+!runs/stall-diagnosis/
+runs/stall-diagnosis/*
+!runs/stall-diagnosis/*.json
+!runs/stall-diagnosis/report.md
 !data/
 data/*
 !data/realistic_envivio/

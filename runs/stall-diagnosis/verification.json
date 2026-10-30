@@ -1,0 +1,12 @@
+{
+  "regression_tests_passed": 139,
+  "existing_gymnasium_warnings": 2,
+  "counterfactual_full_playbacks_audited": 8,
+  "optimistic_segment_arrivals_independently_integrated": 98,
+  "frozen_checkpoint_and_data_hashes_match": true,
+  "original_baseline_matches_previous_report": true,
+  "wall_time_and_stall_accounting_conserved": true,
+  "original_and_minimal_stall_checks": "expected exit 1; failure retained because target is infeasible under current contract",
+  "runtime_defaults_changed": false,
+  "ppo_trained_or_measured_on_real_inputs": false
+}
