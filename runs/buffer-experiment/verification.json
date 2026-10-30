@@ -1,0 +1,20 @@
+{
+  "episodes_audited": 162,
+  "all_completed": true,
+  "source_hash_current": true,
+  "checkpoint_frozen": true,
+  "checks": [
+    "wall-time conservation",
+    "full completion",
+    "per-session timing gates",
+    "summary means",
+    "buffer bound",
+    "discarded byte bound",
+    "default parity with previous experiment",
+    "raw source and trace checksums"
+  ],
+  "regression_tests": {
+    "passed": 129,
+    "existing_gymnasium_bound_warnings": 2
+  }
+}

@@ -48,6 +48,10 @@ runs/request-recovery/*
 !runs/request-recovery/protocol.json
 !runs/request-recovery/results.json
 !runs/request-recovery/report.md
+!runs/buffer-experiment/
+runs/buffer-experiment/*
+!runs/buffer-experiment/*.json
+!runs/buffer-experiment/report.md
 !data/
 data/*
 !data/realistic_envivio/
@@ -56,3 +60,5 @@ data/*
 !data/hard_envivio/**
 !data/learning-holdout/
 !data/learning-holdout/**
+!data/buffer-sessions/
+!data/buffer-sessions/**
