@@ -1,0 +1,8 @@
+{
+  "source_at_capture": {
+    "abr/player_server.py": "c35651fc7f4a03cb67bf987dec7c61c3f3629a577b2bc142ac1567aa4086f996",
+    "experiments/validation/policy-player.mjs": "22458f4bc4ccefb12b565bf03382b66556dec244dca2489e294eebf64222f409",
+    "scripts/capture_policy_player.mjs": "b7d8a0ff7d09cd56953b0bb9280fa2d984709b2110893758ba2faec8351ece44"
+  },
+  "note": "Sources recorded before correcting the discovered event-handler timestamp discrepancy; raw captures remain unchanged."
+}

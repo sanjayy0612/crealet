@@ -1,0 +1,1 @@
+Four additional raw Norway ferry sessions selected in filename order before replay. A fifth test trace is the already-inspected hard control. Raw source URLs and hashes are in provenance.json; experiment settings are in runs/prefetch-validation/protocol.json.

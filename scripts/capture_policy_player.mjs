@@ -1,6 +1,7 @@
 // Real-time Chrome playback capture using the built-in DevTools protocol.
 // node scripts/capture_policy_player.mjs [--smoke] [--port=8787]
-import {spawn} from 'node:child_process';
+import {spawn, execFile} from 'node:child_process';
+import {promisify} from 'node:util';
 import {mkdir, mkdtemp, writeFile, open} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
@@ -15,6 +16,29 @@ await mkdir(out, {recursive: true});
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 const {readFile} = await import('node:fs/promises');
 const browsers = [];
+const measureMemory = process.argv.includes('--memory');
+const processList = promisify(execFile);
+
+async function rssSnapshot() {
+    const {stdout} = await processList('/bin/ps', ['-axo', 'pid=,ppid=,rss=']);
+    return stdout.trim().split('\n').map(line => {
+        const [pid, parent, kib] = line.trim().split(/\s+/).map(Number);
+        return {pid, parent, bytes: kib * 1024};
+    });
+}
+
+function treeRss(rows, root) {
+    if (!rows.some(row => row.pid === root)) return null;
+    const pids = new Set([root]);
+    let changed = true;
+    while (changed) {
+        changed = false;
+        for (const row of rows) if (pids.has(row.parent) && !pids.has(row.pid)) {
+            pids.add(row.pid); changed = true;
+        }
+    }
+    return rows.filter(row => pids.has(row.pid)).reduce((sum, row) => sum + row.bytes, 0);
+}
 
 async function startBrowser(name) {
     const profile = await mkdtemp(join(tmpdir(), 'abr-chrome-'));
@@ -32,7 +56,7 @@ async function startBrowser(name) {
         await sleep(200);
     }
     if (!debugPort) throw Error(`Chrome did not start for ${name}; inspect its log`);
-    return `http://127.0.0.1:${debugPort}`;
+    return {debug: `http://127.0.0.1:${debugPort}`, pid: chrome.pid};
 }
 
 async function connect(url) {
@@ -69,13 +93,23 @@ let cases = smoke ? [{name: 'decode-smoke', policy: 'lowest', split: 'validation
     {name: 'highest-outage', policy: 'highest', split: 'test', trace: 2}
 ];
 const policies = process.argv.find(x => x.startsWith('--policies='))?.slice('--policies='.length).split(',');
+const casesFile = process.argv.find(x => x.startsWith('--cases='))?.slice('--cases='.length);
+if (casesFile) {
+    cases = JSON.parse(await readFile(casesFile, 'utf8'));
+    if (!Array.isArray(cases) || !cases.length || new Set(cases.map(c => c.name)).size !== cases.length ||
+        cases.some(c => !/^[a-z0-9-]+$/.test(c.name) || !Number.isInteger(c.trace) || c.trace < 0 ||
+                    (c.port !== undefined && (!Number.isInteger(c.port) || c.port < 1 || c.port > 65535))))
+        throw Error('Invalid custom playback cases');
+}
 if (!smoke && policies) cases = cases.filter(c => policies.includes(c.policy));
 if (!cases.length) throw Error('No matching playback cases');
 const connections = [];
 try {
     const browserInfo = [];
     for (const item of cases) {
-        const debug = await startBrowser(item.name);
+        const {debug, pid} = await startBrowser(item.name);
+        item.browserPid = pid;
+        item.memory = [];
         browserInfo.push({name: item.name, ...await fetch(debug + '/json/version').then(r => r.json())});
         await writeFile(`${out}/browser.json`, JSON.stringify(browserInfo, null, 2));
         const target = (await fetch(debug + '/json/list').then(r => r.json())).find(t => t.type === 'page');
@@ -83,13 +117,26 @@ try {
         connections.push(client); item.client = client;
         await client.call('Page.enable');
         await client.call('Runtime.enable');
-        const url = `http://127.0.0.1:${serverPort}/?policy=${item.policy}&split=${item.split}&trace=${item.trace}&autostart=1&wall_limit_s=210`;
+        if (measureMemory) {
+            const rows = await rssSnapshot();
+            item.baselineRss = treeRss(rows, pid);
+        }
+        const url = `http://127.0.0.1:${item.port || serverPort}/?policy=${item.policy}&split=${item.split}&trace=${item.trace}&autostart=1&wall_limit_s=${item.wall_limit_s || 210}`;
         await client.call('Page.navigate', {url});
     }
     const start = Date.now();
     const summaries = [];
     while (cases.some(c => !c.done)) {
+        const processes = measureMemory ? await rssSnapshot() : null;
         for (const item of cases.filter(c => !c.done)) {
+            if (measureMemory) {
+                const heap = await item.client.call('Runtime.getHeapUsage');
+                item.memory.push({t_s: (Date.now() - start) / 1000,
+                                  chrome_process_tree_rss_bytes: treeRss(processes, item.browserPid),
+                                  javascript_heap_used_bytes: heap.usedSize,
+                                  javascript_heap_total_bytes: heap.totalSize,
+                                  array_buffer_backing_bytes: heap.backingStorageSize ?? null});
+            }
             const {result, exceptionDetails} = await item.client.call('Runtime.evaluate', {expression: 'window.runStatus', returnByValue: true});
             if (exceptionDetails) throw Error(JSON.stringify(exceptionDetails));
             const status = result.value;
@@ -101,10 +148,25 @@ try {
                 item.done = true; summaries.push({name: item.name, decoded_frames: q.result.value, ...status});
             } else if (status?.done) {
                 const data = await item.client.call('Runtime.evaluate', {expression: 'window.playbackResult', returnByValue: true});
+                // A failed fetch can finish before the server logs its final bytes.
+                if (data.result.value?.context?.session) {
+                    for (let tries = 0; tries < 25; tries++) {
+                        const audit = await fetch(`http://127.0.0.1:${item.port || serverPort}/audit?session=${data.result.value.context.session}`).then(r => r.json());
+                        data.result.value.transport_audit = audit;
+                        if (!audit.in_flight) break;
+                        await sleep(200);
+                    }
+                }
                 await writeFile(`${out}/${item.name}.json`, JSON.stringify(data.result.value || {automation_error: status}, null, 2));
                 item.done = true; summaries.push({name: item.name, ...status});
             }
             if (item.done) {
+                if (measureMemory) await writeFile(`${out}/${item.name}-memory.json`, JSON.stringify({
+                    method: '2-second whole isolated Chrome process-tree RSS sum; shared pages may be counted multiple times; JS heap separately',
+                    baseline_rss_bytes: item.baselineRss, samples: item.memory,
+                    peak_rss_bytes: Math.max(...item.memory.map(s => s.chrome_process_tree_rss_bytes ?? 0)),
+                    peak_javascript_heap_bytes: Math.max(...item.memory.map(s => s.javascript_heap_used_bytes))
+                }, null, 2));
                 const shot = await item.client.call('Page.captureScreenshot', {format: 'png'});
                 await writeFile(`${out}/${item.name}.png`, Buffer.from(shot.data, 'base64'));
                 console.log(JSON.stringify(summaries.at(-1)));

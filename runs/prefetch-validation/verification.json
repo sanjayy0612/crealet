@@ -1,0 +1,23 @@
+{
+  "regression_tests_passed": 143,
+  "existing_gymnasium_warnings": 2,
+  "simulator_full_playbacks": 30,
+  "native_trials": 8,
+  "native_complete": 6,
+  "all_native_event_capture_audits_pass": true,
+  "reported_counter_discrepancies_over20ms": 2,
+  "raw_captures_unchanged": true,
+  "timing_for_gates": "reconstructed native event timestamps",
+  "post_fix_smoke_decoded_frames": 78,
+  "checkpoint_unchanged": true,
+  "default_cap_unchanged": true,
+  "retraining_started": false,
+  "reason": "Predeclared startup/completion gates failed",
+  "platform": {
+    "os": "Darwin",
+    "release": "25.5.0",
+    "machine": "arm64",
+    "python": "3.12.3",
+    "node": "v22.23.2"
+  }
+}

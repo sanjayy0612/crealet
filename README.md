@@ -23,6 +23,7 @@ Its [generation prompt](docs/images/abr-working.prompt.txt) is included.
 | [Buffer experiment](runs/buffer-experiment/report.md) | 162 replay episodes; four additional sessions already had zero stalls with default buffers | Larger buffers added startup delay without reducing stalls on those four sessions |
 | Buffer changes on the earlier failures | Startup threshold 4 s, resume threshold 1 s reduced stalls to **21.02 s and 6.56 s** | One difficult session still failed the stall limit |
 | [Long-stall diagnosis](runs/stall-diagnosis/report.md) | The 30 s buffer contract needs at least **19.11 s of stalls** on the remaining case when startup is limited to 3 s | A PPO/DQN swap alone cannot meet the 8 s target; a 60 s prefetch-cap diagnostic removed stalls on this one session |
+| [Frozen 60 s validation](runs/prefetch-validation/report.md) | Four more sessions, 30 simulator episodes and eight native trials; two new sessions had excessive startup, and two browser runs timed out | Playback gates failed; no retraining or default change. Browser memory and discarded downloads are recorded |
 
 **Current decision: keep the default buffer settings and the frozen baseline.**
 DQN and the highest-allowed rule chose identical actions in all 54 paired
@@ -34,9 +35,9 @@ The recent experiments require every video to finish, startup to stay at or belo
 also checks the per-validation-trace throughput baseline. Partial-playback metrics
 are retained and explicitly distinguished from full-video results.
 
-The latest regression check passed **139 tests**, with two existing Gymnasium
+The latest regression check passed **143 tests**, with two existing Gymnasium
 warnings about infinite observation-space bounds. See the
-[diagnostic audit](runs/stall-diagnosis/verification.json).
+[prefetch validation](runs/prefetch-validation/verification.json).
 
 ## How it works
 
@@ -194,12 +195,11 @@ remains a draft; stronger baselines and broader independent data are still neede
 
 ## Next investigation
 
-The [diagnosis](runs/stall-diagnosis/report.md) found a service deficit under the
-30-second prefetch cap, even for the smallest segment files. Increasing that cap
-to 60 seconds removed stalls in a diagnostic replay without increasing the startup
-threshold. Evaluate this change on separate sessions with downloaded/wasted bytes
-and memory cost before changing defaults. An alternative is a real lower-bitrate
-representation. Offline future-service bounds must never become policy inputs.
+The [frozen prefetch validation](docs/prefetch-validation.md) did not pass the
+startup/completion gates. Validate bounded request recovery in the native player,
+address slow initial delivery, and specify a target-device memory budget before
+retraining for a larger cap. Keep default settings and weights frozen meanwhile.
+Offline future-service bounds must never become policy inputs.
 
 ## Background
 

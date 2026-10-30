@@ -1,0 +1,13 @@
+{
+  "status": {
+    "done": false,
+    "started": true,
+    "t_s": 3.9728999999985097,
+    "media_time_s": 2.9778,
+    "buffer_s": 13.102199999999998,
+    "ready_state": 4,
+    "visibility": "visible",
+    "segments": 4
+  },
+  "decoded_frames": 78
+}

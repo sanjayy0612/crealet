@@ -1,0 +1,708 @@
+{
+  "method": "2-second whole isolated Chrome process-tree RSS sum; shared pages may be counted multiple times; JS heap separately",
+  "baseline_rss_bytes": 935297024,
+  "samples": [
+    {
+      "t_s": 0.171,
+      "chrome_process_tree_rss_bytes": 819789824,
+      "javascript_heap_used_bytes": 989452,
+      "javascript_heap_total_bytes": 1835008,
+      "array_buffer_backing_bytes": 16830
+    },
+    {
+      "t_s": 2.591,
+      "chrome_process_tree_rss_bytes": 877707264,
+      "javascript_heap_used_bytes": 1003264,
+      "javascript_heap_total_bytes": 1835008,
+      "array_buffer_backing_bytes": 16830
+    },
+    {
+      "t_s": 5.035,
+      "chrome_process_tree_rss_bytes": 936574976,
+      "javascript_heap_used_bytes": 1016076,
+      "javascript_heap_total_bytes": 1835008,
+      "array_buffer_backing_bytes": 16830
+    },
+    {
+      "t_s": 7.173,
+      "chrome_process_tree_rss_bytes": 954236928,
+      "javascript_heap_used_bytes": 1029084,
+      "javascript_heap_total_bytes": 1835008,
+      "array_buffer_backing_bytes": 16830
+    },
+    {
+      "t_s": 9.235,
+      "chrome_process_tree_rss_bytes": 958496768,
+      "javascript_heap_used_bytes": 1040104,
+      "javascript_heap_total_bytes": 1835008,
+      "array_buffer_backing_bytes": 16830
+    },
+    {
+      "t_s": 12.149,
+      "chrome_process_tree_rss_bytes": 945537024,
+      "javascript_heap_used_bytes": 1055520,
+      "javascript_heap_total_bytes": 2097152,
+      "array_buffer_backing_bytes": 16830
+    },
+    {
+      "t_s": 14.263,
+      "chrome_process_tree_rss_bytes": 905756672,
+      "javascript_heap_used_bytes": 1067308,
+      "javascript_heap_total_bytes": 2097152,
+      "array_buffer_backing_bytes": 16830
+    },
+    {
+      "t_s": 16.34,
+      "chrome_process_tree_rss_bytes": 885587968,
+      "javascript_heap_used_bytes": 1079488,
+      "javascript_heap_total_bytes": 2097152,
+      "array_buffer_backing_bytes": 16830
+    },
+    {
+      "t_s": 18.389,
+      "chrome_process_tree_rss_bytes": 906526720,
+      "javascript_heap_used_bytes": 1091752,
+      "javascript_heap_total_bytes": 2097152,
+      "array_buffer_backing_bytes": 16830
+    },
+    {
+      "t_s": 20.483,
+      "chrome_process_tree_rss_bytes": 888029184,
+      "javascript_heap_used_bytes": 1102488,
+      "javascript_heap_total_bytes": 2097152,
+      "array_buffer_backing_bytes": 16830
+    },
+    {
+      "t_s": 23.1,
+      "chrome_process_tree_rss_bytes": 743489536,
+      "javascript_heap_used_bytes": 698960,
+      "javascript_heap_total_bytes": 2097152,
+      "array_buffer_backing_bytes": 489888
+    },
+    {
+      "t_s": 25.225,
+      "chrome_process_tree_rss_bytes": 657260544,
+      "javascript_heap_used_bytes": 733536,
+      "javascript_heap_total_bytes": 2097152,
+      "array_buffer_backing_bytes": 809001
+    },
+    {
+      "t_s": 27.468,
+      "chrome_process_tree_rss_bytes": 480919552,
+      "javascript_heap_used_bytes": 787288,
+      "javascript_heap_total_bytes": 2097152,
+      "array_buffer_backing_bytes": 1413627
+    },
+    {
+      "t_s": 29.523,
+      "chrome_process_tree_rss_bytes": 492257280,
+      "javascript_heap_used_bytes": 818672,
+      "javascript_heap_total_bytes": 2097152,
+      "array_buffer_backing_bytes": 1975261
+    },
+    {
+      "t_s": 31.639,
+      "chrome_process_tree_rss_bytes": 494829568,
+      "javascript_heap_used_bytes": 690460,
+      "javascript_heap_total_bytes": 1835008,
+      "array_buffer_backing_bytes": 620636
+    },
+    {
+      "t_s": 33.686,
+      "chrome_process_tree_rss_bytes": 482361344,
+      "javascript_heap_used_bytes": 716664,
+      "javascript_heap_total_bytes": 1835008,
+      "array_buffer_backing_bytes": 1214840
+    },
+    {
+      "t_s": 35.731,
+      "chrome_process_tree_rss_bytes": 475955200,
+      "javascript_heap_used_bytes": 742712,
+      "javascript_heap_total_bytes": 1835008,
+      "array_buffer_backing_bytes": 1839248
+    },
+    {
+      "t_s": 37.783,
+      "chrome_process_tree_rss_bytes": 438206464,
+      "javascript_heap_used_bytes": 781388,
+      "javascript_heap_total_bytes": 1835008,
+      "array_buffer_backing_bytes": 3054512
+    },
+    {
+      "t_s": 39.812,
+      "chrome_process_tree_rss_bytes": 434978816,
+      "javascript_heap_used_bytes": 797984,
+      "javascript_heap_total_bytes": 1835008,
+      "array_buffer_backing_bytes": 3054512
+    },
+    {
+      "t_s": 41.859,
+      "chrome_process_tree_rss_bytes": 426786816,
+      "javascript_heap_used_bytes": 698896,
+      "javascript_heap_total_bytes": 1835008,
+      "array_buffer_backing_bytes": 3977175
+    },
+    {
+      "t_s": 43.897,
+      "chrome_process_tree_rss_bytes": 423559168,
+      "javascript_heap_used_bytes": 724832,
+      "javascript_heap_total_bytes": 1835008,
+      "array_buffer_backing_bytes": 980742
+    },
+    {
+      "t_s": 46.036,
+      "chrome_process_tree_rss_bytes": 429604864,
+      "javascript_heap_used_bytes": 751600,
+      "javascript_heap_total_bytes": 1835008,
+      "array_buffer_backing_bytes": 1866585
+    },
+    {
+      "t_s": 48.089,
+      "chrome_process_tree_rss_bytes": 420265984,
+      "javascript_heap_used_bytes": 768972,
+      "javascript_heap_total_bytes": 1835008,
+      "array_buffer_backing_bytes": 1866585
+    },
+    {
+      "t_s": 50.147,
+      "chrome_process_tree_rss_bytes": 448069632,
+      "javascript_heap_used_bytes": 798184,
+      "javascript_heap_total_bytes": 1835008,
+      "array_buffer_backing_bytes": 2854422
+    },
+    {
+      "t_s": 52.258,
+      "chrome_process_tree_rss_bytes": 387825664,
+      "javascript_heap_used_bytes": 828532,
+      "javascript_heap_total_bytes": 1835008,
+      "array_buffer_backing_bytes": 3778306
+    },
+    {
+      "t_s": 54.356,
+      "chrome_process_tree_rss_bytes": 416874496,
+      "javascript_heap_used_bytes": 857120,
+      "javascript_heap_total_bytes": 1835008,
+      "array_buffer_backing_bytes": 4670040
+    },
+    {
+      "t_s": 56.428,
+      "chrome_process_tree_rss_bytes": 395919360,
+      "javascript_heap_used_bytes": 703432,
+      "javascript_heap_total_bytes": 1835008,
+      "array_buffer_backing_bytes": 5624624
+    },
+    {
+      "t_s": 58.476,
+      "chrome_process_tree_rss_bytes": 374243328,
+      "javascript_heap_used_bytes": 724944,
+      "javascript_heap_total_bytes": 1835008,
+      "array_buffer_backing_bytes": 5624624
+    },
+    {
+      "t_s": 60.554,
+      "chrome_process_tree_rss_bytes": 369491968,
+      "javascript_heap_used_bytes": 752412,
+      "javascript_heap_total_bytes": 1835008,
+      "array_buffer_backing_bytes": 982066
+    },
+    {
+      "t_s": 62.621,
+      "chrome_process_tree_rss_bytes": 365838336,
+      "javascript_heap_used_bytes": 781752,
+      "javascript_heap_total_bytes": 1835008,
+      "array_buffer_backing_bytes": 1518859
+    },
+    {
+      "t_s": 64.676,
+      "chrome_process_tree_rss_bytes": 364675072,
+      "javascript_heap_used_bytes": 701832,
+      "javascript_heap_total_bytes": 1835008,
+      "array_buffer_backing_bytes": 13770
+    },
+    {
+      "t_s": 66.733,
+      "chrome_process_tree_rss_bytes": 351551488,
+      "javascript_heap_used_bytes": 733112,
+      "javascript_heap_total_bytes": 1835008,
+      "array_buffer_backing_bytes": 13785
+    },
+    {
+      "t_s": 68.777,
+      "chrome_process_tree_rss_bytes": 358629376,
+      "javascript_heap_used_bytes": 769924,
+      "javascript_heap_total_bytes": 1835008,
+      "array_buffer_backing_bytes": 604246
+    },
+    {
+      "t_s": 70.826,
+      "chrome_process_tree_rss_bytes": 352714752,
+      "javascript_heap_used_bytes": 794280,
+      "javascript_heap_total_bytes": 1835008,
+      "array_buffer_backing_bytes": 604246
+    },
+    {
+      "t_s": 72.872,
+      "chrome_process_tree_rss_bytes": 332496896,
+      "javascript_heap_used_bytes": 833756,
+      "javascript_heap_total_bytes": 1835008,
+      "array_buffer_backing_bytes": 1300749
+    },
+    {
+      "t_s": 74.912,
+      "chrome_process_tree_rss_bytes": 318816256,
+      "javascript_heap_used_bytes": 855956,
+      "javascript_heap_total_bytes": 1835008,
+      "array_buffer_backing_bytes": 1300749
+    },
+    {
+      "t_s": 76.953,
+      "chrome_process_tree_rss_bytes": 321830912,
+      "javascript_heap_used_bytes": 890348,
+      "javascript_heap_total_bytes": 1835008,
+      "array_buffer_backing_bytes": 1788035
+    },
+    {
+      "t_s": 79.007,
+      "chrome_process_tree_rss_bytes": 315916288,
+      "javascript_heap_used_bytes": 918032,
+      "javascript_heap_total_bytes": 1835008,
+      "array_buffer_backing_bytes": 1788035
+    },
+    {
+      "t_s": 81.083,
+      "chrome_process_tree_rss_bytes": 327188480,
+      "javascript_heap_used_bytes": 954244,
+      "javascript_heap_total_bytes": 1835008,
+      "array_buffer_backing_bytes": 2411058
+    },
+    {
+      "t_s": 83.177,
+      "chrome_process_tree_rss_bytes": 329383936,
+      "javascript_heap_used_bytes": 975672,
+      "javascript_heap_total_bytes": 1835008,
+      "array_buffer_backing_bytes": 2411058
+    },
+    {
+      "t_s": 85.232,
+      "chrome_process_tree_rss_bytes": 320274432,
+      "javascript_heap_used_bytes": 755396,
+      "javascript_heap_total_bytes": 1835008,
+      "array_buffer_backing_bytes": 3051984
+    },
+    {
+      "t_s": 87.348,
+      "chrome_process_tree_rss_bytes": 317636608,
+      "javascript_heap_used_bytes": 785984,
+      "javascript_heap_total_bytes": 1835008,
+      "array_buffer_backing_bytes": 584303
+    },
+    {
+      "t_s": 89.413,
+      "chrome_process_tree_rss_bytes": 306724864,
+      "javascript_heap_used_bytes": 817936,
+      "javascript_heap_total_bytes": 1835008,
+      "array_buffer_backing_bytes": 584303
+    },
+    {
+      "t_s": 91.447,
+      "chrome_process_tree_rss_bytes": 315113472,
+      "javascript_heap_used_bytes": 846772,
+      "javascript_heap_total_bytes": 1835008,
+      "array_buffer_backing_bytes": 1204711
+    },
+    {
+      "t_s": 93.488,
+      "chrome_process_tree_rss_bytes": 301662208,
+      "javascript_heap_used_bytes": 879940,
+      "javascript_heap_total_bytes": 1835008,
+      "array_buffer_backing_bytes": 1204711
+    },
+    {
+      "t_s": 95.562,
+      "chrome_process_tree_rss_bytes": 304922624,
+      "javascript_heap_used_bytes": 908804,
+      "javascript_heap_total_bytes": 1835008,
+      "array_buffer_backing_bytes": 1789189
+    },
+    {
+      "t_s": 97.621,
+      "chrome_process_tree_rss_bytes": 299122688,
+      "javascript_heap_used_bytes": 939704,
+      "javascript_heap_total_bytes": 1835008,
+      "array_buffer_backing_bytes": 1789189
+    },
+    {
+      "t_s": 99.679,
+      "chrome_process_tree_rss_bytes": 311754752,
+      "javascript_heap_used_bytes": 964176,
+      "javascript_heap_total_bytes": 1835008,
+      "array_buffer_backing_bytes": 2824647
+    },
+    {
+      "t_s": 101.723,
+      "chrome_process_tree_rss_bytes": 300875776,
+      "javascript_heap_used_bytes": 995528,
+      "javascript_heap_total_bytes": 2097152,
+      "array_buffer_backing_bytes": 2824647
+    },
+    {
+      "t_s": 103.899,
+      "chrome_process_tree_rss_bytes": 266895360,
+      "javascript_heap_used_bytes": 1024416,
+      "javascript_heap_total_bytes": 2359296,
+      "array_buffer_backing_bytes": 3850832
+    },
+    {
+      "t_s": 106.164,
+      "chrome_process_tree_rss_bytes": 266141696,
+      "javascript_heap_used_bytes": 1054728,
+      "javascript_heap_total_bytes": 2359296,
+      "array_buffer_backing_bytes": 3850832
+    },
+    {
+      "t_s": 108.376,
+      "chrome_process_tree_rss_bytes": 256983040,
+      "javascript_heap_used_bytes": 1086820,
+      "javascript_heap_total_bytes": 2359296,
+      "array_buffer_backing_bytes": 4794903
+    },
+    {
+      "t_s": 110.667,
+      "chrome_process_tree_rss_bytes": 283377664,
+      "javascript_heap_used_bytes": 1113976,
+      "javascript_heap_total_bytes": 2359296,
+      "array_buffer_backing_bytes": 4794903
+    },
+    {
+      "t_s": 113.303,
+      "chrome_process_tree_rss_bytes": 274956288,
+      "javascript_heap_used_bytes": 1159040,
+      "javascript_heap_total_bytes": 2359296,
+      "array_buffer_backing_bytes": 5523994
+    },
+    {
+      "t_s": 115.612,
+      "chrome_process_tree_rss_bytes": 277823488,
+      "javascript_heap_used_bytes": 1187628,
+      "javascript_heap_total_bytes": 2359296,
+      "array_buffer_backing_bytes": 6462710
+    },
+    {
+      "t_s": 117.714,
+      "chrome_process_tree_rss_bytes": 266829824,
+      "javascript_heap_used_bytes": 1218488,
+      "javascript_heap_total_bytes": 2359296,
+      "array_buffer_backing_bytes": 6462710
+    },
+    {
+      "t_s": 120.093,
+      "chrome_process_tree_rss_bytes": 258703360,
+      "javascript_heap_used_bytes": 1245720,
+      "javascript_heap_total_bytes": 2359296,
+      "array_buffer_backing_bytes": 7371503
+    },
+    {
+      "t_s": 122.284,
+      "chrome_process_tree_rss_bytes": 264749056,
+      "javascript_heap_used_bytes": 1281816,
+      "javascript_heap_total_bytes": 2621440,
+      "array_buffer_backing_bytes": 7371503
+    },
+    {
+      "t_s": 124.392,
+      "chrome_process_tree_rss_bytes": 258621440,
+      "javascript_heap_used_bytes": 1313704,
+      "javascript_heap_total_bytes": 2621440,
+      "array_buffer_backing_bytes": 8302210
+    },
+    {
+      "t_s": 126.455,
+      "chrome_process_tree_rss_bytes": 253280256,
+      "javascript_heap_used_bytes": 1338292,
+      "javascript_heap_total_bytes": 2621440,
+      "array_buffer_backing_bytes": 8302210
+    },
+    {
+      "t_s": 128.508,
+      "chrome_process_tree_rss_bytes": 280133632,
+      "javascript_heap_used_bytes": 785896,
+      "javascript_heap_total_bytes": 2097152,
+      "array_buffer_backing_bytes": 9159505
+    },
+    {
+      "t_s": 130.634,
+      "chrome_process_tree_rss_bytes": 259440640,
+      "javascript_heap_used_bytes": 811060,
+      "javascript_heap_total_bytes": 2097152,
+      "array_buffer_backing_bytes": 9159505
+    },
+    {
+      "t_s": 132.697,
+      "chrome_process_tree_rss_bytes": 248594432,
+      "javascript_heap_used_bytes": 828112,
+      "javascript_heap_total_bytes": 2097152,
+      "array_buffer_backing_bytes": 9159505
+    },
+    {
+      "t_s": 134.737,
+      "chrome_process_tree_rss_bytes": 251215872,
+      "javascript_heap_used_bytes": 843076,
+      "javascript_heap_total_bytes": 2097152,
+      "array_buffer_backing_bytes": 9159505
+    },
+    {
+      "t_s": 136.796,
+      "chrome_process_tree_rss_bytes": 249692160,
+      "javascript_heap_used_bytes": 860080,
+      "javascript_heap_total_bytes": 2097152,
+      "array_buffer_backing_bytes": 9159505
+    },
+    {
+      "t_s": 139.206,
+      "chrome_process_tree_rss_bytes": 253526016,
+      "javascript_heap_used_bytes": 886984,
+      "javascript_heap_total_bytes": 2097152,
+      "array_buffer_backing_bytes": 1039047
+    },
+    {
+      "t_s": 141.251,
+      "chrome_process_tree_rss_bytes": 272924672,
+      "javascript_heap_used_bytes": 912376,
+      "javascript_heap_total_bytes": 2097152,
+      "array_buffer_backing_bytes": 1925431
+    },
+    {
+      "t_s": 143.3,
+      "chrome_process_tree_rss_bytes": 274808832,
+      "javascript_heap_used_bytes": 937472,
+      "javascript_heap_total_bytes": 2097152,
+      "array_buffer_backing_bytes": 2899532
+    },
+    {
+      "t_s": 145.351,
+      "chrome_process_tree_rss_bytes": 272777216,
+      "javascript_heap_used_bytes": 971596,
+      "javascript_heap_total_bytes": 2097152,
+      "array_buffer_backing_bytes": 3858655
+    },
+    {
+      "t_s": 147.391,
+      "chrome_process_tree_rss_bytes": 254033920,
+      "javascript_heap_used_bytes": 991280,
+      "javascript_heap_total_bytes": 2097152,
+      "array_buffer_backing_bytes": 3858655
+    },
+    {
+      "t_s": 149.456,
+      "chrome_process_tree_rss_bytes": 267370496,
+      "javascript_heap_used_bytes": 1022808,
+      "javascript_heap_total_bytes": 2097152,
+      "array_buffer_backing_bytes": 4840846
+    },
+    {
+      "t_s": 151.494,
+      "chrome_process_tree_rss_bytes": 267272192,
+      "javascript_heap_used_bytes": 1040420,
+      "javascript_heap_total_bytes": 2359296,
+      "array_buffer_backing_bytes": 4840846
+    },
+    {
+      "t_s": 153.524,
+      "chrome_process_tree_rss_bytes": 293781504,
+      "javascript_heap_used_bytes": 1074692,
+      "javascript_heap_total_bytes": 2359296,
+      "array_buffer_backing_bytes": 5379584
+    },
+    {
+      "t_s": 156.517,
+      "chrome_process_tree_rss_bytes": 272089088,
+      "javascript_heap_used_bytes": 1107376,
+      "javascript_heap_total_bytes": 2359296,
+      "array_buffer_backing_bytes": 5930615
+    },
+    {
+      "t_s": 158.559,
+      "chrome_process_tree_rss_bytes": 277839872,
+      "javascript_heap_used_bytes": 1124600,
+      "javascript_heap_total_bytes": 2359296,
+      "array_buffer_backing_bytes": 6322065
+    },
+    {
+      "t_s": 160.586,
+      "chrome_process_tree_rss_bytes": 272269312,
+      "javascript_heap_used_bytes": 1140912,
+      "javascript_heap_total_bytes": 2359296,
+      "array_buffer_backing_bytes": 6322065
+    },
+    {
+      "t_s": 162.624,
+      "chrome_process_tree_rss_bytes": 260096000,
+      "javascript_heap_used_bytes": 1155828,
+      "javascript_heap_total_bytes": 2359296,
+      "array_buffer_backing_bytes": 6322065
+    },
+    {
+      "t_s": 164.691,
+      "chrome_process_tree_rss_bytes": 258015232,
+      "javascript_heap_used_bytes": 1171388,
+      "javascript_heap_total_bytes": 2359296,
+      "array_buffer_backing_bytes": 6322065
+    },
+    {
+      "t_s": 166.747,
+      "chrome_process_tree_rss_bytes": 258637824,
+      "javascript_heap_used_bytes": 1186376,
+      "javascript_heap_total_bytes": 2359296,
+      "array_buffer_backing_bytes": 6322065
+    },
+    {
+      "t_s": 168.855,
+      "chrome_process_tree_rss_bytes": 289980416,
+      "javascript_heap_used_bytes": 1203404,
+      "javascript_heap_total_bytes": 2359296,
+      "array_buffer_backing_bytes": 6322065
+    },
+    {
+      "t_s": 170.994,
+      "chrome_process_tree_rss_bytes": 371720192,
+      "javascript_heap_used_bytes": 1221124,
+      "javascript_heap_total_bytes": 2359296,
+      "array_buffer_backing_bytes": 6322065
+    },
+    {
+      "t_s": 173.033,
+      "chrome_process_tree_rss_bytes": 340475904,
+      "javascript_heap_used_bytes": 1237484,
+      "javascript_heap_total_bytes": 2359296,
+      "array_buffer_backing_bytes": 6322065
+    },
+    {
+      "t_s": 175.137,
+      "chrome_process_tree_rss_bytes": 315998208,
+      "javascript_heap_used_bytes": 1253140,
+      "javascript_heap_total_bytes": 2359296,
+      "array_buffer_backing_bytes": 6322065
+    },
+    {
+      "t_s": 177.216,
+      "chrome_process_tree_rss_bytes": 308051968,
+      "javascript_heap_used_bytes": 1270192,
+      "javascript_heap_total_bytes": 2359296,
+      "array_buffer_backing_bytes": 6322065
+    },
+    {
+      "t_s": 179.277,
+      "chrome_process_tree_rss_bytes": 310165504,
+      "javascript_heap_used_bytes": 1285752,
+      "javascript_heap_total_bytes": 2359296,
+      "array_buffer_backing_bytes": 6322065
+    },
+    {
+      "t_s": 181.332,
+      "chrome_process_tree_rss_bytes": 335298560,
+      "javascript_heap_used_bytes": 1302016,
+      "javascript_heap_total_bytes": 2621440,
+      "array_buffer_backing_bytes": 6322065
+    },
+    {
+      "t_s": 183.387,
+      "chrome_process_tree_rss_bytes": 317751296,
+      "javascript_heap_used_bytes": 1317672,
+      "javascript_heap_total_bytes": 2621440,
+      "array_buffer_backing_bytes": 6322065
+    },
+    {
+      "t_s": 185.425,
+      "chrome_process_tree_rss_bytes": 284180480,
+      "javascript_heap_used_bytes": 1333960,
+      "javascript_heap_total_bytes": 2621440,
+      "array_buffer_backing_bytes": 6322065
+    },
+    {
+      "t_s": 187.467,
+      "chrome_process_tree_rss_bytes": 303955968,
+      "javascript_heap_used_bytes": 1350988,
+      "javascript_heap_total_bytes": 2621440,
+      "array_buffer_backing_bytes": 6322065
+    },
+    {
+      "t_s": 189.535,
+      "chrome_process_tree_rss_bytes": 285786112,
+      "javascript_heap_used_bytes": 1377736,
+      "javascript_heap_total_bytes": 2621440,
+      "array_buffer_backing_bytes": 6322065
+    },
+    {
+      "t_s": 191.673,
+      "chrome_process_tree_rss_bytes": 243613696,
+      "javascript_heap_used_bytes": 1394132,
+      "javascript_heap_total_bytes": 2621440,
+      "array_buffer_backing_bytes": 6322065
+    },
+    {
+      "t_s": 193.714,
+      "chrome_process_tree_rss_bytes": 251920384,
+      "javascript_heap_used_bytes": 1409120,
+      "javascript_heap_total_bytes": 2621440,
+      "array_buffer_backing_bytes": 6322065
+    },
+    {
+      "t_s": 197.357,
+      "chrome_process_tree_rss_bytes": 139476992,
+      "javascript_heap_used_bytes": 1432892,
+      "javascript_heap_total_bytes": 2621440,
+      "array_buffer_backing_bytes": 6322065
+    },
+    {
+      "t_s": 199.662,
+      "chrome_process_tree_rss_bytes": 161038336,
+      "javascript_heap_used_bytes": 819888,
+      "javascript_heap_total_bytes": 1835008,
+      "array_buffer_backing_bytes": 6321028
+    },
+    {
+      "t_s": 201.692,
+      "chrome_process_tree_rss_bytes": 178061312,
+      "javascript_heap_used_bytes": 834828,
+      "javascript_heap_total_bytes": 1835008,
+      "array_buffer_backing_bytes": 6321028
+    },
+    {
+      "t_s": 203.751,
+      "chrome_process_tree_rss_bytes": 154107904,
+      "javascript_heap_used_bytes": 849792,
+      "javascript_heap_total_bytes": 1835008,
+      "array_buffer_backing_bytes": 6321028
+    },
+    {
+      "t_s": 209.026,
+      "chrome_process_tree_rss_bytes": 167690240,
+      "javascript_heap_used_bytes": 824740,
+      "javascript_heap_total_bytes": 1835008,
+      "array_buffer_backing_bytes": 13770
+    },
+    {
+      "t_s": 213.204,
+      "chrome_process_tree_rss_bytes": 231915520,
+      "javascript_heap_used_bytes": 855840,
+      "javascript_heap_total_bytes": 1835008,
+      "array_buffer_backing_bytes": 13770
+    },
+    {
+      "t_s": 215.272,
+      "chrome_process_tree_rss_bytes": 186777600,
+      "javascript_heap_used_bytes": 871520,
+      "javascript_heap_total_bytes": 1835008,
+      "array_buffer_backing_bytes": 13770
+    },
+    {
+      "t_s": 217.305,
+      "chrome_process_tree_rss_bytes": 227229696,
+      "javascript_heap_used_bytes": 922864,
+      "javascript_heap_total_bytes": 1835008,
+      "array_buffer_backing_bytes": 31558
+    }
+  ],
+  "peak_rss_bytes": 958496768,
+  "peak_javascript_heap_bytes": 1432892
+}

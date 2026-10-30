@@ -1,0 +1,66 @@
+[
+  {
+    "name": "cap30-new-first-dqn",
+    "policy": "dqn",
+    "split": "test",
+    "trace": 0,
+    "port": 8840,
+    "wall_limit_s": 240
+  },
+  {
+    "name": "cap30-new-first-highest-allowed",
+    "policy": "highest_allowed",
+    "split": "test",
+    "trace": 0,
+    "port": 8840,
+    "wall_limit_s": 240
+  },
+  {
+    "name": "cap30-known-hard-dqn",
+    "policy": "dqn",
+    "split": "test",
+    "trace": 4,
+    "port": 8840,
+    "wall_limit_s": 240
+  },
+  {
+    "name": "cap30-known-hard-highest-allowed",
+    "policy": "highest_allowed",
+    "split": "test",
+    "trace": 4,
+    "port": 8840,
+    "wall_limit_s": 240
+  },
+  {
+    "name": "cap60-new-first-dqn",
+    "policy": "dqn",
+    "split": "test",
+    "trace": 0,
+    "port": 8841,
+    "wall_limit_s": 240
+  },
+  {
+    "name": "cap60-new-first-highest-allowed",
+    "policy": "highest_allowed",
+    "split": "test",
+    "trace": 0,
+    "port": 8841,
+    "wall_limit_s": 240
+  },
+  {
+    "name": "cap60-known-hard-dqn",
+    "policy": "dqn",
+    "split": "test",
+    "trace": 4,
+    "port": 8841,
+    "wall_limit_s": 240
+  },
+  {
+    "name": "cap60-known-hard-highest-allowed",
+    "policy": "highest_allowed",
+    "split": "test",
+    "trace": 4,
+    "port": 8841,
+    "wall_limit_s": 240
+  }
+]

@@ -4,7 +4,7 @@ This is an application-level test server, not a packet-level network emulator.
 Run: python -m abr.player_server --checkpoint runs/learning-ablation/baseline-seed-7/accepted.npz
 """
 import argparse
-from dataclasses import asdict
+from dataclasses import asdict, replace
 import hashlib
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import json
@@ -27,7 +27,7 @@ from .models.safety import ActionSafety, allowed_actions
 from .transport import Replay
 
 ROOT = Path(__file__).resolve().parents[1]
-POLICIES = ('dqn', 'throughput', 'lowest', 'highest')
+POLICIES = ('dqn', 'highest_allowed', 'throughput', 'lowest', 'highest')
 
 
 def select_action(policy, observation, config, model_policy=None):
@@ -37,6 +37,10 @@ def select_action(policy, observation, config, model_policy=None):
         return 0
     if policy == 'highest':
         return len(observation['candidates']) - 1
+    if policy == 'highest_allowed':
+        if model_policy is None or model_policy.safety is None:
+            raise ValueError('Highest-allowed comparison requires the checkpoint action filter')
+        return int(np.flatnonzero(allowed_actions(observation, model_policy.safety))[-1])
     if policy != 'throughput':
         raise ValueError('Unknown policy')
     samples = observation['history'][observation['history'][:, -1] > 0, 0]
@@ -47,8 +51,21 @@ def select_action(policy, observation, config, model_policy=None):
     return int(eligible[-1]) if len(eligible) else 0
 
 
+def experimental_replay(dataset, config, replay_dataset=None, max_buffer_s=None):
+    """Explicit research overrides; retain trained data/config identity separately."""
+    selected = dataset if replay_dataset is None else replay_dataset
+    for key in ('bitrates_kbps', 'durations_s', 'sizes_bytes'):
+        if not np.array_equal(getattr(dataset.video, key), getattr(selected.video, key)):
+            raise ValueError('Replay video differs from checkpoint training media')
+    if max_buffer_s is not None:
+        config = replace(config, max_buffer_s=max_buffer_s)
+    if config.max_buffer_s < max(selected.video.durations_s) + max(config.startup_s, config.resume_s):
+        raise ValueError('Buffer cannot hold segment plus playback threshold')
+    return selected, config
+
+
 class PlayerApp:
-    def __init__(self, dataset, checkpoint, media_dir):
+    def __init__(self, dataset, checkpoint, media_dir, *, replay_dataset=None, max_buffer_s=None):
         torch.set_num_threads(1)
         self.dataset = dataset
         self.model, self.metadata = load_model(checkpoint)
@@ -65,6 +82,10 @@ class PlayerApp:
             raise ValueError('Player requires an accepted checkpoint')
         if training['training_dataset_sha256'] != dataset.fingerprint:
             raise ValueError('Checkpoint and dataset differ')
+        self.training_dataset_sha256 = dataset.fingerprint
+        self.training_config = asdict(self.config)
+        self.dataset, self.config = experimental_replay(dataset, self.config, replay_dataset, max_buffer_s)
+        self.experimental_overrides = {'max_buffer_s': max_buffer_s} if max_buffer_s is not None else {}
         self.checkpoint_sha256 = hashlib.sha256(Path(checkpoint).read_bytes()).hexdigest()
         self.media_dir = Path(media_dir)
         self.index = json.loads((self.media_dir / 'index.json').read_text())
@@ -97,6 +118,8 @@ class PlayerApp:
                 'trace_semantics': trace.semantics, 'config': asdict(self.config),
                 'durations_s': self.dataset.video.durations_s.tolist(), 'representations': self.reps,
                 'dataset_sha256': self.dataset.fingerprint, 'checkpoint_sha256': self.checkpoint_sha256,
+                'training_dataset_sha256': self.training_dataset_sha256, 'training_config': self.training_config,
+                'experimental_overrides': self.experimental_overrides, 'request_recovery': False,
                 'checkpoint_episode': self.metadata['training']['episode'],
                 'safety_filter': self.metadata['training'].get('safety_filter'),
                 'source_commit': self.index['source_commit'],
@@ -149,8 +172,8 @@ class Handler(BaseHTTPRequestHandler):
                 make_batch([observation], [self.app.config], self.app.model.config)
                 action = select_action(session['policy'], observation, self.app.config, self.app.policy)
             result = {'action': action, 'bitrate_kbps': float(ladder[action]),
-                      'filter_applied': session['policy'] == 'dqn' and self.app.policy.safety is not None,
-                      'allowed_actions': np.flatnonzero(allowed_actions(observation, self.app.policy.safety if session['policy'] == 'dqn' else None)).tolist(),
+                      'filter_applied': session['policy'] in ('dqn', 'highest_allowed') and self.app.policy.safety is not None,
+                      'allowed_actions': np.flatnonzero(allowed_actions(observation, self.app.policy.safety if session['policy'] in ('dqn', 'highest_allowed') else None)).tolist(),
                       'decision_ms': (time.perf_counter() - start) * 1000}
             session['decisions'].append({'segment_index': index, 'state': observation['state'].tolist(), **result})
             self.respond(result)
@@ -229,8 +252,12 @@ def main():
     parser.add_argument('--dataset', default='data/hard_envivio/dataset.json')
     parser.add_argument('--media-dir', default='artifacts/player-media')
     parser.add_argument('--port', type=int, default=8787)
+    parser.add_argument('--replay-dataset', help='Research-only traces; video must exactly match training media')
+    parser.add_argument('--experimental-max-buffer-s', type=float, help='Explicit frozen-model buffer-cap experiment')
     args = parser.parse_args()
-    app = PlayerApp(Dataset.load(args.dataset), args.checkpoint, args.media_dir)
+    app = PlayerApp(Dataset.load(args.dataset), args.checkpoint, args.media_dir,
+                    replay_dataset=Dataset.load(args.replay_dataset) if args.replay_dataset else None,
+                    max_buffer_s=args.experimental_max_buffer_s)
     server = ThreadingHTTPServer(('127.0.0.1', args.port), Handler)
     server.daemon_threads = True
     server.app = app

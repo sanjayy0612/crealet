@@ -45,15 +45,19 @@ async function run() {
     let timer, context, source, sourceBuffer, codec, lastAction = null;
     const history = Array.from({length: 8}, () => [0, 0, 0, 0, 0]);
     const initializations = new Map();
-    const event = type => capture.events.push({type, t_s: t(), media_time_s: video.currentTime});
+    const event = type => {
+        const timestamp = t();
+        capture.events.push({type, t_s: timestamp, media_time_s: video.currentTime});
+        return timestamp;
+    };
     const playing = () => {
-        event('playing');
-        if (!started) {startup = t(); started = true;}
-        if (stallStart !== null) {stallSeconds += t() - stallStart; stallStart = null;}
+        const timestamp = event('playing');
+        if (!started) {startup = timestamp; started = true;}
+        if (stallStart !== null) {stallSeconds += timestamp - stallStart; stallStart = null;}
     };
     const waiting = () => {
-        event('waiting');
-        if (started && stallStart === null && !video.ended) {stallStart = t(); stallEvents++;}
+        const timestamp = event('waiting');
+        if (started && stallStart === null && !video.ended) {stallStart = timestamp; stallEvents++;}
     };
     video.addEventListener('playing', playing);
     video.addEventListener('waiting', waiting);
@@ -61,7 +65,8 @@ async function run() {
         if (finalized) return;
         finalized = true;
         clearInterval(timer);
-        if (stallStart !== null) stallSeconds += t() - stallStart;
+        const finishedAt = t();
+        if (stallStart !== null) stallSeconds += finishedAt - stallStart;
         let position = 0, integral = 0;
         if (context) for (const row of capture.segments) {
             const duration = context.durations_s[row.segment_index];
@@ -73,7 +78,7 @@ async function run() {
         capture.error = error;
         capture.context = context;
         capture.metrics = {startup_s: startup, rebuffer_s: stallSeconds, stall_events: stallEvents,
-                           played_s: video.currentTime, wall_time_s: t(),
+                           played_s: video.currentTime, wall_time_s: finishedAt,
                            mean_played_bitrate_kbps: video.currentTime > 0 ? integral / video.currentTime : 0,
                            dropped_frames: quality.droppedVideoFrames, total_frames: quality.totalVideoFrames};
         if (context) capture.transport_audit = await fetch(`/audit?session=${context.session}`).then(r => r.json());

@@ -1,0 +1,34 @@
+{
+  "dataset_sha256": "e9b05042b442de7a847e4e88284926505bdaa2d81afc768bb87ccb8da7070a93",
+  "new_sessions": [
+    {
+      "url": "https://datasets.simula.no/downloads/hsdpa-tcp-logs/ferry.nesoddtangen-oslo/report.2011-01-29_1800CET.log",
+      "file": "data/prefetch-sessions/report.2011-01-29_1800CET.log",
+      "raw_sha256": "f4d1e309f8354ddc0d6a072f606b9453d4632b3da9a55a4a442f2554d9a60899",
+      "trace_sha256": "dfde276f67ddd94e1aa3e702053c7209ff9d6888628c20e94ed7565465daeed6",
+      "duration_s": 555.273
+    },
+    {
+      "url": "https://datasets.simula.no/downloads/hsdpa-tcp-logs/ferry.nesoddtangen-oslo/report.2011-01-31_1830CET.log",
+      "file": "data/prefetch-sessions/report.2011-01-31_1830CET.log",
+      "raw_sha256": "4f3226c3ebd8eb300c75dc12c26ff42dc892eebf16394f134ca75a9494639fff",
+      "trace_sha256": "745162901e0f20f73337fc2493b127b0c001c06223a0fc03e78db2735cf8c042",
+      "duration_s": 521.3599999999999
+    },
+    {
+      "url": "https://datasets.simula.no/downloads/hsdpa-tcp-logs/ferry.nesoddtangen-oslo/report.2011-02-01_0629CET.log",
+      "file": "data/prefetch-sessions/report.2011-02-01_0629CET.log",
+      "raw_sha256": "839b1c771a008261e9ff49276e3e859aa9265e8eb02cb63a77ee5c6487648c0c",
+      "trace_sha256": "d99e16176763b4c948030b48e1e82903c20baa37e7660db4983e3812a4a9c900",
+      "duration_s": 1425.0169999999998
+    },
+    {
+      "url": "https://datasets.simula.no/downloads/hsdpa-tcp-logs/ferry.nesoddtangen-oslo/report.2011-02-01_0740CET.log",
+      "file": "data/prefetch-sessions/report.2011-02-01_0740CET.log",
+      "raw_sha256": "487f3dff4c9a3798f37c320b217fb27fa5a27472714eb308702bc020e299d5ac",
+      "trace_sha256": "5049ed9f94f8aafc7bf3ae56cef05f63920a0e538c000440a95cf65ce9f83712",
+      "duration_s": 1354.394
+    }
+  ],
+  "known_control": "fresh-ferry-2010-09-21_1622CEST"
+}

@@ -1,0 +1,10 @@
+[
+  {
+    "name": "post-fix-decode",
+    "policy": "dqn",
+    "split": "test",
+    "trace": 4,
+    "port": 8841,
+    "wall_limit_s": 240
+  }
+]

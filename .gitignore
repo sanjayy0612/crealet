@@ -56,6 +56,18 @@ runs/buffer-experiment/*
 runs/stall-diagnosis/*
 !runs/stall-diagnosis/*.json
 !runs/stall-diagnosis/report.md
+!runs/prefetch-validation/
+runs/prefetch-validation/*
+!runs/prefetch-validation/*.json
+!runs/prefetch-validation/report.md
+!runs/prefetch-validation/native/
+runs/prefetch-validation/native/*
+!runs/prefetch-validation/native/*.json
+!runs/prefetch-validation/native/*.png
+!runs/prefetch-validation/post-fix-smoke/
+runs/prefetch-validation/post-fix-smoke/*
+!runs/prefetch-validation/post-fix-smoke/*.json
+!runs/prefetch-validation/post-fix-smoke/*.png
 !data/
 data/*
 !data/realistic_envivio/
@@ -66,3 +78,5 @@ data/*
 !data/learning-holdout/**
 !data/buffer-sessions/
 !data/buffer-sessions/**
+!data/prefetch-sessions/
+!data/prefetch-sessions/**
