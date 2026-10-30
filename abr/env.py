@@ -13,6 +13,7 @@ from .data import Dataset
 from .media import Media
 from .playback import Player
 from .transport import Replay
+from .recovery import RecoveryConfig
 
 
 @dataclass(frozen=True)
@@ -66,7 +67,8 @@ class StreamingEnv(gym.Env):
     observation_version = 2
 
     def __init__(self, dataset: Dataset, *, media: Media | None = None, split="train",
-                 config: StreamConfig | None = None, weights: QoEWeights | None = None, history=8):
+                 config: StreamConfig | None = None, weights: QoEWeights | None = None, history=8,
+                 recovery: RecoveryConfig | None = None):
         super().__init__()
         self.dataset, self.config, self.weights = dataset, config or StreamConfig(), weights or QoEWeights()
         self.media = media or Media(dataset.video)
@@ -80,6 +82,9 @@ class StreamingEnv(gym.Env):
             if not np.array_equal(getattr(self.media.video, key), getattr(self.video, key)):
                 raise ValueError("Media and dataset videos differ")
         self.live = self.config.mode == "live"
+        if recovery is not None and (not isinstance(recovery, RecoveryConfig) or self.live):
+            raise ValueError('Request recovery currently requires VOD and RecoveryConfig')
+        self.recovery = recovery
         self.units = [self.media.units(i, self.live) for i in range(len(self.video.durations_s))]
         largest = max(float(ds.max()) for ds, _ in self.units)
         # Enough room to build a threshold and receive the next indivisible unit.
@@ -110,6 +115,8 @@ class StreamingEnv(gym.Env):
         self.previous_action = None
         self.history = np.zeros((self.history_length, 5), dtype=np.float32)
         self.downloaded_bytes = self.downloaded_media_s = 0.
+        self.request_retries = self.abandoned_requests = 0
+        self.wasted_bytes = 0.
         self._done = False
         return self._observation(), {"trace": traces[index].name, "observation_version": 2}
 
@@ -174,7 +181,95 @@ class StreamingEnv(gym.Env):
                  mean_played_bitrate_kbps=s["bitrate_integral"] / max(s["played_s"], 1e-12),
                  mean_live_latency_s=s["latency_integral"] / max(s["latency_wall_s"], 1e-12),
                  stall_ratio=s["rebuffer_s"] / max(s["rebuffer_s"] + s["playback_wall_s"], 1e-12))
+        if self.recovery is not None:
+            s.update(request_retries=self.request_retries, abandoned_requests=self.abandoned_requests,
+                     wasted_bytes=self.wasted_bytes)
         return s
+
+    def _recover_vod_transfer(self, action, duration, sizes, deadline):
+        """Restart cancelled bodies at lowest quality; every byte and RTT counts.
+
+        Actual size is known only for the active request (Content-Length). A
+        proposed lower representation uses the same nominal size estimate as
+        the normal observation, never its unrequested true future size.
+        """
+        cfg = self.recovery
+        lowest = 0  # Video contract requires a strictly increasing ladder.
+        estimate = self.video.bitrates_kbps[lowest] * 1000 / 8 * duration
+        attempts = []
+        total_bytes = total_body_s = extra_rtt_s = backoff_s = 0.
+        complete = False
+        exhausted = False
+        for attempt in range(cfg.max_retries + 1):
+            body_start = self.wall_s
+            last_progress = self.wall_s
+            received = 0.
+            size = float(sizes[action])
+            reason = None
+            probe = None
+            while (received < size - 1e-7 and self.network.time_s < deadline - 1e-9
+                   and self.network.time_s < self.network.ends[-1] - 1e-9):
+                transfer = self.network.transfer(size - received,
+                    min(deadline, self.network.time_s + cfg.poll_s))
+                self._advance(transfer.elapsed_s)
+                total_body_s += transfer.elapsed_s
+                total_bytes += transfer.bytes_received
+                received += transfer.bytes_received
+                if transfer.bytes_received > 1e-7:
+                    last_progress = self.wall_s
+                if received >= size - 1e-7:
+                    complete = True
+                    break
+                # A deadline/trace boundary is a failed transfer, not an early
+                # controller cancellation (and must retain timeout backoff).
+                if self.network.time_s >= min(deadline, self.network.ends[-1]) - 1e-9:
+                    break
+                probe = dict(elapsed_s=self.wall_s - body_start, received_bytes=received,
+                             content_bytes=size, idle_s=self.wall_s - last_progress,
+                             buffer_s=self.player.buffer_s, lowest_estimate_bytes=float(estimate),
+                             at_lowest=action == lowest)
+                reason = cfg.abandon_reason(**probe) if attempt < cfg.max_retries else None
+                if reason or transfer.elapsed_s <= 1e-12:
+                    break
+            trace_end = self.network.time_s >= self.network.ends[-1] - 1e-9
+            outcome = 'complete' if complete else reason or ('trace_end' if trace_end else 'request_timeout')
+            attempts.append({'attempt': attempt, 'representation': int(action),
+                             'bitrate_kbps': float(self.video.bitrates_kbps[action]),
+                             'body_start_s': body_start, 'body_end_s': self.wall_s,
+                             'content_bytes': size, 'bytes_received': received,
+                             'outcome': outcome, 'last_probe': probe})
+            if complete:
+                break
+            self.wasted_bytes += received
+            self.abandoned_requests += int(reason is not None)
+            if trace_end:
+                break
+            if attempt == cfg.max_retries:
+                exhausted = True
+                break
+            # Back off after a hard timeout or no progress, not after an active
+            # but overly large download. Backoff drains playback normally.
+            if outcome in ('request_timeout', 'no_progress'):
+                waited, ok = self._wait(cfg.backoff_s)
+                backoff_s += waited
+                if not ok or self.network.time_s >= self.network.ends[-1] - 1e-9:
+                    break
+            deadline = self.network.time_s + self.config.request_timeout_s
+            action = lowest
+            self.request_retries += 1
+            waited, ok = self._wait(self.network.rtt_s, deadline)
+            extra_rtt_s += waited
+            if not ok:
+                attempts.append({'attempt': attempt + 1, 'representation': int(action),
+                                 'bitrate_kbps': float(self.video.bitrates_kbps[action]),
+                                 'body_start_s': self.wall_s, 'body_end_s': self.wall_s,
+                                 'content_bytes': None, 'bytes_received': 0.,
+                                 'outcome': ('trace_end' if self.network.time_s >= self.network.ends[-1] - 1e-9
+                                             else 'request_timeout'), 'last_probe': None})
+                break
+        return {'complete': complete, 'action': action, 'bytes': total_bytes,
+                'body_s': total_body_s, 'rtt_s': extra_rtt_s, 'backoff_s': backoff_s,
+                'attempts': attempts, 'exhausted': exhausted}
 
     def step(self, action):
         if self._done:
@@ -182,6 +277,7 @@ class StreamingEnv(gym.Env):
         if isinstance(action, (bool, np.bool_)) or not self.action_space.contains(action):
             raise ValueError("Action must be an integer representation index")
         action = int(action)
+        policy_action = action
         segment_index = self.segment
         before = dict(self.player.stats)
         start = self.wall_s
@@ -191,6 +287,7 @@ class StreamingEnv(gym.Env):
         rtt, complete = self._wait(self.network.rtt_s, deadline)
         source_wait = buffer_wait = body_time = received = 0.
         events = []
+        recovery_result = None
         media_end = self.segment_starts[self.segment]
         for part, duration in enumerate(ds):
             if not complete:
@@ -209,11 +306,18 @@ class StreamingEnv(gym.Env):
                 buffer_wait += waited
             if not complete:
                 break
-            transfer = self.network.transfer(float(bs[part, action]), deadline)
-            self._advance(transfer.elapsed_s)
-            body_time += transfer.elapsed_s
-            received += transfer.bytes_received
-            complete = transfer.complete
+            if self.recovery is not None:
+                recovery_result = self._recover_vod_transfer(action, duration, bs[part], deadline)
+                complete, action = recovery_result['complete'], recovery_result['action']
+                body_time += recovery_result['body_s']
+                received += recovery_result['bytes']
+                rtt += recovery_result['rtt_s']
+            else:
+                transfer = self.network.transfer(float(bs[part, action]), deadline)
+                self._advance(transfer.elapsed_s)
+                body_time += transfer.elapsed_s
+                received += transfer.bytes_received
+                complete = transfer.complete
             if complete:
                 self.player.append(duration, self.video.bitrates_kbps[action])
                 self.downloaded_media_s += duration
@@ -245,6 +349,7 @@ class StreamingEnv(gym.Env):
                  "rate_deviation": -w.rate_deviation * delta["rate_deviation_s"]}
         reason = ("playback_end" if terminated else
                   "trace_end" if truncated and self.network.time_s >= self.network.ends[-1] - 1e-9 else
+                  "retry_limit" if truncated and recovery_result is not None and recovery_result['exhausted'] else
                   "request_timeout" if truncated else None)
         info = {"trace": self.network.trace.name, "segment_complete": complete,
                 "segment_index": segment_index, "elapsed_s": self.wall_s - start,
@@ -253,6 +358,10 @@ class StreamingEnv(gym.Env):
                 "source_wait_s": source_wait, "buffer_wait_s": buffer_wait,
                 "bytes_received": received, "parts": events, "reward_terms": terms,
                 "termination_reason": reason, "metrics": self.metrics()}
+        if self.recovery is not None:
+            info.update(policy_action=policy_action, effective_action=action,
+                        request_attempts=[] if recovery_result is None else recovery_result['attempts'],
+                        recovery_backoff_s=0. if recovery_result is None else recovery_result['backoff_s'])
         return self._observation(), float(sum(terms.values())), bool(terminated), bool(truncated), info
 
     def provenance(self):
@@ -260,6 +369,7 @@ class StreamingEnv(gym.Env):
                  "part_durations_s": None if self.media.part_durations_s is None else [x.tolist() for x in self.media.part_durations_s],
                  "part_sizes_bytes": None if self.media.part_sizes_bytes is None else [x.tolist() for x in self.media.part_sizes_bytes]}
         return {"environment_version": 2, "observation_version": 2,
+                "request_recovery": None if self.recovery is None else self.recovery.to_dict(),
                 "dataset_sha256": self.dataset.fingerprint,
                 "media_sha256": hashlib.sha256(json.dumps(media, sort_keys=True).encode()).hexdigest(),
                 "config": asdict(self.config), "weights": asdict(self.weights),

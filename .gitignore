@@ -43,6 +43,11 @@ runs/learning-ablation/*
 runs/learning-ablation/*-seed-*/*
 !runs/learning-ablation/*-seed-*/metrics.json
 !runs/learning-ablation/*-seed-*/accepted.npz
+!runs/request-recovery/
+runs/request-recovery/*
+!runs/request-recovery/protocol.json
+!runs/request-recovery/results.json
+!runs/request-recovery/report.md
 !data/
 data/*
 !data/realistic_envivio/

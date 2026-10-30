@@ -51,7 +51,7 @@ def evaluate(env, *, baseline='lowest', seed=0, policy=None, policy_metadata=Non
                          'termination_reason': info['termination_reason'], 'reward': total_reward,
                          'metrics': env.metrics(), 'steps': steps})
     digest = hashlib.sha256()
-    for name in ('data.py', 'media.py', 'transport.py', 'playback.py', 'env.py', 'trace_import.py', 'benchmark.py'):
+    for name in ('data.py', 'media.py', 'transport.py', 'playback.py', 'env.py', 'recovery.py', 'trace_import.py', 'benchmark.py'):
         path = Path(__file__).with_name(name)
         digest.update(name.encode() + path.read_bytes())
     return {'provenance': {**env.provenance(), 'source_sha256': digest.hexdigest(),

@@ -1,0 +1,70 @@
+{
+  "purpose": "Repair request termination separately from frozen bitrate selection",
+  "training": false,
+  "checkpoint": "runs/learning-ablation/baseline-seed-7/accepted.npz",
+  "checkpoint_sha256": "5567f45b1e335142188f931d626f68777d2e1abac4ea13adb146adf000e63470",
+  "recovery": {
+    "none": null,
+    "timeout_only": {
+      "max_retries": 4,
+      "poll_s": 1.0,
+      "min_observation_s": 2.0,
+      "no_progress_s": 3.0,
+      "buffer_reserve_s": 2.0,
+      "backoff_s": 2.0,
+      "restart_fraction": 0.8,
+      "early_abandon": false
+    },
+    "progress": {
+      "max_retries": 4,
+      "poll_s": 1.0,
+      "min_observation_s": 2.0,
+      "no_progress_s": 3.0,
+      "buffer_reserve_s": 2.0,
+      "backoff_s": 2.0,
+      "restart_fraction": 0.8,
+      "early_abandon": true
+    }
+  },
+  "policies": [
+    "lowest",
+    "throughput",
+    "highest_allowed",
+    "dqn"
+  ],
+  "safety_filter": {
+    "min_buffer_s": 12.0,
+    "throughput_factor": 0.65
+  },
+  "targets": {
+    "completion_fraction": 1.0,
+    "max_startup_s": 3.0,
+    "max_rebuffer_s": 8.0
+  },
+  "target_rule": "Every session must complete and meet both timing limits",
+  "data": [
+    {
+      "path": "data/learning-holdout/dataset.json",
+      "split": "test",
+      "label": "failure_development_sessions"
+    },
+    {
+      "path": "data/hard_envivio/dataset.json",
+      "split": "validation",
+      "label": "historical_validation"
+    },
+    {
+      "path": "data/hard_envivio/dataset.json",
+      "split": "test",
+      "label": "historical_test_already_observed"
+    }
+  ],
+  "limitations": [
+    "Simulator only; native browser recovery not implemented",
+    "Known sessions; no untouched test or new video",
+    "Finite observed-goodput replay, not a causal network model",
+    "Failed bodies restart in full; no HTTP Range resumption",
+    "Policy history includes received bytes from failed attempts",
+    "All settings fixed before replay; no selection using these results"
+  ]
+}
