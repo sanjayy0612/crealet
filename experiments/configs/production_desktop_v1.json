@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "profile_id": "desktop-m2-single-player-v1",
+  "status": "proposed_not_approved",
+  "scope": "Reference pilot target based on the available Mac; not a claim about all desktops or mobile devices",
+  "target": {
+    "model_identifier": "Mac14,2",
+    "processor": "Apple M2",
+    "minimum_system_ram_bytes": 8589934592,
+    "verified_os": "macOS 26.5.1",
+    "verified_browser": "Chrome 156.0.8078.74",
+    "runtime": "Native MSE browser playback plus one local Python/PyTorch inference worker",
+    "maximum_active_playbacks": 1,
+    "browser_measurement_scope": "One isolated Chrome process tree; other user tabs are outside this measurement",
+    "unverified_targets": ["Safari", "Firefox", "Windows", "Linux", "Android", "iOS"]
+  },
+  "memory_budget": {
+    "status": "proposed_engineering_limits_not_an_industry_standard",
+    "browser_tree_rss_limit_bytes": 1610612736,
+    "inference_worker_rss_limit_bytes": 536870912,
+    "combined_rss_limit_bytes": 2147483648,
+    "javascript_heap_limit_bytes": 67108864,
+    "measurement": "Sample browser process-tree RSS and server RSS at the same time; keep JS heap diagnostic separate and do not add it to RSS twice",
+    "required_soak_minutes": 30,
+    "proposed_max_retained_growth_from_warm_baseline_bytes": 67108864,
+    "cautions": [
+      "RSS sums can count shared pages multiple times",
+      "Sampled peaks are not guaranteed maxima",
+      "A warm-worker measurement does not prove server peak during full HTTP playback",
+      "Current historical runs do not establish the 30-minute memory-growth requirement"
+    ]
+  },
+  "quality_budget": {
+    "status": "proposed_product_limits_require_visual_review",
+    "normal_minimum": {"nominal_bitrate_kbps": 300, "width": 320, "height": 180, "fps": 25},
+    "emergency_rung": {"nominal_bitrate_kbps": 8, "width": 96, "height": 54, "fps": 25},
+    "maximum_continuous_emergency_media_s": 12,
+    "maximum_total_emergency_fraction": 0.10,
+    "priority": "Avoid stalls; continue emergency playback if required, show degraded quality and fail the quality acceptance gate rather than force an unsafe upgrade",
+    "interpretation": "Normal-quality floor and emergency exposure limits are proposals, not measured human acceptability or VMAF thresholds",
+    "human_review": "Review both videos at the actual player size for motion, faces and text before accepting this floor"
+  },
+  "playback_budget": {"complete": true, "max_startup_s": 3, "max_rebuffer_s": 8},
+  "evaluation_rule": "Diagnostic assessment of existing evidence only; freeze this profile before new independent acceptance trials, retain startup failures and do not use these post-hoc limits to promote a checkpoint",
+  "implementation": "Documentation and audit profile only; these limits are not runtime-enforced and do not change existing policies, weights or defaults"
+}

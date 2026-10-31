@@ -1,0 +1,11 @@
+{
+  "method": "Fresh Python process; ps RSS is KiB converted to bytes; Darwin ru_maxrss is bytes. Constructor plus 100 inference calls; no HTTP/video traffic.",
+  "before_app_rss_bytes": 201785344,
+  "loaded_app_rss_bytes": 230981632,
+  "warm_rss_bytes": 233078784,
+  "sampled_process_lifetime_peak_rss_bytes": 235257856,
+  "parameter_count": 77826,
+  "parameter_tensor_bytes": 311304,
+  "checkpoint_bytes": 298815,
+  "full_playback_server_memory_test": false
+}

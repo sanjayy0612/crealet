@@ -94,8 +94,11 @@ the original default checkpoint:
 .venv/bin/python -m abr.player_server --checkpoint runs/startup-ladder/seed-7/accepted.npz --dataset data/startup-ladder/training.json --media-dir artifacts/startup-ladder-v1 --replay-dataset data/startup-ladder/development.json --enable-request-recovery
 ```
 
-Remaining limits are concrete: desktop Chrome only, no specified device-memory
-budget, no accepted minimum visual quality, one same-route recording family, a
+The [production readiness profile](production-readiness.md) defines a proposed
+reference device, memory budget and quality floor, with a reproducible audit of
+these captures. Those limits are not yet accepted. Remaining limits are concrete:
+desktop Chrome only, incomplete full-stack memory evidence, no accepted minimum
+visual quality, one same-route recording family, a
 short second video, and no learned-policy advantage. Mobile/production approval
 requires an explicit target and those acceptance criteria. See
 [measured results](../runs/startup-ladder/report.md) and

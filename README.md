@@ -212,8 +212,13 @@ visual-quality tradeoff. One unused session supplies only about 1.1 KB by 3 s an
 still misses the startup limit. New learned checkpoints did not outperform the
 rule on transfer, so defaults remain unchanged.
 
-Production approval still needs a target device/browser and memory budget, an
-accepted minimum visual quality, and a network-conditioned startup requirement.
+The [production readiness profile](docs/production-readiness.md) now proposes an
+Apple M2 / 8 GiB / desktop Chrome reference target, a 1.5 GiB browser budget plus
+512 MiB for inference, and a normal quality floor of 180p / 300 kbps. These are
+draft limits, not approved requirements. Existing captures fit the sampled memory
+limits but all eight fail the proposed emergency-quality exposure limits.
+Production approval still needs full-stack memory and soak measurements, visual
+acceptance, and a network-conditioned startup requirement.
 The desktop prototype is runnable; universal startup guarantees and a neural
 advantage are not established. Offline future-service bounds must never become
 policy inputs.

@@ -1,0 +1,213 @@
+{
+  "checked_at_utc": "2026-10-31T19:00:33.123949+00:00",
+  "profile_status": "proposed_not_approved",
+  "profile_sha256": "b092e5d5f5d9fb9a2468642e37560237ba808a370d2e93ba103086ee215c099a",
+  "hardware": {
+    "checked_at_utc": "2026-10-31T18:58:16.108464+00:00",
+    "model_identifier": "Mac14,2",
+    "system_ram_bytes": 8589934592,
+    "processor": "Apple M2",
+    "architecture": "arm64",
+    "os_version": "26.5.1",
+    "browser_version": "156.0.8078.74",
+    "method": "Current sysctl hardware and installed browser plist; archived captures independently record their browser/platform"
+  },
+  "memory_assessment": {
+    "browser_peak_rss_bytes": 1300840448,
+    "javascript_peak_heap_bytes": 1822876,
+    "worker_probe_peak_rss_bytes": 235257856,
+    "sum_of_separately_observed_component_peaks_bytes": 1536098304,
+    "fits_proposed_snapshot_budgets": true,
+    "combined_full_playback_measured": false,
+    "soak_completed": false,
+    "status": "Snapshot compatibility only; not memory approval or proof of no leak"
+  },
+  "worker_probe": {
+    "method": "Fresh Python process; ps RSS is KiB converted to bytes; Darwin ru_maxrss is bytes. Constructor plus 100 inference calls; no HTTP/video traffic.",
+    "before_app_rss_bytes": 201785344,
+    "loaded_app_rss_bytes": 230981632,
+    "warm_rss_bytes": 233078784,
+    "sampled_process_lifetime_peak_rss_bytes": 235257856,
+    "parameter_count": 77826,
+    "parameter_tensor_bytes": 311304,
+    "checkpoint_bytes": 298815,
+    "full_playback_server_memory_test": false
+  },
+  "quality_cases": [
+    {
+      "case": "hard-dqn",
+      "capture": "runs/startup-ladder/native/hard-dqn.json",
+      "capture_sha256": "29d0e4fb219837c28fe1dff78e5e3b14f182a44d0b9f3fc67bf1084a13f887e9",
+      "browser_sampled_peak_rss_bytes": 1233895424,
+      "javascript_sampled_peak_heap_bytes": 1822336,
+      "quality_exposure": {
+        "duration_s": 193.68,
+        "emergency_media_s": 29.68,
+        "emergency_fraction": 0.15324246179264767,
+        "longest_continuous_emergency_s": 16.0,
+        "emergency_dimensions": [
+          [
+            96,
+            54
+          ]
+        ],
+        "scope": "Complete captured playback; encoded media duration, not wall time or visual opinion"
+      },
+      "meets_proposed_quality_limits": false
+    },
+    {
+      "case": "hard-highest-allowed",
+      "capture": "runs/startup-ladder/native/hard-highest-allowed.json",
+      "capture_sha256": "d28e2fdbd3a4be12bf8bddaa2a72368f2abd997a59ab752716f835421528e5a9",
+      "browser_sampled_peak_rss_bytes": 1300840448,
+      "javascript_sampled_peak_heap_bytes": 1822876,
+      "quality_exposure": {
+        "duration_s": 193.68,
+        "emergency_media_s": 29.68,
+        "emergency_fraction": 0.15324246179264767,
+        "longest_continuous_emergency_s": 16.0,
+        "emergency_dimensions": [
+          [
+            96,
+            54
+          ]
+        ],
+        "scope": "Complete captured playback; encoded media duration, not wall time or visual opinion"
+      },
+      "meets_proposed_quality_limits": false
+    },
+    {
+      "case": "slow-first-dqn",
+      "capture": "runs/startup-ladder/native/slow-first-dqn.json",
+      "capture_sha256": "74779d7d656e80f5e1d6788b4f8257c60e29b53b04f46d47497b75f248db0311",
+      "browser_sampled_peak_rss_bytes": 1184301056,
+      "javascript_sampled_peak_heap_bytes": 1606228,
+      "quality_exposure": {
+        "duration_s": 193.68,
+        "emergency_media_s": 112.0,
+        "emergency_fraction": 0.5782734407269723,
+        "longest_continuous_emergency_s": 112.0,
+        "emergency_dimensions": [
+          [
+            96,
+            54
+          ]
+        ],
+        "scope": "Complete captured playback; encoded media duration, not wall time or visual opinion"
+      },
+      "meets_proposed_quality_limits": false
+    },
+    {
+      "case": "slow-first-highest-allowed",
+      "capture": "runs/startup-ladder/native/slow-first-highest-allowed.json",
+      "capture_sha256": "fbd6cd9469d35079e6db4db3ff93f70c2a5300565d710ca680025162412401c2",
+      "browser_sampled_peak_rss_bytes": 1230077952,
+      "javascript_sampled_peak_heap_bytes": 1562860,
+      "quality_exposure": {
+        "duration_s": 193.68,
+        "emergency_media_s": 112.0,
+        "emergency_fraction": 0.5782734407269723,
+        "longest_continuous_emergency_s": 112.0,
+        "emergency_dimensions": [
+          [
+            96,
+            54
+          ]
+        ],
+        "scope": "Complete captured playback; encoded media duration, not wall time or visual opinion"
+      },
+      "meets_proposed_quality_limits": false
+    },
+    {
+      "case": "slow-start-dqn",
+      "capture": "runs/startup-ladder/native/slow-start-dqn.json",
+      "capture_sha256": "9b6bcd59d3a9eb363477954826288d8de4051355318be184094988f63959ef85",
+      "browser_sampled_peak_rss_bytes": 1160314880,
+      "javascript_sampled_peak_heap_bytes": 1714392,
+      "quality_exposure": {
+        "duration_s": 193.68,
+        "emergency_media_s": 44.0,
+        "emergency_fraction": 0.22717885171416768,
+        "longest_continuous_emergency_s": 44.0,
+        "emergency_dimensions": [
+          [
+            96,
+            54
+          ]
+        ],
+        "scope": "Complete captured playback; encoded media duration, not wall time or visual opinion"
+      },
+      "meets_proposed_quality_limits": false
+    },
+    {
+      "case": "slow-start-highest-allowed",
+      "capture": "runs/startup-ladder/native/slow-start-highest-allowed.json",
+      "capture_sha256": "cbb8d390e26c4f38d516983235d2375f9a19a750b9101dc7edd5f70e25963080",
+      "browser_sampled_peak_rss_bytes": 1191477248,
+      "javascript_sampled_peak_heap_bytes": 1708928,
+      "quality_exposure": {
+        "duration_s": 193.68,
+        "emergency_media_s": 44.0,
+        "emergency_fraction": 0.22717885171416768,
+        "longest_continuous_emergency_s": 44.0,
+        "emergency_dimensions": [
+          [
+            96,
+            54
+          ]
+        ],
+        "scope": "Complete captured playback; encoded media duration, not wall time or visual opinion"
+      },
+      "meets_proposed_quality_limits": false
+    },
+    {
+      "case": "sintel-dqn",
+      "capture": "runs/startup-ladder/sintel-native/sintel-dqn.json",
+      "capture_sha256": "9c33d0cb9f9c498928d72c0d5ea9fa7bfd362a75eafbfefac6ec7668d8c18995",
+      "browser_sampled_peak_rss_bytes": 1084866560,
+      "javascript_sampled_peak_heap_bytes": 1477936,
+      "quality_exposure": {
+        "duration_s": 52.2,
+        "emergency_media_s": 52.2,
+        "emergency_fraction": 1.0,
+        "longest_continuous_emergency_s": 52.2,
+        "emergency_dimensions": [
+          [
+            96,
+            54
+          ]
+        ],
+        "scope": "Complete captured playback; encoded media duration, not wall time or visual opinion"
+      },
+      "meets_proposed_quality_limits": false
+    },
+    {
+      "case": "sintel-highest-allowed",
+      "capture": "runs/startup-ladder/sintel-native/sintel-highest-allowed.json",
+      "capture_sha256": "ca38dffcdbddea3b0df24e8e1b00e38808e7cec3f85236caa804bec61b84e4e0",
+      "browser_sampled_peak_rss_bytes": 1221525504,
+      "javascript_sampled_peak_heap_bytes": 1470848,
+      "quality_exposure": {
+        "duration_s": 52.2,
+        "emergency_media_s": 52.2,
+        "emergency_fraction": 1.0,
+        "longest_continuous_emergency_s": 52.2,
+        "emergency_dimensions": [
+          [
+            96,
+            54
+          ]
+        ],
+        "scope": "Complete captured playback; encoded media duration, not wall time or visual opinion"
+      },
+      "meets_proposed_quality_limits": false
+    }
+  ],
+  "proposed_quality_limits_passed": 0,
+  "quality_cases_count": 8,
+  "human_quality_accepted": false,
+  "production_approved": false,
+  "decision": "Reference target identified; draft budgets defined. See quality-case outcomes and memory snapshots; full-stack/soak and human quality acceptance remain unverified.",
+  "runtime_or_checkpoint_changes": false,
+  "source_sha256": "77c66069cd782ca3fca5448b5688126677a28d41ea14aecbe6d623eaefe5d0ce"
+}

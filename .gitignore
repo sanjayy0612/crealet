@@ -92,6 +92,9 @@ runs/startup-ladder/native/*
 runs/startup-ladder/sintel-native/*
 !runs/startup-ladder/sintel-native/*.json
 !runs/startup-ladder/sintel-native/*.png
+!runs/production-readiness/
+runs/production-readiness/*
+!runs/production-readiness/*.json
 !data/
 data/*
 !data/realistic_envivio/
