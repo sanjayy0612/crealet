@@ -1,0 +1,22 @@
+[
+  {
+    "name": "sintel-dqn",
+    "Browser": "Chrome/156.0.8078.74",
+    "File-Path-Style": "posix",
+    "Protocol-Version": "1.3",
+    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.0.0 Safari/537.36",
+    "V8-Version": "15.6.75.25",
+    "WebKit-Version": "537.36 (@d331de35ca8ab1358c7a17e4bd41627d55eaef51)",
+    "webSocketDebuggerUrl": "ws://127.0.0.1:62495/devtools/browser/9ba7d60c-5e36-4a0b-a385-0f29088f33ee"
+  },
+  {
+    "name": "sintel-highest-allowed",
+    "Browser": "Chrome/156.0.8078.74",
+    "File-Path-Style": "posix",
+    "Protocol-Version": "1.3",
+    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.0.0 Safari/537.36",
+    "V8-Version": "15.6.75.25",
+    "WebKit-Version": "537.36 (@d331de35ca8ab1358c7a17e4bd41627d55eaef51)",
+    "webSocketDebuggerUrl": "ws://127.0.0.1:62501/devtools/browser/3b269370-760b-48e4-a296-0e7365d6d3bc"
+  }
+]

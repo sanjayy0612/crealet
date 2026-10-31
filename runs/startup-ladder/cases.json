@@ -1,0 +1,50 @@
+[
+  {
+    "name": "slow-first-dqn",
+    "policy": "dqn",
+    "split": "test",
+    "trace": 0,
+    "port": 8861,
+    "wall_limit_s": 240
+  },
+  {
+    "name": "slow-first-highest-allowed",
+    "policy": "highest_allowed",
+    "split": "test",
+    "trace": 0,
+    "port": 8861,
+    "wall_limit_s": 240
+  },
+  {
+    "name": "slow-start-dqn",
+    "policy": "dqn",
+    "split": "test",
+    "trace": 3,
+    "port": 8861,
+    "wall_limit_s": 240
+  },
+  {
+    "name": "slow-start-highest-allowed",
+    "policy": "highest_allowed",
+    "split": "test",
+    "trace": 3,
+    "port": 8861,
+    "wall_limit_s": 240
+  },
+  {
+    "name": "hard-dqn",
+    "policy": "dqn",
+    "split": "test",
+    "trace": 4,
+    "port": 8861,
+    "wall_limit_s": 240
+  },
+  {
+    "name": "hard-highest-allowed",
+    "policy": "highest_allowed",
+    "split": "test",
+    "trace": 4,
+    "port": 8861,
+    "wall_limit_s": 240
+  }
+]

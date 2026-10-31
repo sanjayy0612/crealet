@@ -1,0 +1,36 @@
+[
+  {
+    "name": "sintel-dqn",
+    "done": true,
+    "completed": true,
+    "error": null,
+    "startup_s": 2.70529999999702,
+    "rebuffer_s": 0,
+    "stall_events": 0,
+    "played_s": 52.2,
+    "wall_time_s": 54.90619999998808,
+    "mean_played_bitrate_kbps": 8,
+    "received_media_bytes": 56782,
+    "discarded_media_bytes": 0,
+    "request_retries": 0,
+    "dropped_frames": 0,
+    "total_frames": 1305
+  },
+  {
+    "name": "sintel-highest-allowed",
+    "done": true,
+    "completed": true,
+    "error": null,
+    "startup_s": 2.639,
+    "rebuffer_s": 0,
+    "stall_events": 0,
+    "played_s": 52.2,
+    "wall_time_s": 54.84120000000298,
+    "mean_played_bitrate_kbps": 8,
+    "received_media_bytes": 56782,
+    "discarded_media_bytes": 0,
+    "request_retries": 0,
+    "dropped_frames": 0,
+    "total_frames": 1305
+  }
+]

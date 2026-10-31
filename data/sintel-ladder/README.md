@@ -1,0 +1,3 @@
+Real, aligned H.264 fragments: Sintel Trailer (Blender Foundation / Durian Open Movie Team). Source: https://download.blender.org/durian/trailer/sintel_trailer-480p.mp4. An 8 kbps 96x54 rung trades substantial visual quality for startup/download feasibility. Sizes and sample durations are measured from MP4 boxes. Recipes, encoder/version hashes and strict decode results are in provenance.json. Large media stays in ignored artifacts/sintel-ladder-v1; run scripts.prepare_startup_ladder to rebuild.
+
+Credit: Blender Foundation / Durian Open Movie Team. Source license: CC BY 3.0, https://durian.blender.org/about/. Changes: video-only resize/re-encode, normalized frame timing.

@@ -1,0 +1,2 @@
+# Optional real-media preparation only; includes a platform FFmpeg binary.
+imageio-ffmpeg==0.6.0

@@ -1,0 +1,26 @@
+{
+  "selection": "Highest original validation reward among eligible checkpoints; no transfer outcome selects a checkpoint",
+  "seeds": [
+    {
+      "seed": 7,
+      "path": "runs/startup-ladder/seed-7/accepted.npz",
+      "sha256": "0b89cec329eec93447462f29d87ba2fe4ce80646dc78678a0f01ab9f80b5d4ac",
+      "validation_reward": 676.7627195089275,
+      "rule_reward": 646.8451410499957
+    },
+    {
+      "seed": 11,
+      "path": "runs/startup-ladder/seed-11/accepted.npz",
+      "sha256": "ce36e8d5f5bc2b0deae049a3c328b9dfc078978d791e493f323c55454c42deb3",
+      "validation_reward": 662.4849062647853,
+      "rule_reward": 646.8451410499957
+    },
+    {
+      "seed": 13,
+      "path": "runs/startup-ladder/seed-13/accepted.npz",
+      "sha256": "ef242ac32cafa28d85ea0241879aaac3717050835486d2efdae86ef65854cce7",
+      "validation_reward": 595.3836557433107,
+      "rule_reward": 646.8451410499957
+    }
+  ]
+}

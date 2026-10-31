@@ -1,0 +1,1 @@
+Four remaining original ferry sessions fixed before scoring. Raw provenance retained, no scaling/repetition or duration-based exclusions. Envivio and Sintel datasets share these traces but have separate measured video arrays. Only test is scored.

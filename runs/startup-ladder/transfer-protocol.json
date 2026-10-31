@@ -1,0 +1,19 @@
+{
+  "sessions": [
+    "2011-02-01_0840CET",
+    "2011-02-01_1000CET",
+    "2011-02-01_1539CET",
+    "2011-02-01_1639CET"
+  ],
+  "selection": "Next four unused archive filenames, no filtering by observed outcomes/duration",
+  "videos": [
+    "derived Envivio",
+    "Sintel trailer, Blender Foundation / Durian Open Movie Team"
+  ],
+  "second_video_used_for_training": false,
+  "context": "60 s cap, startup/resume1 s, same recovery/filter",
+  "checkpoint_selection": "Validation only; each fixed seed evaluated after checkpoints are frozen",
+  "finite_traces": "Keep too-short traces and failures; no repetition or padding",
+  "Sintel_source": "https://download.blender.org/durian/trailer/sintel_trailer-480p.mp4",
+  "Sintel_credit_license": "Blender Foundation / Durian Open Movie Team; video-only re-encode, CC BY 3.0; https://durian.blender.org/about/"
+}

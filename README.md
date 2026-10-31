@@ -25,6 +25,7 @@ Its [original prompt](docs/images/abr-working.prompt.txt) and [native-label edit
 | [Long-stall diagnosis](runs/stall-diagnosis/report.md) | The 30 s buffer contract needs at least **19.11 s of stalls** on the remaining case when startup is limited to 3 s | A PPO/DQN swap alone cannot meet the 8 s target; a 60 s prefetch-cap diagnostic removed stalls on this one session |
 | [Frozen 60 s validation](runs/prefetch-validation/report.md) | Four more sessions, 30 simulator episodes and eight native trials; two new sessions had excessive startup, and two browser runs timed out | Playback gates failed; no retraining or default change. Browser memory and discarded downloads are recorded |
 | [Native recovery](runs/native-recovery/report.md) | All six recovery-on browser runs finished; both recovery-off hard controls timed out. Hard-case stalls were **0.00 s for DQN / 0.15 s for the rule** | Request recovery works on these development cases; 29 s and 8 s startup waits still need smaller startup media |
+| [Real startup media and matched training](runs/startup-ladder/report.md) | A real 8 kbps / 96x54 rung cut the known native startup cases below 3 s; a second video also played. Three new 120-episode seeds were tested on four unused sessions | Every trained seed lost to the rule on transfer reward. One new session still had about 10.35 s startup; no promotion |
 
 **Current decision: keep the default buffer settings and the frozen baseline.**
 DQN and the highest-allowed rule chose identical actions in all 54 paired
@@ -36,9 +37,9 @@ The recent experiments require every video to finish, startup to stay at or belo
 also checks the per-validation-trace throughput baseline. Partial-playback metrics
 are retained and explicitly distinguished from full-video results.
 
-The latest regression check passed **148 tests**, with two existing Gymnasium
+The latest regression check passed **157 tests**, with two existing Gymnasium
 warnings about infinite observation-space bounds. See the
-[native recovery audit](runs/native-recovery/verification.json).
+[startup-media/training audit](runs/startup-ladder/verification.json).
 
 ## How it works
 
@@ -158,7 +159,7 @@ See [player instructions and capture checks](experiments/validation/POLICY_PLAYE
 
 ## Data and limits
 
-- The current realistic VOD is one Envivio video, 49 segments and six bitrate
+- The original realistic VOD is one Envivio video, 49 segments and six bitrate
   levels: 300, 750, 1200, 1850, 2850 and 4300 kbps. Segment byte sizes come from
   the published media; the local player verifies its cached fragments.
 - `data/hard_envivio/` contains the main Norway HSDPA experiment: fourteen measured
@@ -170,6 +171,12 @@ See [player instructions and capture checks](experiments/validation/POLICY_PLAYE
   sessions; selecting a winner from them needs separate confirmation.
 - `data/realistic_envivio/` retains the earlier pilot with eight Ghent 4G logs.
   Both measured collections are old network data, not a modern-network benchmark.
+- `data/startup-ladder/` and `data/sintel-ladder/` contain actual re-encoded media
+  sizes/timings for seven rungs, including a deliberately very-low-quality 8 kbps
+  fallback. Sintel is a second, 52.2-second content example, never used in training.
+  See [asset preparation and attribution](docs/startup-ladder.md).
+- `data/transfer-sessions/` contains four unused-session tests. The three new
+  checkpoints were fixed from validation before scoring these sessions/content.
 
 The simulator supports finite VOD and a finite low-latency live event using
 explicit part metadata. The recent training, recovery and buffer evidence is
@@ -177,7 +184,7 @@ explicit part metadata. The recent training, recovery and buffer evidence is
 capacity model. The simulator omits TCP/QUIC behavior, packet loss, radio scheduling,
 audio and decoding; the native player adds real decoding but has different timing.
 
-One video and a few route groups do not establish broad generalization. There is
+Two content examples and a few route groups do not establish broad generalization. There is
 no proven neural advantage, production readiness, or complete simulator/browser
 equivalence. The [evaluation protocol](experiments/configs/evaluation_v2.json)
 remains a draft; stronger baselines and broader independent data are still needed.
@@ -188,6 +195,7 @@ remains a draft; stronger baselines and broader independent data are still neede
 | --- | --- |
 | `abr/env.py`, `transport.py`, `playback.py`, `media.py` | Finite streaming simulator and playback accounting |
 | `abr/recovery.py` | Optional bounded VOD request recovery |
+| `abr/mp4.py`, `abr/startup_training.py` | Generated-media timing extraction and fixed matched training experiment |
 | `abr/models/` | Model architectures, checkpoints, inference, PPO and DQN trainers |
 | `abr/benchmark.py`, `trace_import.py`, `validate_player.py` | Replay, trace import and player comparison tools |
 | `abr/player_server.py`, `experiments/validation/` | Local native player and independent capture tooling |
@@ -197,13 +205,18 @@ remains a draft; stronger baselines and broader independent data are still neede
 
 ## Next investigation
 
-Native recovery now completes the tested request failures. The remaining slow
-startup is infeasible with the current first segment: it is 181,801 bytes, but
-the slow traces supply only about 8–9 KB by the 3-second target. Evaluate a smaller
-independently playable startup unit/representation with actual encoded sizes and
-real decoding. Keep default settings and weights frozen until the full playback
-gates pass, and specify a target-device memory budget before deployment.
-Offline future-service bounds must never become policy inputs.
+The [real startup-ladder experiment](docs/startup-ladder.md) completed the next
+media, native-playback, second-video and matched-training checks. It fixes known
+startup cases by reducing the first media fragment to 5,478 bytes, with a major
+visual-quality tradeoff. One unused session supplies only about 1.1 KB by 3 s and
+still misses the startup limit. New learned checkpoints did not outperform the
+rule on transfer, so defaults remain unchanged.
+
+Production approval still needs a target device/browser and memory budget, an
+accepted minimum visual quality, and a network-conditioned startup requirement.
+The desktop prototype is runnable; universal startup guarantees and a neural
+advantage are not established. Offline future-service bounds must never become
+policy inputs.
 
 ## Background
 

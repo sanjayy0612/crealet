@@ -52,11 +52,13 @@ def select_action(policy, observation, config, model_policy=None):
     return int(eligible[-1]) if len(eligible) else 0
 
 
-def experimental_replay(dataset, config, replay_dataset=None, max_buffer_s=None):
+def experimental_replay(dataset, config, replay_dataset=None, max_buffer_s=None, allow_media_change=False):
     """Explicit research overrides; retain trained data/config identity separately."""
     selected = dataset if replay_dataset is None else replay_dataset
+    if allow_media_change and replay_dataset is None:
+        raise ValueError('Experimental media requires an explicit replay dataset')
     for key in ('bitrates_kbps', 'durations_s', 'sizes_bytes'):
-        if not np.array_equal(getattr(dataset.video, key), getattr(selected.video, key)):
+        if not allow_media_change and not np.array_equal(getattr(dataset.video, key), getattr(selected.video, key)):
             raise ValueError('Replay video differs from checkpoint training media')
     if max_buffer_s is not None:
         config = replace(config, max_buffer_s=max_buffer_s)
@@ -66,7 +68,8 @@ def experimental_replay(dataset, config, replay_dataset=None, max_buffer_s=None)
 
 
 class PlayerApp:
-    def __init__(self, dataset, checkpoint, media_dir, *, replay_dataset=None, max_buffer_s=None, recovery=None):
+    def __init__(self, dataset, checkpoint, media_dir, *, replay_dataset=None, max_buffer_s=None, recovery=None,
+                 allow_media_change=False):
         torch.set_num_threads(1)
         self.dataset = dataset
         self.model, self.metadata = load_model(checkpoint)
@@ -76,6 +79,9 @@ class PlayerApp:
         safety = training.get('safety_filter')
         self.policy = DecisionPolicy(self.model, safety=ActionSafety(**safety) if safety else None)
         self.config = StreamConfig(**training['config'])
+        expected_recovery = training.get('recovery')
+        if expected_recovery is not None and (not isinstance(recovery, RecoveryConfig) or asdict(recovery) != expected_recovery):
+            raise ValueError('Checkpoint requires its recorded request-recovery configuration')
         if self.config.mode != 'vod':
             raise ValueError('This player supports finite VOD only')
         validation = training['best_validation']
@@ -85,20 +91,27 @@ class PlayerApp:
             raise ValueError('Checkpoint and dataset differ')
         self.training_dataset_sha256 = dataset.fingerprint
         self.training_config = asdict(self.config)
-        self.dataset, self.config = experimental_replay(dataset, self.config, replay_dataset, max_buffer_s)
+        self.dataset, self.config = experimental_replay(dataset, self.config, replay_dataset, max_buffer_s, allow_media_change)
         self.experimental_overrides = {'max_buffer_s': max_buffer_s} if max_buffer_s is not None else {}
+        if allow_media_change:
+            self.experimental_overrides['media_changed'] = True
         self.recovery = recovery
         self.checkpoint_sha256 = hashlib.sha256(Path(checkpoint).read_bytes()).hexdigest()
         self.media_dir = Path(media_dir)
         self.index = json.loads((self.media_dir / 'index.json').read_text())
         self.reps = self.index['representations']
-        if [r['bitrate_kbps'] for r in self.reps] != dataset.video.bitrates_kbps.tolist():
-            raise ValueError('Cached media ladder differs from training')
+        if [r['bitrate_kbps'] for r in self.reps] != self.dataset.video.bitrates_kbps.tolist():
+            raise ValueError('Cached media ladder differs from replay dataset')
         for i, rep in enumerate(self.reps):
-            for j in range(len(dataset.video.durations_s)):
+            for j in range(len(self.dataset.video.durations_s)):
                 name = f"{rep['id']}/{j + 1}.m4s"
-                if (self.media_dir / name).stat().st_size != dataset.video.sizes_bytes[j, i]:
+                if (self.media_dir / name).stat().st_size != self.dataset.video.sizes_bytes[j, i]:
                     raise ValueError(f'Cached segment size mismatch: {name}')
+            for filename in ['Header.m4s'] + [f'{j+1}.m4s' for j in range(len(self.dataset.video.durations_s))]:
+                name = f"{rep['id']}/{filename}"
+                expected = self.index['files'][name].get('sha256')
+                if expected and hashlib.sha256((self.media_dir / name).read_bytes()).hexdigest() != expected:
+                    raise ValueError(f'Derived media hash mismatch: {name}')
         self.sessions = {}
         self.inference_lock = threading.Lock()
 
@@ -126,6 +139,7 @@ class PlayerApp:
                 'checkpoint_episode': self.metadata['training']['episode'],
                 'safety_filter': self.metadata['training'].get('safety_filter'),
                 'source_commit': self.index['source_commit'],
+                'derived_media': self.index.get('derived_media'),
                 'network_method': 'HTTP body pacing from finite trace, 16 KiB chunks; assumed per-request RTT; includes init requests; no packet/radio emulation'}
 
 
@@ -277,11 +291,13 @@ def main():
     parser.add_argument('--replay-dataset', help='Research-only traces; video must exactly match training media')
     parser.add_argument('--experimental-max-buffer-s', type=float, help='Explicit frozen-model buffer-cap experiment')
     parser.add_argument('--enable-request-recovery', action='store_true', help='Opt-in bounded native VOD recovery')
+    parser.add_argument('--allow-experimental-media', action='store_true', help='Explicit untrained-media transfer experiment; records changed media')
     args = parser.parse_args()
     app = PlayerApp(Dataset.load(args.dataset), args.checkpoint, args.media_dir,
                     replay_dataset=Dataset.load(args.replay_dataset) if args.replay_dataset else None,
                     max_buffer_s=args.experimental_max_buffer_s,
-                    recovery=RecoveryConfig() if args.enable_request_recovery else None)
+                    recovery=RecoveryConfig() if args.enable_request_recovery else None,
+                    allow_media_change=args.allow_experimental_media)
     server = ThreadingHTTPServer(('127.0.0.1', args.port), Handler)
     server.daemon_threads = True
     server.app = app

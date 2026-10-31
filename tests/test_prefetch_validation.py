@@ -50,3 +50,12 @@ def test_native_highest_allowed_uses_same_checkpoint_filter():
     assert select_action('highest_allowed', obs, env.config, policy) == 0
     with pytest.raises(ValueError, match='checkpoint action filter'):
         select_action('highest_allowed', obs, env.config)
+
+
+def test_changed_media_requires_explicit_dataset_and_opt_in():
+    data, _ = fixture()
+    changed, _ = fixture(sizes=[[1001., 2000.], [1000., 2000.]])
+    with pytest.raises(ValueError, match='explicit replay dataset'):
+        experimental_replay(data, StreamConfig(), None, 60., allow_media_change=True)
+    selected, config = experimental_replay(data, StreamConfig(), changed, 60., allow_media_change=True)
+    assert selected is changed and config.max_buffer_s == 60.
