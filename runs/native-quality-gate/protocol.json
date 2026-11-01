@@ -1,0 +1,70 @@
+{
+  "checkpoint": "runs/learning-ablation/baseline-seed-7/accepted.npz",
+  "checkpoint_sha256": "5567f45b1e335142188f931d626f68777d2e1abac4ea13adb146adf000e63470",
+  "training_dataset": "data/hard_envivio/dataset.json",
+  "max_buffer_s": 60,
+  "recovery": true,
+  "thresholds_s": [
+    12,
+    4
+  ],
+  "cases": [
+    {
+      "name": "slow-first-12s",
+      "policy": "dqn",
+      "split": "test",
+      "trace": 0,
+      "port": 8871,
+      "wall_limit_s": 240
+    },
+    {
+      "name": "slow-first-4s",
+      "policy": "dqn",
+      "split": "test",
+      "trace": 0,
+      "port": 8872,
+      "wall_limit_s": 240
+    },
+    {
+      "name": "upgrade-12s",
+      "policy": "dqn",
+      "split": "test",
+      "trace": 2,
+      "port": 8871,
+      "wall_limit_s": 240
+    },
+    {
+      "name": "upgrade-4s",
+      "policy": "dqn",
+      "split": "test",
+      "trace": 2,
+      "port": 8872,
+      "wall_limit_s": 240
+    }
+  ],
+  "contents": [
+    {
+      "name": "envivio",
+      "dataset": "data/startup-ladder/development.json",
+      "media": "artifacts/startup-ladder-v1",
+      "dataset_sha256": "20bd5e9071a801eec770d8cf7b7b115b36cd16bdfb32f4c485ffa0029aa2568e",
+      "media_index_sha256": "1ef77a9d02552d4d05e1d0aa218a4d749e50aa47fd2b3d9cd9c4a18d65271647"
+    },
+    {
+      "name": "sintel",
+      "dataset": "data/sintel-ladder/development.json",
+      "media": "artifacts/sintel-ladder-v1",
+      "dataset_sha256": "51f6fb8a565d89c43f819e3a46e94827635c27ff8999059bf068a8a6b17e3f3c",
+      "media_index_sha256": "5925ac13fdfce6cdede21664df17d707db122ce9d4253b2bfededd784024add6"
+    }
+  ],
+  "sources": {
+    "abr/player_server.py": "992a5958504d82d38e6ba8ac4bd85f88227bab5a107dd8acb2107fdaeaecedf6",
+    "abr/models/safety.py": "b88780f7f23b0fea10d109f3ee0d86f6adffc303e171c0ce6c362a4997d815b4",
+    "scripts/capture_policy_player.mjs": "b7d8a0ff7d09cd56953b0bb9280fa2d984709b2110893758ba2faec8351ece44",
+    "/Users/sanjayelango/Desktop/dev_me/abr-decision-engine/scripts/validate_native_quality_gate.py": "bb8b8592825d064f27be7863f7c25151b2fd37cb49298ed008b0235c12e5f4f1"
+  },
+  "comparison": "Both complete, startup <=3s, stalls <=8s; candidate has no extra stall seconds, startup no more than 0.25s above paired baseline (browser timing tolerance). Compare emergency exposure; retain failures; no default/checkpoint promotion.",
+  "selection": "Known trace 2 improved in simulator; known slow-first trace 0 did not. Both on both contents, fixed before native playback.",
+  "limits": "Four isolated Chrome processes run concurrently per content on one host. This tests paired behavior, not single-player memory approval, a soak, or independent generalization."
+}

@@ -1,0 +1,34 @@
+[
+  {
+    "name": "slow-first-12s",
+    "policy": "dqn",
+    "split": "test",
+    "trace": 0,
+    "port": 8871,
+    "wall_limit_s": 240
+  },
+  {
+    "name": "slow-first-4s",
+    "policy": "dqn",
+    "split": "test",
+    "trace": 0,
+    "port": 8872,
+    "wall_limit_s": 240
+  },
+  {
+    "name": "upgrade-12s",
+    "policy": "dqn",
+    "split": "test",
+    "trace": 2,
+    "port": 8871,
+    "wall_limit_s": 240
+  },
+  {
+    "name": "upgrade-4s",
+    "policy": "dqn",
+    "split": "test",
+    "trace": 2,
+    "port": 8872,
+    "wall_limit_s": 240
+  }
+]

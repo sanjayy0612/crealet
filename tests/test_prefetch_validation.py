@@ -5,7 +5,7 @@ import numpy as np
 import pytest
 
 from abr.env import StreamingEnv, StreamConfig
-from abr.player_server import experimental_replay, select_action
+from abr.player_server import experimental_replay, experimental_safety, select_action
 from abr.models.safety import ActionSafety
 from abr.recovery import RecoveryConfig
 from scripts.evaluate_prefetch import MeteredEnv
@@ -59,3 +59,17 @@ def test_changed_media_requires_explicit_dataset_and_opt_in():
         experimental_replay(data, StreamConfig(), None, 60., allow_media_change=True)
     selected, config = experimental_replay(data, StreamConfig(), changed, 60., allow_media_change=True)
     assert selected is changed and config.max_buffer_s == 60.
+
+
+def test_explicit_buffer_gate_changes_only_reserve_and_preserves_checkpoint_filter():
+    original = ActionSafety()
+    assert experimental_safety(original) is original
+    assert experimental_safety(None) is None
+    changed = experimental_safety(original, 4.)
+    assert changed.min_buffer_s == 4. and original.min_buffer_s == 12.
+    assert changed.throughput_factor == original.throughput_factor
+    for value in (-1., float('nan'), float('inf')):
+        with pytest.raises(ValueError):
+            experimental_safety(original, value)
+    with pytest.raises(ValueError, match='requires checkpoint action safety'):
+        experimental_safety(None, 4.)

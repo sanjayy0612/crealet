@@ -67,9 +67,18 @@ def experimental_replay(dataset, config, replay_dataset=None, max_buffer_s=None,
     return selected, config
 
 
+def experimental_safety(safety, min_buffer_s=None):
+    """Keep checkpoint safety unless a buffer-only experiment is explicit."""
+    if min_buffer_s is None:
+        return safety
+    if safety is None:
+        raise ValueError('Experimental buffer gate requires checkpoint action safety')
+    return replace(safety, min_buffer_s=min_buffer_s)
+
+
 class PlayerApp:
     def __init__(self, dataset, checkpoint, media_dir, *, replay_dataset=None, max_buffer_s=None, recovery=None,
-                 allow_media_change=False):
+                 allow_media_change=False, min_buffer_s=None):
         torch.set_num_threads(1)
         self.dataset = dataset
         self.model, self.metadata = load_model(checkpoint)
@@ -77,7 +86,8 @@ class PlayerApp:
             raise ValueError('Queue-summary research checkpoints require the offline QueueObservation adapter; native deployment is not enabled')
         training = self.metadata['training']
         safety = training.get('safety_filter')
-        self.policy = DecisionPolicy(self.model, safety=ActionSafety(**safety) if safety else None)
+        self.policy = DecisionPolicy(self.model, safety=experimental_safety(
+            ActionSafety(**safety) if safety else None, min_buffer_s))
         self.config = StreamConfig(**training['config'])
         expected_recovery = training.get('recovery')
         if expected_recovery is not None and (not isinstance(recovery, RecoveryConfig) or asdict(recovery) != expected_recovery):
@@ -95,6 +105,8 @@ class PlayerApp:
         self.experimental_overrides = {'max_buffer_s': max_buffer_s} if max_buffer_s is not None else {}
         if allow_media_change:
             self.experimental_overrides['media_changed'] = True
+        if min_buffer_s is not None:
+            self.experimental_overrides['min_buffer_s'] = min_buffer_s
         self.recovery = recovery
         self.checkpoint_sha256 = hashlib.sha256(Path(checkpoint).read_bytes()).hexdigest()
         self.media_dir = Path(media_dir)
@@ -137,7 +149,8 @@ class PlayerApp:
                 'experimental_overrides': self.experimental_overrides,
                 'request_recovery': False if self.recovery is None else asdict(self.recovery),
                 'checkpoint_episode': self.metadata['training']['episode'],
-                'safety_filter': self.metadata['training'].get('safety_filter'),
+                'safety_filter': asdict(self.policy.safety) if self.policy.safety is not None else None,
+                'training_safety_filter': self.metadata['training'].get('safety_filter'),
                 'source_commit': self.index['source_commit'],
                 'derived_media': self.index.get('derived_media'),
                 'network_method': 'HTTP body pacing from finite trace, 16 KiB chunks; assumed per-request RTT; includes init requests; no packet/radio emulation'}
@@ -290,6 +303,7 @@ def main():
     parser.add_argument('--port', type=int, default=8787)
     parser.add_argument('--replay-dataset', help='Research-only traces; video must exactly match training media')
     parser.add_argument('--experimental-max-buffer-s', type=float, help='Explicit frozen-model buffer-cap experiment')
+    parser.add_argument('--experimental-min-buffer-s', type=float, help='Explicit buffer-only safety-gate experiment; retains throughput margin')
     parser.add_argument('--enable-request-recovery', action='store_true', help='Opt-in bounded native VOD recovery')
     parser.add_argument('--allow-experimental-media', action='store_true', help='Explicit untrained-media transfer experiment; records changed media')
     args = parser.parse_args()
@@ -297,7 +311,8 @@ def main():
                     replay_dataset=Dataset.load(args.replay_dataset) if args.replay_dataset else None,
                     max_buffer_s=args.experimental_max_buffer_s,
                     recovery=RecoveryConfig() if args.enable_request_recovery else None,
-                    allow_media_change=args.allow_experimental_media)
+                    allow_media_change=args.allow_experimental_media,
+                    min_buffer_s=args.experimental_min_buffer_s)
     server = ThreadingHTTPServer(('127.0.0.1', args.port), Handler)
     server.daemon_threads = True
     server.app = app

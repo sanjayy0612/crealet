@@ -1,0 +1,495 @@
+{
+  "protocol_sha256": "fa520cab2e8f8ead47b5eca3a414913f22e78fa2c6313791677011e5e404eef8",
+  "captures": [
+    {
+      "content": "envivio",
+      "case": "slow-first-12s",
+      "threshold_s": 12,
+      "capture": "runs/native-quality-gate/envivio/slow-first-12s.json",
+      "capture_sha256": "74d28ebf40a1dc36e66b026797deeb74d4e759b77fc070f1f931deb564cd34a0",
+      "completed": true,
+      "checks": {
+        "checkpoint": true,
+        "dataset": true,
+        "trace": true,
+        "applied_threshold": true,
+        "original_threshold_preserved": true,
+        "throughput_margin_unchanged": true,
+        "cap": true,
+        "experimental_override_recorded": true,
+        "decoded_frames": true,
+        "visible": true,
+        "segment_bytes": true,
+        "decision_count": true,
+        "filter_respected": true,
+        "policy_choices": true,
+        "stall_events_agree": true,
+        "transport_finished": true,
+        "full_segment_sequence": true,
+        "full_media": true
+      },
+      "valid": true,
+      "metrics": {
+        "startup_s": 2.774300000011921,
+        "rebuffer_s": 0,
+        "stall_events": 0,
+        "played_s": 193.68,
+        "wall_time_s": 196.456,
+        "mean_played_bitrate_kbps": 637.154068566708,
+        "received_media_bytes": 15415579,
+        "discarded_media_bytes": 0,
+        "request_retries": 0,
+        "dropped_frames": 1,
+        "total_frames": 4842
+      },
+      "quality_exposure": {
+        "duration_s": 193.68,
+        "emergency_media_s": 112.0,
+        "emergency_fraction": 0.5782734407269723,
+        "longest_continuous_emergency_s": 112.0,
+        "emergency_dimensions": [
+          [
+            96,
+            54
+          ]
+        ],
+        "scope": "Complete captured playback; encoded media duration, not wall time or visual opinion"
+      },
+      "quality_limits_met": false
+    },
+    {
+      "content": "envivio",
+      "case": "slow-first-4s",
+      "threshold_s": 4,
+      "capture": "runs/native-quality-gate/envivio/slow-first-4s.json",
+      "capture_sha256": "939a0f804089fc4958384352eecc074d341d7e7dda7558ddb2f34b6b976b8d52",
+      "completed": true,
+      "checks": {
+        "checkpoint": true,
+        "dataset": true,
+        "trace": true,
+        "applied_threshold": true,
+        "original_threshold_preserved": true,
+        "throughput_margin_unchanged": true,
+        "cap": true,
+        "experimental_override_recorded": true,
+        "decoded_frames": true,
+        "visible": true,
+        "segment_bytes": true,
+        "decision_count": true,
+        "filter_respected": true,
+        "policy_choices": true,
+        "stall_events_agree": true,
+        "transport_finished": true,
+        "full_segment_sequence": true,
+        "full_media": true
+      },
+      "valid": true,
+      "metrics": {
+        "startup_s": 2.61179999999702,
+        "rebuffer_s": 0,
+        "stall_events": 0,
+        "played_s": 193.68,
+        "wall_time_s": 196.29489999999106,
+        "mean_played_bitrate_kbps": 605.1425030978935,
+        "received_media_bytes": 14545393,
+        "discarded_media_bytes": 0,
+        "request_retries": 0,
+        "dropped_frames": 0,
+        "total_frames": 4842
+      },
+      "quality_exposure": {
+        "duration_s": 193.68,
+        "emergency_media_s": 112.0,
+        "emergency_fraction": 0.5782734407269723,
+        "longest_continuous_emergency_s": 112.0,
+        "emergency_dimensions": [
+          [
+            96,
+            54
+          ]
+        ],
+        "scope": "Complete captured playback; encoded media duration, not wall time or visual opinion"
+      },
+      "quality_limits_met": false
+    },
+    {
+      "content": "envivio",
+      "case": "upgrade-12s",
+      "threshold_s": 12,
+      "capture": "runs/native-quality-gate/envivio/upgrade-12s.json",
+      "capture_sha256": "58360642588f76a88fd50f5803e5a04cd9389d3ef55f39770d3c80022f9ef25c",
+      "completed": true,
+      "checks": {
+        "checkpoint": true,
+        "dataset": true,
+        "trace": true,
+        "applied_threshold": true,
+        "original_threshold_preserved": true,
+        "throughput_margin_unchanged": true,
+        "cap": true,
+        "experimental_override_recorded": true,
+        "decoded_frames": true,
+        "visible": true,
+        "segment_bytes": true,
+        "decision_count": true,
+        "filter_respected": true,
+        "policy_choices": true,
+        "stall_events_agree": true,
+        "transport_finished": true,
+        "full_segment_sequence": true,
+        "full_media": true
+      },
+      "valid": true,
+      "metrics": {
+        "startup_s": 0.30220000000298025,
+        "rebuffer_s": 0,
+        "stall_events": 0,
+        "played_s": 193.68,
+        "wall_time_s": 193.98420000000297,
+        "mean_played_bitrate_kbps": 1539.8389095415116,
+        "received_media_bytes": 37162804,
+        "discarded_media_bytes": 0,
+        "request_retries": 0,
+        "dropped_frames": 0,
+        "total_frames": 4842
+      },
+      "quality_exposure": {
+        "duration_s": 193.68,
+        "emergency_media_s": 16.0,
+        "emergency_fraction": 0.08261049153242461,
+        "longest_continuous_emergency_s": 16.0,
+        "emergency_dimensions": [
+          [
+            96,
+            54
+          ]
+        ],
+        "scope": "Complete captured playback; encoded media duration, not wall time or visual opinion"
+      },
+      "quality_limits_met": false
+    },
+    {
+      "content": "envivio",
+      "case": "upgrade-4s",
+      "threshold_s": 4,
+      "capture": "runs/native-quality-gate/envivio/upgrade-4s.json",
+      "capture_sha256": "4104f8543a95e5c5cec1a84e24e93e26eaaff6ea3b3d58ce34f8620cee5d65b1",
+      "completed": true,
+      "checks": {
+        "checkpoint": true,
+        "dataset": true,
+        "trace": true,
+        "applied_threshold": true,
+        "original_threshold_preserved": true,
+        "throughput_margin_unchanged": true,
+        "cap": true,
+        "experimental_override_recorded": true,
+        "decoded_frames": true,
+        "visible": true,
+        "segment_bytes": true,
+        "decision_count": true,
+        "filter_respected": true,
+        "policy_choices": true,
+        "stall_events_agree": true,
+        "transport_finished": true,
+        "full_segment_sequence": true,
+        "full_media": true
+      },
+      "valid": true,
+      "metrics": {
+        "startup_s": 0.5273000000119209,
+        "rebuffer_s": 0,
+        "stall_events": 0,
+        "played_s": 193.68,
+        "wall_time_s": 194.21010000000894,
+        "mean_played_bitrate_kbps": 1643.804213135068,
+        "received_media_bytes": 39681425,
+        "discarded_media_bytes": 0,
+        "request_retries": 0,
+        "dropped_frames": 0,
+        "total_frames": 4842
+      },
+      "quality_exposure": {
+        "duration_s": 193.68,
+        "emergency_media_s": 8.0,
+        "emergency_fraction": 0.041305245766212306,
+        "longest_continuous_emergency_s": 8.0,
+        "emergency_dimensions": [
+          [
+            96,
+            54
+          ]
+        ],
+        "scope": "Complete captured playback; encoded media duration, not wall time or visual opinion"
+      },
+      "quality_limits_met": true
+    },
+    {
+      "content": "sintel",
+      "case": "slow-first-12s",
+      "threshold_s": 12,
+      "capture": "runs/native-quality-gate/sintel/slow-first-12s.json",
+      "capture_sha256": "04cafbd2c96b50683dc7dac433de92f6a0a144512ef834c35a3faa3b7e8b69ea",
+      "completed": true,
+      "checks": {
+        "checkpoint": true,
+        "dataset": true,
+        "trace": true,
+        "applied_threshold": true,
+        "original_threshold_preserved": true,
+        "throughput_margin_unchanged": true,
+        "cap": true,
+        "experimental_override_recorded": true,
+        "decoded_frames": true,
+        "visible": true,
+        "segment_bytes": true,
+        "decision_count": true,
+        "filter_respected": true,
+        "policy_choices": true,
+        "stall_events_agree": true,
+        "transport_finished": true,
+        "full_segment_sequence": true,
+        "full_media": true
+      },
+      "valid": true,
+      "metrics": {
+        "startup_s": 2.7549000000059602,
+        "rebuffer_s": 0,
+        "stall_events": 0,
+        "played_s": 52.2,
+        "wall_time_s": 54.95460000000894,
+        "mean_played_bitrate_kbps": 8,
+        "received_media_bytes": 56782,
+        "discarded_media_bytes": 0,
+        "request_retries": 0,
+        "dropped_frames": 0,
+        "total_frames": 1305
+      },
+      "quality_exposure": {
+        "duration_s": 52.2,
+        "emergency_media_s": 52.2,
+        "emergency_fraction": 1.0,
+        "longest_continuous_emergency_s": 52.2,
+        "emergency_dimensions": [
+          [
+            96,
+            54
+          ]
+        ],
+        "scope": "Complete captured playback; encoded media duration, not wall time or visual opinion"
+      },
+      "quality_limits_met": false
+    },
+    {
+      "content": "sintel",
+      "case": "slow-first-4s",
+      "threshold_s": 4,
+      "capture": "runs/native-quality-gate/sintel/slow-first-4s.json",
+      "capture_sha256": "3c885f29a1cdff5d345077d226371889bf588ada407b99c55e6cbc4c8a4ab6f0",
+      "completed": true,
+      "checks": {
+        "checkpoint": true,
+        "dataset": true,
+        "trace": true,
+        "applied_threshold": true,
+        "original_threshold_preserved": true,
+        "throughput_margin_unchanged": true,
+        "cap": true,
+        "experimental_override_recorded": true,
+        "decoded_frames": true,
+        "visible": true,
+        "segment_bytes": true,
+        "decision_count": true,
+        "filter_respected": true,
+        "policy_choices": true,
+        "stall_events_agree": true,
+        "transport_finished": true,
+        "full_segment_sequence": true,
+        "full_media": true
+      },
+      "valid": true,
+      "metrics": {
+        "startup_s": 2.6465,
+        "rebuffer_s": 0,
+        "stall_events": 0,
+        "played_s": 52.2,
+        "wall_time_s": 54.84860000000894,
+        "mean_played_bitrate_kbps": 8,
+        "received_media_bytes": 56782,
+        "discarded_media_bytes": 0,
+        "request_retries": 0,
+        "dropped_frames": 0,
+        "total_frames": 1305
+      },
+      "quality_exposure": {
+        "duration_s": 52.2,
+        "emergency_media_s": 52.2,
+        "emergency_fraction": 1.0,
+        "longest_continuous_emergency_s": 52.2,
+        "emergency_dimensions": [
+          [
+            96,
+            54
+          ]
+        ],
+        "scope": "Complete captured playback; encoded media duration, not wall time or visual opinion"
+      },
+      "quality_limits_met": false
+    },
+    {
+      "content": "sintel",
+      "case": "upgrade-12s",
+      "threshold_s": 12,
+      "capture": "runs/native-quality-gate/sintel/upgrade-12s.json",
+      "capture_sha256": "7ea460b01fd079eceaddb213c0e2a98d027bd2c857c62b925d54bf915f8795af",
+      "completed": true,
+      "checks": {
+        "checkpoint": true,
+        "dataset": true,
+        "trace": true,
+        "applied_threshold": true,
+        "original_threshold_preserved": true,
+        "throughput_margin_unchanged": true,
+        "cap": true,
+        "experimental_override_recorded": true,
+        "decoded_frames": true,
+        "visible": true,
+        "segment_bytes": true,
+        "decision_count": true,
+        "filter_respected": true,
+        "policy_choices": true,
+        "stall_events_agree": true,
+        "transport_finished": true,
+        "full_segment_sequence": true,
+        "full_media": true
+      },
+      "valid": true,
+      "metrics": {
+        "startup_s": 0.28770000000298024,
+        "rebuffer_s": 0,
+        "stall_events": 0,
+        "played_s": 52.2,
+        "wall_time_s": 52.49009999999404,
+        "mean_played_bitrate_kbps": 837.1264367816093,
+        "received_media_bytes": 4444764,
+        "discarded_media_bytes": 0,
+        "request_retries": 0,
+        "dropped_frames": 1,
+        "total_frames": 1305
+      },
+      "quality_exposure": {
+        "duration_s": 52.2,
+        "emergency_media_s": 16.0,
+        "emergency_fraction": 0.3065134099616858,
+        "longest_continuous_emergency_s": 16.0,
+        "emergency_dimensions": [
+          [
+            96,
+            54
+          ]
+        ],
+        "scope": "Complete captured playback; encoded media duration, not wall time or visual opinion"
+      },
+      "quality_limits_met": false
+    },
+    {
+      "content": "sintel",
+      "case": "upgrade-4s",
+      "threshold_s": 4,
+      "capture": "runs/native-quality-gate/sintel/upgrade-4s.json",
+      "capture_sha256": "fcbf4f26dedb26a40706d9ccce9c51ee9153832e4337f387e8de3685e5b6253c",
+      "completed": true,
+      "checks": {
+        "checkpoint": true,
+        "dataset": true,
+        "trace": true,
+        "applied_threshold": true,
+        "original_threshold_preserved": true,
+        "throughput_margin_unchanged": true,
+        "cap": true,
+        "experimental_override_recorded": true,
+        "decoded_frames": true,
+        "visible": true,
+        "segment_bytes": true,
+        "decision_count": true,
+        "filter_respected": true,
+        "policy_choices": true,
+        "stall_events_agree": true,
+        "transport_finished": true,
+        "full_segment_sequence": true,
+        "full_media": true
+      },
+      "valid": true,
+      "metrics": {
+        "startup_s": 0.26979999999701976,
+        "rebuffer_s": 0,
+        "stall_events": 0,
+        "played_s": 52.2,
+        "wall_time_s": 52.47179999999702,
+        "mean_played_bitrate_kbps": 1119.4252873563219,
+        "received_media_bytes": 5728795,
+        "discarded_media_bytes": 0,
+        "request_retries": 0,
+        "dropped_frames": 0,
+        "total_frames": 1305
+      },
+      "quality_exposure": {
+        "duration_s": 52.2,
+        "emergency_media_s": 8.0,
+        "emergency_fraction": 0.1532567049808429,
+        "longest_continuous_emergency_s": 8.0,
+        "emergency_dimensions": [
+          [
+            96,
+            54
+          ]
+        ],
+        "scope": "Complete captured playback; encoded media duration, not wall time or visual opinion"
+      },
+      "quality_limits_met": false
+    }
+  ],
+  "pairs": [
+    {
+      "content": "envivio",
+      "case": "slow-first",
+      "startup_delta_s": -0.16250000001490106,
+      "stall_delta_s": 0,
+      "wasted_bytes_delta": 0,
+      "emergency_reduction_s": 0.0,
+      "paired_playback_gate_passed": true
+    },
+    {
+      "content": "envivio",
+      "case": "upgrade",
+      "startup_delta_s": 0.22510000000894065,
+      "stall_delta_s": 0,
+      "wasted_bytes_delta": 0,
+      "emergency_reduction_s": 8.0,
+      "paired_playback_gate_passed": true
+    },
+    {
+      "content": "sintel",
+      "case": "slow-first",
+      "startup_delta_s": -0.10840000000596017,
+      "stall_delta_s": 0,
+      "wasted_bytes_delta": 0,
+      "emergency_reduction_s": 0.0,
+      "paired_playback_gate_passed": true
+    },
+    {
+      "content": "sintel",
+      "case": "upgrade",
+      "startup_delta_s": -0.01790000000596048,
+      "stall_delta_s": 0,
+      "wasted_bytes_delta": 0,
+      "emergency_reduction_s": 8.0,
+      "paired_playback_gate_passed": true
+    }
+  ],
+  "all_captures_valid": true,
+  "all_paired_playback_gates_passed": true,
+  "defaults_changed": false,
+  "production_approved": false
+}

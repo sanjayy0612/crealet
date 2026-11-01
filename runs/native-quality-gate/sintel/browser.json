@@ -1,0 +1,42 @@
+[
+  {
+    "name": "slow-first-12s",
+    "Browser": "Chrome/156.0.8078.74",
+    "File-Path-Style": "posix",
+    "Protocol-Version": "1.3",
+    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.0.0 Safari/537.36",
+    "V8-Version": "15.6.75.25",
+    "WebKit-Version": "537.36 (@d331de35ca8ab1358c7a17e4bd41627d55eaef51)",
+    "webSocketDebuggerUrl": "ws://127.0.0.1:51042/devtools/browser/70b7e03c-67ad-4249-8629-9c6608f8e3b0"
+  },
+  {
+    "name": "slow-first-4s",
+    "Browser": "Chrome/156.0.8078.74",
+    "File-Path-Style": "posix",
+    "Protocol-Version": "1.3",
+    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.0.0 Safari/537.36",
+    "V8-Version": "15.6.75.25",
+    "WebKit-Version": "537.36 (@d331de35ca8ab1358c7a17e4bd41627d55eaef51)",
+    "webSocketDebuggerUrl": "ws://127.0.0.1:51062/devtools/browser/bdaf3a25-a12d-46f4-86b6-704c21d4043d"
+  },
+  {
+    "name": "upgrade-12s",
+    "Browser": "Chrome/156.0.8078.74",
+    "File-Path-Style": "posix",
+    "Protocol-Version": "1.3",
+    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.0.0 Safari/537.36",
+    "V8-Version": "15.6.75.25",
+    "WebKit-Version": "537.36 (@d331de35ca8ab1358c7a17e4bd41627d55eaef51)",
+    "webSocketDebuggerUrl": "ws://127.0.0.1:51083/devtools/browser/85b7f8b0-79b9-4ad9-812b-a59299752724"
+  },
+  {
+    "name": "upgrade-4s",
+    "Browser": "Chrome/156.0.8078.74",
+    "File-Path-Style": "posix",
+    "Protocol-Version": "1.3",
+    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.0.0 Safari/537.36",
+    "V8-Version": "15.6.75.25",
+    "WebKit-Version": "537.36 (@d331de35ca8ab1358c7a17e4bd41627d55eaef51)",
+    "webSocketDebuggerUrl": "ws://127.0.0.1:51106/devtools/browser/cf9df166-1c12-4cac-bd43-05105f8531ce"
+  }
+]

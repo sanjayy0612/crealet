@@ -99,6 +99,16 @@ runs/production-readiness/*
 runs/quality-gate-diagnosis/*
 !runs/quality-gate-diagnosis/*.json
 !runs/quality-gate-diagnosis/report.md
+!runs/native-quality-gate/
+runs/native-quality-gate/*
+!runs/native-quality-gate/*.json
+!runs/native-quality-gate/report.md
+!runs/native-quality-gate/envivio/
+runs/native-quality-gate/envivio/*
+!runs/native-quality-gate/envivio/*.json
+!runs/native-quality-gate/sintel/
+runs/native-quality-gate/sintel/*
+!runs/native-quality-gate/sintel/*.json
 !data/
 data/*
 !data/realistic_envivio/

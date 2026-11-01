@@ -1,0 +1,14 @@
+{
+  "captures_checked": 8,
+  "full_frame_counts_match": true,
+  "all_captures_integrity_passed": true,
+  "all_paired_playback_gates_passed": true,
+  "all_zero_stalls_and_discarded_media": true,
+  "candidate_quality_gates_passed": 1,
+  "candidate_playbacks": 4,
+  "source_and_capture_hashes_match": true,
+  "checkpoint_unchanged": true,
+  "focused_tests_passed": 18,
+  "memory_soak_performed": false,
+  "production_approved": false
+}

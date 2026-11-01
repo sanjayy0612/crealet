@@ -210,8 +210,12 @@ model preferred an upgrade in all 140 examined emergency decisions, but the
 safety filter blocked it. In 78 simulator rollouts, lowering only the buffer
 threshold from 12 s to 4 s reduced emergency exposure by 12.1% per policy without
 added stalls or startup delay. Seven of thirteen video/session cases still fail
-the draft quality limits. Defaults remain unchanged; native confirmation of the
-4-second candidate and throughput-history diagnosis are next.
+the draft quality limits. The [native Chrome comparison](runs/native-quality-gate/report.md)
+then completed eight playbacks with zero stalls and no discarded downloads.
+Emergency exposure fell from 16 s to 8 s in the selected upgrade case on each
+video; the slow-network case did not improve. Only one of four candidate runs
+met the draft quality limits, and one case had lower mean bitrate. Defaults
+remain unchanged; throughput-history diagnosis is next.
 
 The [real startup-ladder experiment](docs/startup-ladder.md) completed the next
 media, native-playback, second-video and matched-training checks. It fixes known
