@@ -219,7 +219,12 @@ remain unchanged. The [throughput diagnosis](runs/throughput-diagnosis/report.md
 then confirmed about 20 s of stale-estimate delay in the long video. The short
 video finished downloading before network recovery. Shorter safety histories
 helped some traces but worsened a controlled validation case by 64 s of emergency
-quality, so no estimator was promoted. A buffer-aware recovery check is next.
+quality, so no estimator was promoted. The subsequent
+[buffer-aware recovery experiment](runs/buffer-aware-recovery/report.md) completed
+96 simulator rollouts and eight native playbacks. It improved the intended
+recovery, but added 16 s of emergency quality on a transfer case and 12 s on a
+native controlled case, losing a quality pass. The candidate was rejected for
+promotion; its research adapter is opt-in, with model weights and defaults unchanged.
 
 The [real startup-ladder experiment](docs/startup-ladder.md) completed the next
 media, native-playback, second-video and matched-training checks. It fixes known

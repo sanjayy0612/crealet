@@ -1,0 +1,80 @@
+{
+  "checkpoint": "runs/learning-ablation/baseline-seed-7/accepted.npz",
+  "checkpoint_sha256": "5567f45b1e335142188f931d626f68777d2e1abac4ea13adb146adf000e63470",
+  "simulator_protocol_sha256": "db0a3fe1a81a529bb39a7fffc2f4353132ff30b9bef183dc0e1d9d2b7477cea5",
+  "variants": {
+    "baseline": {
+      "min_buffer_s": 4.0,
+      "throughput_factor": 0.65
+    },
+    "buffer_aware": {
+      "min_buffer_s": 4.0,
+      "throughput_factor": 0.65,
+      "recovery_samples": 3,
+      "recovery_floor_kbps": 300.0,
+      "recovery_min_buffer_s": 12.0,
+      "recovery_reserve_s": 4.0,
+      "recovery_max_download_s": 8.0,
+      "recovery_size_factor": 1.25
+    }
+  },
+  "baseline_promotion_gate_passed": false,
+  "cases": [
+    {
+      "name": "slow-first-baseline",
+      "policy": "dqn",
+      "split": "test",
+      "trace": 0,
+      "port": 8881,
+      "wall_limit_s": 240
+    },
+    {
+      "name": "slow-first-candidate",
+      "policy": "dqn",
+      "split": "test",
+      "trace": 0,
+      "port": 8882,
+      "wall_limit_s": 240
+    },
+    {
+      "name": "controlled-baseline",
+      "policy": "dqn",
+      "split": "validation",
+      "trace": 2,
+      "port": 8881,
+      "wall_limit_s": 240
+    },
+    {
+      "name": "controlled-candidate",
+      "policy": "dqn",
+      "split": "validation",
+      "trace": 2,
+      "port": 8882,
+      "wall_limit_s": 240
+    }
+  ],
+  "contents": [
+    {
+      "name": "envivio",
+      "dataset": "data/startup-ladder/development.json",
+      "media": "artifacts/startup-ladder-v1",
+      "dataset_sha256": "20bd5e9071a801eec770d8cf7b7b115b36cd16bdfb32f4c485ffa0029aa2568e",
+      "media_index_sha256": "1ef77a9d02552d4d05e1d0aa218a4d749e50aa47fd2b3d9cd9c4a18d65271647"
+    },
+    {
+      "name": "sintel",
+      "dataset": "data/sintel-ladder/development.json",
+      "media": "artifacts/sintel-ladder-v1",
+      "dataset_sha256": "51f6fb8a565d89c43f819e3a46e94827635c27ff8999059bf068a8a6b17e3f3c",
+      "media_index_sha256": "5925ac13fdfce6cdede21664df17d707db122ce9d4253b2bfededd784024add6"
+    }
+  ],
+  "sources": {
+    "scripts/validate_buffer_recovery.py": "e3e7ef7ddf6cc16b1347166bcb7e31d9570383b47a5a705aa3eacb6be200eb7f",
+    "abr/player_server.py": "d867571610fee25ebadff710149638c49611f22de89f073180341b1238514181",
+    "abr/buffer_safety.py": "8b76a810b867ac5bf7e3bd3425179959e3569ac44f3ed35c429ca5ff4f7b2878",
+    "scripts/capture_policy_player.mjs": "b7d8a0ff7d09cd56953b0bb9280fa2d984709b2110893758ba2faec8351ece44"
+  },
+  "gate": "Paired completion, startup <=3s and <=baseline+0.25s, no added stalls, no added emergency media, no lost draft quality pass, no additional discarded media. Retain failures; no promotion even if native passes because the simulator transfer gate failed.",
+  "limits": "Known cases, one capture per setting, four isolated Chrome processes concurrently per content. Not a single-player memory approval, soak, or generalization result."
+}

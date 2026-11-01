@@ -1,0 +1,17 @@
+{
+  "simulator_rollouts": 96,
+  "native_playbacks": 8,
+  "full_regression_tests_passed": 176,
+  "existing_gymnasium_warnings": 2,
+  "comparable_baseline_matches": 26,
+  "recomputed_candidate_native_masks": 126,
+  "all_native_captures_valid": true,
+  "simulator_quality_gate_failures": 2,
+  "native_quality_gate_failures": 1,
+  "all_native_zero_stalls": true,
+  "checkpoint_and_neural_sources_unchanged": true,
+  "all_source_and_capture_hashes_match": true,
+  "memory_soak_completed": false,
+  "promotion_recommended": false,
+  "production_defaults_changed": false
+}

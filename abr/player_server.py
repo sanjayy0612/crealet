@@ -21,9 +21,9 @@ from .data import Dataset
 from .env import StreamConfig
 from .models.checkpoint import load_model
 from .models.inputs import make_batch
-from .models.policy import DecisionPolicy
 from .models.train_dueling_dqn import checkpoint_eligible
-from .models.safety import ActionSafety, allowed_actions
+from .models.safety import ActionSafety
+from .buffer_safety import BufferAwareSafety, BufferAwarePolicy, allowed_actions
 from .transport import Replay
 from .recovery import RecoveryConfig
 
@@ -67,18 +67,18 @@ def experimental_replay(dataset, config, replay_dataset=None, max_buffer_s=None,
     return selected, config
 
 
-def experimental_safety(safety, min_buffer_s=None):
+def experimental_safety(safety, min_buffer_s=None, buffer_aware=False):
     """Keep checkpoint safety unless a buffer-only experiment is explicit."""
-    if min_buffer_s is None:
-        return safety
-    if safety is None:
+    if safety is None and (min_buffer_s is not None or buffer_aware):
         raise ValueError('Experimental buffer gate requires checkpoint action safety')
-    return replace(safety, min_buffer_s=min_buffer_s)
+    if min_buffer_s is not None:
+        safety = replace(safety, min_buffer_s=min_buffer_s)
+    return BufferAwareSafety(**asdict(safety)) if buffer_aware else safety
 
 
 class PlayerApp:
     def __init__(self, dataset, checkpoint, media_dir, *, replay_dataset=None, max_buffer_s=None, recovery=None,
-                 allow_media_change=False, min_buffer_s=None):
+                 allow_media_change=False, min_buffer_s=None, buffer_aware=False):
         torch.set_num_threads(1)
         self.dataset = dataset
         self.model, self.metadata = load_model(checkpoint)
@@ -86,8 +86,8 @@ class PlayerApp:
             raise ValueError('Queue-summary research checkpoints require the offline QueueObservation adapter; native deployment is not enabled')
         training = self.metadata['training']
         safety = training.get('safety_filter')
-        self.policy = DecisionPolicy(self.model, safety=experimental_safety(
-            ActionSafety(**safety) if safety else None, min_buffer_s))
+        self.policy = BufferAwarePolicy(self.model, safety=experimental_safety(
+            ActionSafety(**safety) if safety else None, min_buffer_s, buffer_aware))
         self.config = StreamConfig(**training['config'])
         expected_recovery = training.get('recovery')
         if expected_recovery is not None and (not isinstance(recovery, RecoveryConfig) or asdict(recovery) != expected_recovery):
@@ -107,6 +107,8 @@ class PlayerApp:
             self.experimental_overrides['media_changed'] = True
         if min_buffer_s is not None:
             self.experimental_overrides['min_buffer_s'] = min_buffer_s
+        if buffer_aware:
+            self.experimental_overrides['buffer_aware_safety'] = True
         self.recovery = recovery
         self.checkpoint_sha256 = hashlib.sha256(Path(checkpoint).read_bytes()).hexdigest()
         self.media_dir = Path(media_dir)
@@ -212,6 +214,8 @@ class Handler(BaseHTTPRequestHandler):
                       'filter_applied': session['policy'] in ('dqn', 'highest_allowed') and self.app.policy.safety is not None,
                       'allowed_actions': np.flatnonzero(allowed_actions(observation, self.app.policy.safety if session['policy'] in ('dqn', 'highest_allowed') else None)).tolist(),
                       'decision_ms': (time.perf_counter() - start) * 1000}
+            if isinstance(self.app.policy.safety, BufferAwareSafety):
+                result['recovery_input_history'] = observation['history'].tolist()
             session['decisions'].append({'segment_index': index, 'state': observation['state'].tolist(), **result})
             self.respond(result)
         except (ValueError, KeyError, TypeError, IndexError) as exc:
@@ -304,6 +308,7 @@ def main():
     parser.add_argument('--replay-dataset', help='Research-only traces; video must exactly match training media')
     parser.add_argument('--experimental-max-buffer-s', type=float, help='Explicit frozen-model buffer-cap experiment')
     parser.add_argument('--experimental-min-buffer-s', type=float, help='Explicit buffer-only safety-gate experiment; retains throughput margin')
+    parser.add_argument('--experimental-buffer-aware-safety', action='store_true', help='Opt-in normal-floor recovery after sustained fast samples and a buffer cost check')
     parser.add_argument('--enable-request-recovery', action='store_true', help='Opt-in bounded native VOD recovery')
     parser.add_argument('--allow-experimental-media', action='store_true', help='Explicit untrained-media transfer experiment; records changed media')
     args = parser.parse_args()
@@ -312,7 +317,8 @@ def main():
                     max_buffer_s=args.experimental_max_buffer_s,
                     recovery=RecoveryConfig() if args.enable_request_recovery else None,
                     allow_media_change=args.allow_experimental_media,
-                    min_buffer_s=args.experimental_min_buffer_s)
+                    min_buffer_s=args.experimental_min_buffer_s,
+                    buffer_aware=args.experimental_buffer_aware_safety)
     server = ThreadingHTTPServer(('127.0.0.1', args.port), Handler)
     server.daemon_threads = True
     server.app = app

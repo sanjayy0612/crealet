@@ -1,0 +1,12 @@
+{
+  "candidate": "buffer-aware normal-floor recovery v1",
+  "status": "rejected_for_promotion",
+  "reason": [
+    "Simulator Envivio transfer case adds 16 seconds of emergency media",
+    "Native Envivio controlled case adds 12 seconds and loses a draft quality pass"
+  ],
+  "available_only_as": "explicit --experimental-buffer-aware-safety opt-in",
+  "model_weights_changed": false,
+  "production_defaults_changed": false,
+  "production_approved": false
+}

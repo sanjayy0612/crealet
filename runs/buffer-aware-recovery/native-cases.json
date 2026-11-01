@@ -1,0 +1,34 @@
+[
+  {
+    "name": "slow-first-baseline",
+    "policy": "dqn",
+    "split": "test",
+    "trace": 0,
+    "port": 8881,
+    "wall_limit_s": 240
+  },
+  {
+    "name": "slow-first-candidate",
+    "policy": "dqn",
+    "split": "test",
+    "trace": 0,
+    "port": 8882,
+    "wall_limit_s": 240
+  },
+  {
+    "name": "controlled-baseline",
+    "policy": "dqn",
+    "split": "validation",
+    "trace": 2,
+    "port": 8881,
+    "wall_limit_s": 240
+  },
+  {
+    "name": "controlled-candidate",
+    "policy": "dqn",
+    "split": "validation",
+    "trace": 2,
+    "port": 8882,
+    "wall_limit_s": 240
+  }
+]

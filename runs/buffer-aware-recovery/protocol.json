@@ -1,0 +1,131 @@
+{
+  "checkpoint": "runs/learning-ablation/baseline-seed-7/accepted.npz",
+  "checkpoint_sha256": "5567f45b1e335142188f931d626f68777d2e1abac4ea13adb146adf000e63470",
+  "stream_protocol": {
+    "checkpoint": "runs/learning-ablation/baseline-seed-7/accepted.npz",
+    "checkpoint_sha256": "5567f45b1e335142188f931d626f68777d2e1abac4ea13adb146adf000e63470",
+    "config": {
+      "mode": "vod",
+      "max_buffer_s": 60.0,
+      "startup_s": 1.0,
+      "resume_s": 1.0,
+      "request_timeout_s": 30.0,
+      "source_age_s": 3.0,
+      "encoder_delay_s": 0.0,
+      "target_latency_s": 3.0,
+      "catchup": true,
+      "min_rate": 0.95,
+      "max_rate": 1.05,
+      "catchup_gain": 0.03,
+      "latency_deadband_s": 0.1,
+      "control_tick_s": 0.1,
+      "known_vod_sizes": false
+    },
+    "recovery": {
+      "max_retries": 4,
+      "poll_s": 1.0,
+      "min_observation_s": 2.0,
+      "no_progress_s": 3.0,
+      "buffer_reserve_s": 2.0,
+      "backoff_s": 2.0,
+      "restart_fraction": 0.8,
+      "early_abandon": true
+    },
+    "safety": {
+      "min_buffer_s": 12.0,
+      "throughput_factor": 0.65
+    },
+    "media_index_sha256": "1ef77a9d02552d4d05e1d0aa218a4d749e50aa47fd2b3d9cd9c4a18d65271647",
+    "training_dataset": "data/startup-ladder/training.json",
+    "development_dataset": "data/startup-ladder/development.json",
+    "targets": {
+      "startup_s": 3.0,
+      "rebuffer_s": 8.0,
+      "complete": true
+    },
+    "fixed_training": {
+      "seeds": [
+        7,
+        11,
+        13
+      ],
+      "episodes": 120,
+      "validation_every": 20,
+      "warmup": 500,
+      "learn_every": 4,
+      "batch_size": 64,
+      "target_every": 250,
+      "replay_capacity": 50000,
+      "learning_rate": 0.0001,
+      "gamma": 1.0,
+      "epsilon_steps": 10000,
+      "baseline": "highest_allowed"
+    },
+    "training_gate": "All frozen validation/development and six native playback cases must meet timing/completion limits",
+    "quality_warning": "8 kbps / 96x54 is a survival rung; startup gain trades substantial visual quality",
+    "test_status": "Known development sessions and the same video; no claim of untouched-test generalization"
+  },
+  "variants": {
+    "baseline": {
+      "min_buffer_s": 4.0,
+      "throughput_factor": 0.65
+    },
+    "buffer_aware": {
+      "min_buffer_s": 4.0,
+      "throughput_factor": 0.65,
+      "recovery_samples": 3,
+      "recovery_floor_kbps": 300.0,
+      "recovery_min_buffer_s": 12.0,
+      "recovery_reserve_s": 4.0,
+      "recovery_max_download_s": 8.0,
+      "recovery_size_factor": 1.25
+    }
+  },
+  "inputs": [
+    {
+      "label": "envivio-validation",
+      "path": "data/startup-ladder/training.json",
+      "split": "validation",
+      "sha256": "01a82104e3c2047c8ec40933fa6b26b8dc87d544edd732faf2051702274724c7"
+    },
+    {
+      "label": "envivio-test",
+      "path": "data/startup-ladder/development.json",
+      "split": "test",
+      "sha256": "20bd5e9071a801eec770d8cf7b7b115b36cd16bdfb32f4c485ffa0029aa2568e"
+    },
+    {
+      "label": "sintel-validation",
+      "path": "data/sintel-ladder/training.json",
+      "split": "validation",
+      "sha256": "1441ec4ac66b2c226a34fb5f2bbe383bfd911f750150b73a12ab03c1d6f1d2df"
+    },
+    {
+      "label": "sintel-test",
+      "path": "data/sintel-ladder/development.json",
+      "split": "test",
+      "sha256": "51f6fb8a565d89c43f819e3a46e94827635c27ff8999059bf068a8a6b17e3f3c"
+    },
+    {
+      "label": "envivio-transfer",
+      "path": "data/transfer-sessions/envivio.json",
+      "split": "test",
+      "sha256": "fae6db0ca37b22de901f324a2eff76ddc88c99dce36992259400ac1dc67b8def"
+    },
+    {
+      "label": "sintel-transfer",
+      "path": "data/transfer-sessions/sintel.json",
+      "split": "test",
+      "sha256": "065d5906e027a4fe6bafc0e7ed4fa4375df7571d407a16aff8ccace5ce43463a"
+    }
+  ],
+  "sources": {
+    "scripts/evaluate_buffer_recovery.py": "a95173fcfea0c085058d1f06b75b2c30b174a50ddb24b5876596cc31a3345147",
+    "abr/models/safety.py": "b88780f7f23b0fea10d109f3ee0d86f6adffc303e171c0ce6c362a4997d815b4",
+    "abr/buffer_safety.py": "8b76a810b867ac5bf7e3bd3425179959e3569ac44f3ed35c429ca5ff4f7b2878",
+    "abr/env.py": "55e1c1dedf1ba52c2e4c713a049c3a8d4cac6deb870cf98ae732fc0aaff8ab12"
+  },
+  "gate": "Diagnostic candidate only. Paired complete, no added stalls or startup delay, no added emergency media or lost draft quality passes. Retain bitrate and wasted-byte changes. Any gate failure prevents promotion. No checkpoint or default changes.",
+  "native_plan": "If candidate improves a measured recovery case without extra stalls there, compare baseline and candidate in Chrome on slow-first test trace 0 and controlled validation trace 2, on Envivio and Sintel. Retain negative native outcomes; no automatic production approval.",
+  "limits": "Known measured sessions and synthetic controls; transfer sessions were already used in prior experiments. Not a new independent acceptance set. Nominal sizes and observed history only, no future service inputs."
+}

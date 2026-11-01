@@ -113,6 +113,16 @@ runs/native-quality-gate/sintel/*
 runs/throughput-diagnosis/*
 !runs/throughput-diagnosis/*.json
 !runs/throughput-diagnosis/report.md
+!runs/buffer-aware-recovery/
+runs/buffer-aware-recovery/*
+!runs/buffer-aware-recovery/*.json
+!runs/buffer-aware-recovery/report.md
+!runs/buffer-aware-recovery/envivio/
+runs/buffer-aware-recovery/envivio/*
+!runs/buffer-aware-recovery/envivio/*.json
+!runs/buffer-aware-recovery/sintel/
+runs/buffer-aware-recovery/sintel/*
+!runs/buffer-aware-recovery/sintel/*.json
 !data/
 data/*
 !data/realistic_envivio/

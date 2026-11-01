@@ -1,0 +1,42 @@
+[
+  {
+    "name": "slow-first-baseline",
+    "Browser": "Chrome/156.0.8078.74",
+    "File-Path-Style": "posix",
+    "Protocol-Version": "1.3",
+    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.0.0 Safari/537.36",
+    "V8-Version": "15.6.75.25",
+    "WebKit-Version": "537.36 (@d331de35ca8ab1358c7a17e4bd41627d55eaef51)",
+    "webSocketDebuggerUrl": "ws://127.0.0.1:51571/devtools/browser/c34fda0c-2e79-4792-afc0-126833bc7f6d"
+  },
+  {
+    "name": "slow-first-candidate",
+    "Browser": "Chrome/156.0.8078.74",
+    "File-Path-Style": "posix",
+    "Protocol-Version": "1.3",
+    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.0.0 Safari/537.36",
+    "V8-Version": "15.6.75.25",
+    "WebKit-Version": "537.36 (@d331de35ca8ab1358c7a17e4bd41627d55eaef51)",
+    "webSocketDebuggerUrl": "ws://127.0.0.1:51590/devtools/browser/3e6a0e9b-b4ec-4fa6-ada9-2cda7fcde5f4"
+  },
+  {
+    "name": "controlled-baseline",
+    "Browser": "Chrome/156.0.8078.74",
+    "File-Path-Style": "posix",
+    "Protocol-Version": "1.3",
+    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.0.0 Safari/537.36",
+    "V8-Version": "15.6.75.25",
+    "WebKit-Version": "537.36 (@d331de35ca8ab1358c7a17e4bd41627d55eaef51)",
+    "webSocketDebuggerUrl": "ws://127.0.0.1:51608/devtools/browser/70ae6b99-cce0-420a-a583-fd4f031a65bb"
+  },
+  {
+    "name": "controlled-candidate",
+    "Browser": "Chrome/156.0.8078.74",
+    "File-Path-Style": "posix",
+    "Protocol-Version": "1.3",
+    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.0.0 Safari/537.36",
+    "V8-Version": "15.6.75.25",
+    "WebKit-Version": "537.36 (@d331de35ca8ab1358c7a17e4bd41627d55eaef51)",
+    "webSocketDebuggerUrl": "ws://127.0.0.1:51638/devtools/browser/b5f3a1f8-bcd6-4286-bd62-68a32cfa888e"
+  }
+]

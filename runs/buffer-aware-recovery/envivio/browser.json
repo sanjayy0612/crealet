@@ -1,0 +1,42 @@
+[
+  {
+    "name": "slow-first-baseline",
+    "Browser": "Chrome/156.0.8078.74",
+    "File-Path-Style": "posix",
+    "Protocol-Version": "1.3",
+    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.0.0 Safari/537.36",
+    "V8-Version": "15.6.75.25",
+    "WebKit-Version": "537.36 (@d331de35ca8ab1358c7a17e4bd41627d55eaef51)",
+    "webSocketDebuggerUrl": "ws://127.0.0.1:51391/devtools/browser/10cfdc08-9c27-4818-a205-0667e9a6cb07"
+  },
+  {
+    "name": "slow-first-candidate",
+    "Browser": "Chrome/156.0.8078.74",
+    "File-Path-Style": "posix",
+    "Protocol-Version": "1.3",
+    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.0.0 Safari/537.36",
+    "V8-Version": "15.6.75.25",
+    "WebKit-Version": "537.36 (@d331de35ca8ab1358c7a17e4bd41627d55eaef51)",
+    "webSocketDebuggerUrl": "ws://127.0.0.1:51412/devtools/browser/0acaefce-68d0-45a3-9788-2dbdfd86205f"
+  },
+  {
+    "name": "controlled-baseline",
+    "Browser": "Chrome/156.0.8078.74",
+    "File-Path-Style": "posix",
+    "Protocol-Version": "1.3",
+    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.0.0 Safari/537.36",
+    "V8-Version": "15.6.75.25",
+    "WebKit-Version": "537.36 (@d331de35ca8ab1358c7a17e4bd41627d55eaef51)",
+    "webSocketDebuggerUrl": "ws://127.0.0.1:51426/devtools/browser/ed9494e6-e792-4ccf-a2f0-39cd52aec21f"
+  },
+  {
+    "name": "controlled-candidate",
+    "Browser": "Chrome/156.0.8078.74",
+    "File-Path-Style": "posix",
+    "Protocol-Version": "1.3",
+    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.0.0 Safari/537.36",
+    "V8-Version": "15.6.75.25",
+    "WebKit-Version": "537.36 (@d331de35ca8ab1358c7a17e4bd41627d55eaef51)",
+    "webSocketDebuggerUrl": "ws://127.0.0.1:51446/devtools/browser/948c4239-de13-4ac6-ab5c-462166209cc9"
+  }
+]
