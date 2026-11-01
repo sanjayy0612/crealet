@@ -1,0 +1,9 @@
+{
+  "baseline_rollouts_matching_archive": 16,
+  "replays_completed": 78,
+  "all_changed_rollouts_no_stall_or_startup_regression": true,
+  "checkpoint_unchanged": true,
+  "report_arithmetic_checked": true,
+  "focused_tests_passed": 31,
+  "browser_replay_executed": false
+}

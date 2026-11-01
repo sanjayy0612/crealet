@@ -95,6 +95,10 @@ runs/startup-ladder/sintel-native/*
 !runs/production-readiness/
 runs/production-readiness/*
 !runs/production-readiness/*.json
+!runs/quality-gate-diagnosis/
+runs/quality-gate-diagnosis/*
+!runs/quality-gate-diagnosis/*.json
+!runs/quality-gate-diagnosis/report.md
 !data/
 data/*
 !data/realistic_envivio/

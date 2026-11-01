@@ -205,6 +205,14 @@ remains a draft; stronger baselines and broader independent data are still neede
 
 ## Next investigation
 
+The [safety-gate diagnosis](runs/quality-gate-diagnosis/report.md) found that the
+model preferred an upgrade in all 140 examined emergency decisions, but the
+safety filter blocked it. In 78 simulator rollouts, lowering only the buffer
+threshold from 12 s to 4 s reduced emergency exposure by 12.1% per policy without
+added stalls or startup delay. Seven of thirteen video/session cases still fail
+the draft quality limits. Defaults remain unchanged; native confirmation of the
+4-second candidate and throughput-history diagnosis are next.
+
 The [real startup-ladder experiment](docs/startup-ladder.md) completed the next
 media, native-playback, second-video and matched-training checks. It fixes known
 startup cases by reducing the first media fragment to 5,478 bytes, with a major

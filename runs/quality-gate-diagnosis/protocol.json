@@ -1,0 +1,105 @@
+{
+  "hypothesis": "The 12-second buffer gate may block stall-free upgrades to the normal floor",
+  "checkpoint": "runs/learning-ablation/baseline-seed-7/accepted.npz",
+  "checkpoint_sha256": "5567f45b1e335142188f931d626f68777d2e1abac4ea13adb146adf000e63470",
+  "stream_protocol": {
+    "checkpoint": "runs/learning-ablation/baseline-seed-7/accepted.npz",
+    "checkpoint_sha256": "5567f45b1e335142188f931d626f68777d2e1abac4ea13adb146adf000e63470",
+    "config": {
+      "mode": "vod",
+      "max_buffer_s": 60.0,
+      "startup_s": 1.0,
+      "resume_s": 1.0,
+      "request_timeout_s": 30.0,
+      "source_age_s": 3.0,
+      "encoder_delay_s": 0.0,
+      "target_latency_s": 3.0,
+      "catchup": true,
+      "min_rate": 0.95,
+      "max_rate": 1.05,
+      "catchup_gain": 0.03,
+      "latency_deadband_s": 0.1,
+      "control_tick_s": 0.1,
+      "known_vod_sizes": false
+    },
+    "recovery": {
+      "max_retries": 4,
+      "poll_s": 1.0,
+      "min_observation_s": 2.0,
+      "no_progress_s": 3.0,
+      "buffer_reserve_s": 2.0,
+      "backoff_s": 2.0,
+      "restart_fraction": 0.8,
+      "early_abandon": true
+    },
+    "safety": {
+      "min_buffer_s": 12.0,
+      "throughput_factor": 0.65
+    },
+    "media_index_sha256": "1ef77a9d02552d4d05e1d0aa218a4d749e50aa47fd2b3d9cd9c4a18d65271647",
+    "training_dataset": "data/startup-ladder/training.json",
+    "development_dataset": "data/startup-ladder/development.json",
+    "targets": {
+      "startup_s": 3.0,
+      "rebuffer_s": 8.0,
+      "complete": true
+    },
+    "fixed_training": {
+      "seeds": [
+        7,
+        11,
+        13
+      ],
+      "episodes": 120,
+      "validation_every": 20,
+      "warmup": 500,
+      "learn_every": 4,
+      "batch_size": 64,
+      "target_every": 250,
+      "replay_capacity": 50000,
+      "learning_rate": 0.0001,
+      "gamma": 1.0,
+      "epsilon_steps": 10000,
+      "baseline": "highest_allowed"
+    },
+    "training_gate": "All frozen validation/development and six native playback cases must meet timing/completion limits",
+    "quality_warning": "8 kbps / 96x54 is a survival rung; startup gain trades substantial visual quality",
+    "test_status": "Known development sessions and the same video; no claim of untouched-test generalization"
+  },
+  "thresholds_s": [
+    12.0,
+    4.0,
+    0.0
+  ],
+  "policies": [
+    "dqn",
+    "highest_allowed"
+  ],
+  "datasets": [
+    {
+      "label": "envivio-validation",
+      "path": "data/startup-ladder/training.json",
+      "split": "validation",
+      "sha256": "01a82104e3c2047c8ec40933fa6b26b8dc87d544edd732faf2051702274724c7"
+    },
+    {
+      "label": "envivio-development",
+      "path": "data/startup-ladder/development.json",
+      "split": "test",
+      "sha256": "20bd5e9071a801eec770d8cf7b7b115b36cd16bdfb32f4c485ffa0029aa2568e"
+    },
+    {
+      "label": "sintel-development",
+      "path": "data/sintel-ladder/development.json",
+      "split": "test",
+      "sha256": "51f6fb8a565d89c43f819e3a46e94827635c27ff8999059bf068a8a6b17e3f3c"
+    }
+  ],
+  "acceptance": "Diagnostic only. Compare each changed rollout with the matching 12s policy: complete, no extra stalls, no worse startup, less emergency exposure. No defaults or checkpoint promotion.",
+  "limits": [
+    "Known development/validation cases, not an untouched acceptance set",
+    "Simulator only, not a repeat native-browser measurement",
+    "Single-step future-service probes are offline diagnostics, never policy inputs",
+    "Only min_buffer_s changes; throughput factor, weights, recovery and cap stay fixed"
+  ]
+}

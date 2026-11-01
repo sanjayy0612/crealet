@@ -1,0 +1,80 @@
+{
+  "rollouts": 78,
+  "video_session_combinations": 13,
+  "baseline_emergency_decisions": 140,
+  "model_preferred_upgrade": 140,
+  "floor_blocked_by_buffer_only": 28,
+  "floor_blocked_by_throughput_estimate": 112,
+  "single_request_safe_floor_probes": 108,
+  "safe_floor_probes_blocked_by_buffer_only": 28,
+  "groups": [
+    {
+      "min_buffer_s": 12.0,
+      "policy": "dqn",
+      "sessions": 13,
+      "completed": 13,
+      "playback_targets_met": 13,
+      "quality_limits_met": 0,
+      "emergency_media_s": 563.5600000000001,
+      "rebuffer_s": 0.0,
+      "paired_no_regression": null
+    },
+    {
+      "min_buffer_s": 12.0,
+      "policy": "highest_allowed",
+      "sessions": 13,
+      "completed": 13,
+      "playback_targets_met": 13,
+      "quality_limits_met": 0,
+      "emergency_media_s": 563.5600000000001,
+      "rebuffer_s": 0.0,
+      "paired_no_regression": null
+    },
+    {
+      "min_buffer_s": 4.0,
+      "policy": "dqn",
+      "sessions": 13,
+      "completed": 13,
+      "playback_targets_met": 13,
+      "quality_limits_met": 6,
+      "emergency_media_s": 495.56,
+      "rebuffer_s": 0.0,
+      "paired_no_regression": true
+    },
+    {
+      "min_buffer_s": 4.0,
+      "policy": "highest_allowed",
+      "sessions": 13,
+      "completed": 13,
+      "playback_targets_met": 13,
+      "quality_limits_met": 6,
+      "emergency_media_s": 495.56,
+      "rebuffer_s": 0.0,
+      "paired_no_regression": true
+    },
+    {
+      "min_buffer_s": 0.0,
+      "policy": "dqn",
+      "sessions": 13,
+      "completed": 13,
+      "playback_targets_met": 13,
+      "quality_limits_met": 6,
+      "emergency_media_s": 495.56,
+      "rebuffer_s": 0.0,
+      "paired_no_regression": true
+    },
+    {
+      "min_buffer_s": 0.0,
+      "policy": "highest_allowed",
+      "sessions": 13,
+      "completed": 13,
+      "playback_targets_met": 13,
+      "quality_limits_met": 6,
+      "emergency_media_s": 495.56,
+      "rebuffer_s": 0.0,
+      "paired_no_regression": true
+    }
+  ],
+  "runtime_defaults_changed": false,
+  "production_approved": false
+}
