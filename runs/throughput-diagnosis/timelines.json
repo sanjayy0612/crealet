@@ -1,0 +1,93 @@
+{
+  "method": "Derived from archived native segment completion timestamps, reproduced filter decisions and actual trace intervals. No new playback.",
+  "cases": [
+    {
+      "content": "envivio",
+      "threshold_s": 12,
+      "source_capture": "runs/native-quality-gate/envivio/slow-first-12s.json",
+      "sha256": "74d28ebf40a1dc36e66b026797deeb74d4e759b77fc070f1f931deb564cd34a0",
+      "initial_low_service_ends_at_trace_s": 28.972,
+      "last_segment_received_at_capture_s": 137.317700000003,
+      "clock_caution": "Trace/session clock begins just after capture start; completion timestamps are proxies for decision times. The roughly 10-second Sintel ordering gap is much larger than this clock offset.",
+      "request_retries": 0,
+      "discarded_media_bytes": 0,
+      "first_three_sample_permission_segment": 23,
+      "first_actual_upgrade_segment": 28,
+      "completion_timestamp_proxy_delay_s": 19.976899999991055,
+      "first_permission_estimates_kbps": {
+        "8": 29.88096046447754,
+        "3": 1350.9385986328125,
+        "1": 1352.2921142578125
+      },
+      "blocked_segment_indices": [
+        23,
+        24,
+        25,
+        26,
+        27
+      ],
+      "captured_buffers_s": [
+        59.871299743652344,
+        59.8651008605957,
+        59.86050033569336,
+        59.85599899291992,
+        59.90169906616211
+      ]
+    },
+    {
+      "content": "envivio",
+      "threshold_s": 4,
+      "source_capture": "runs/native-quality-gate/envivio/slow-first-4s.json",
+      "sha256": "939a0f804089fc4958384352eecc074d341d7e7dda7558ddb2f34b6b976b8d52",
+      "initial_low_service_ends_at_trace_s": 28.972,
+      "last_segment_received_at_capture_s": 137.16509999999403,
+      "clock_caution": "Trace/session clock begins just after capture start; completion timestamps are proxies for decision times. The roughly 10-second Sintel ordering gap is much larger than this clock offset.",
+      "request_retries": 0,
+      "discarded_media_bytes": 0,
+      "first_three_sample_permission_segment": 23,
+      "first_actual_upgrade_segment": 28,
+      "completion_timestamp_proxy_delay_s": 20.009900000005963,
+      "first_permission_estimates_kbps": {
+        "8": 29.08310317993164,
+        "3": 320.75299072265625,
+        "1": 1130.08447265625
+      },
+      "blocked_segment_indices": [
+        23,
+        24,
+        25,
+        26,
+        27
+      ],
+      "captured_buffers_s": [
+        59.882598876953125,
+        59.886199951171875,
+        59.87879943847656,
+        59.87620162963867,
+        59.868099212646484
+      ]
+    },
+    {
+      "content": "sintel",
+      "threshold_s": 12,
+      "source_capture": "runs/native-quality-gate/sintel/slow-first-12s.json",
+      "sha256": "04cafbd2c96b50683dc7dac433de92f6a0a144512ef834c35a3faa3b7e8b69ea",
+      "initial_low_service_ends_at_trace_s": 28.972,
+      "last_segment_received_at_capture_s": 19.06,
+      "clock_caution": "Trace/session clock begins just after capture start; completion timestamps are proxies for decision times. The roughly 10-second Sintel ordering gap is much larger than this clock offset.",
+      "request_retries": 0,
+      "discarded_media_bytes": 0
+    },
+    {
+      "content": "sintel",
+      "threshold_s": 4,
+      "source_capture": "runs/native-quality-gate/sintel/slow-first-4s.json",
+      "sha256": "3c885f29a1cdff5d345077d226371889bf588ada407b99c55e6cbc4c8a4ab6f0",
+      "initial_low_service_ends_at_trace_s": 28.972,
+      "last_segment_received_at_capture_s": 18.89640000000596,
+      "clock_caution": "Trace/session clock begins just after capture start; completion timestamps are proxies for decision times. The roughly 10-second Sintel ordering gap is much larger than this clock offset.",
+      "request_retries": 0,
+      "discarded_media_bytes": 0
+    }
+  ]
+}

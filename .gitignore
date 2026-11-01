@@ -109,6 +109,10 @@ runs/native-quality-gate/envivio/*
 !runs/native-quality-gate/sintel/
 runs/native-quality-gate/sintel/*
 !runs/native-quality-gate/sintel/*.json
+!runs/throughput-diagnosis/
+runs/throughput-diagnosis/*
+!runs/throughput-diagnosis/*.json
+!runs/throughput-diagnosis/report.md
 !data/
 data/*
 !data/realistic_envivio/

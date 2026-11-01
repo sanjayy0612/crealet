@@ -1,0 +1,13 @@
+{
+  "baseline_rollouts_matching_previous_4s_replays": 26,
+  "simulator_rollouts": 78,
+  "native_captures_reconstructed": 8,
+  "captured_8_vs_3_floor_lockouts": 10,
+  "focused_tests_passed": 11,
+  "all_changed_rollouts_no_added_stalls_or_startup_delay": true,
+  "shorter_window_quality_regressions_retained": true,
+  "production_defaults_changed": false,
+  "new_native_playback_performed": false,
+  "source_hashes_match": true,
+  "diagnostic_check_expected_exit_code": 1
+}

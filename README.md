@@ -215,7 +215,11 @@ then completed eight playbacks with zero stalls and no discarded downloads.
 Emergency exposure fell from 16 s to 8 s in the selected upgrade case on each
 video; the slow-network case did not improve. Only one of four candidate runs
 met the draft quality limits, and one case had lower mean bitrate. Defaults
-remain unchanged; throughput-history diagnosis is next.
+remain unchanged. The [throughput diagnosis](runs/throughput-diagnosis/report.md)
+then confirmed about 20 s of stale-estimate delay in the long video. The short
+video finished downloading before network recovery. Shorter safety histories
+helped some traces but worsened a controlled validation case by 64 s of emergency
+quality, so no estimator was promoted. A buffer-aware recovery check is next.
 
 The [real startup-ladder experiment](docs/startup-ladder.md) completed the next
 media, native-playback, second-video and matched-training checks. It fixes known
