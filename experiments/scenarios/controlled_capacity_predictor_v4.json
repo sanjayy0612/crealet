@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "scenario_set_id": "controlled-capacity-predictor-v4",
+  "generator_seed": 20261104,
+  "trace_duration_s": 600,
+  "interval_s": 1,
+  "rtt_s": 0.08,
+  "families": ["step_drop_recovery", "repeated_capacity_changes", "zero_outage_then_degraded_recovery"],
+  "split_sizes_per_family": {"train": 12, "validation": 4, "test": 4},
+  "capacity_units": "kbps",
+  "generation": {
+    "step_drop_recovery": {"baseline_kbps": [4000, 8000], "drop_kbps": [100, 500], "drop_start_s": [45, 130], "drop_duration_s": [80, 180], "recovery_fraction_of_baseline": [0.75, 1.0]},
+    "repeated_capacity_changes": {"plateau_kbps": [100, 7000], "first_transition_s": [30, 76], "subsequent_transition_spacing_s": [35, 91], "transition_count": 4},
+    "zero_outage_then_degraded_recovery": {"baseline_kbps": [4000, 8000], "outage_start_s": [45, 130], "outage_duration_s": [20, 75], "degraded_kbps": [80, 450], "degraded_duration_s": [60, 150], "recovery_fraction_of_baseline": [0.7, 1.0]}
+  },
+  "selection_rule": "Independent deterministic parameter draws per split; all test profiles are reserved for one final evaluation after model and controller are frozen.",
+  "semantics": "controlled_capacity",
+  "design_note": "Fresh controlled stress profiles for a supervised next-segment capacity forecast. This measures transfer across draws within known scenario families, not generalization to measured networks."
+}

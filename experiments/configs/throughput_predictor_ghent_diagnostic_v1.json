@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "protocol_id": "abr-throughput-predictor-ghent-diagnostic-v1",
+  "status": "frozen_before_measured_trace_evaluation",
+  "question": "Does the frozen synthetic-trained p20 forecast improve RobustMPC on observed historical 4G application-goodput traces?",
+  "dataset": "data/ghent-holdout/dataset.json",
+  "dataset_file_sha256": "26c3d8bc9cdd80a2aaffdbe343cf680959f737c0edd5a238429ca15b7294f087",
+  "dataset_fingerprint": "da9f0d6f07c223051f0866011e9a315b9abd47bed687397046dd3450c0298b6e",
+  "test_split": "test",
+  "test_sessions": 32,
+  "source": "Official historical Ghent 4G/LTE application-goodput archive; see data/ghent-holdout/provenance.json",
+  "source_url": "https://users.ugent.be/~jvdrhoof/dataset-4g/logs/logs_all.zip",
+  "measurement_semantics": "HTTP application goodput derived from interval bytes; not physical link capacity",
+  "rtt_s": 0.08,
+  "predictor_protocol": "experiments/configs/throughput_predictor_v1.json",
+  "predictor_protocol_sha256": "6074ccbd5e4bedf48538192b0902450a3e747647330f499fe39382d9289d5127",
+  "predictor_checkpoint": "runs/throughput-predictor-v1/predictor.pt",
+  "predictor_checkpoint_sha256": "0eed2055d9b8f10f66c134387cd97a61ed62306f0b454d6f96e1e42be6788aa9",
+  "evaluation_code_sha256": {
+    "scripts/evaluate_throughput_predictor.py": "47f56e99fd75bb450a2ad0ed5c280ca39730c5f7042dbe78268b3e07671f1ead",
+    "scripts/evaluate_measured_throughput_predictor.py": "3f7d566f8770ac53bc4d44fce3049a9e8348053043160517f2b06a4f9911f4bc"
+  },
+  "reuse_disclosure": "These Ghent sessions were reserved from the eight sessions used by an earlier project pilot, but the 32 sessions have been evaluated in earlier project studies. The current predictor was trained only on synthetic v4 data and has not been calibrated or tuned on these measured sessions. Treat this as a measured-trace diagnostic, not a newly untouched benchmark.",
+  "selection_rule": "Use all 32 test sessions. No measured session is used to fit, calibrate, or select the predictor. Compare paired playback outcomes under the already frozen stream, QoE, safety, and RobustMPC settings.",
+  "output": "runs/throughput-predictor-v1/ghent-measured-results.json"
+}

@@ -68,11 +68,21 @@ class StreamingEnv(gym.Env):
 
     def __init__(self, dataset: Dataset, *, media: Media | None = None, split="train",
                  config: StreamConfig | None = None, weights: QoEWeights | None = None, history=8,
-                 recovery: RecoveryConfig | None = None):
+                 recovery: RecoveryConfig | None = None, quality_utility=None):
         super().__init__()
         self.dataset, self.config, self.weights = dataset, config or StreamConfig(), weights or QoEWeights()
         self.media = media or Media(dataset.video)
         self.video = dataset.video
+        if quality_utility is None:
+            self.quality_utility = None
+        else:
+            utility = np.array(quality_utility, dtype=np.float64, copy=True)
+            expected = (len(self.video.durations_s), len(self.video.bitrates_kbps))
+            if (self.config.mode != 'vod' or utility.shape != expected
+                    or not np.isfinite(utility).all() or (utility < 0).any()):
+                raise ValueError('Quality utility must be a finite nonnegative VOD [segment, action] matrix')
+            utility.setflags(write=False)
+            self.quality_utility = utility
         if split not in dataset.splits:
             raise ValueError("Unknown split")
         if not isinstance(history, int) or isinstance(history, bool) or history < 1:
@@ -319,7 +329,9 @@ class StreamingEnv(gym.Env):
                 received += transfer.bytes_received
                 complete = transfer.complete
             if complete:
-                self.player.append(duration, self.video.bitrates_kbps[action])
+                quality_utility = (None if self.quality_utility is None else
+                                   self.quality_utility[segment_index, action])
+                self.player.append(duration, self.video.bitrates_kbps[action], quality_utility)
                 self.downloaded_media_s += duration
                 events.append({"part": part, "received_at_s": self.wall_s,
                                "media_end_s": float(media_end), "buffer_s": self.player.buffer_s,
@@ -368,11 +380,16 @@ class StreamingEnv(gym.Env):
         media = {"provenance": self.media.provenance,
                  "part_durations_s": None if self.media.part_durations_s is None else [x.tolist() for x in self.media.part_durations_s],
                  "part_sizes_bytes": None if self.media.part_sizes_bytes is None else [x.tolist() for x in self.media.part_sizes_bytes]}
+        utility_sha256 = (None if self.quality_utility is None else
+                          hashlib.sha256(self.quality_utility.tobytes()).hexdigest())
         return {"environment_version": 2, "observation_version": 2,
                 "request_recovery": None if self.recovery is None else self.recovery.to_dict(),
                 "dataset_sha256": self.dataset.fingerprint,
                 "media_sha256": hashlib.sha256(json.dumps(media, sort_keys=True).encode()).hexdigest(),
                 "config": asdict(self.config), "weights": asdict(self.weights),
                 "network_model": "finite application-goodput replay; no TCP/QUIC/radio/packet model",
-                "quality_model": "playback-duration-weighted log bitrate proxy; not VMAF/MOS",
+                "quality_model": ("playback-duration-weighted log bitrate proxy; not VMAF/MOS"
+                                  if self.quality_utility is None else
+                                  "playback-duration-weighted segment/rung VMAF utility, linearly scaled to log-bitrate reward range; not MOS"),
+                "quality_utility_sha256": utility_sha256,
                 "latency_metric": "live edge minus playhead; wall-time weighted after startup, including stalls"}

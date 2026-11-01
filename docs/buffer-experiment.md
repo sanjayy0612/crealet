@@ -52,8 +52,7 @@ Reproduce from the repository root:
 .venv/bin/python -m scripts.evaluate_buffer_experiment
 ```
 
-The next useful investigation is the remaining long-stall case: compare its
-minimum-quality download demand with the service available before the playback
-buffer empties. This can separate a bitrate/recovery timing problem from a period
-when even the lowest representation cannot arrive in time. Such an offline
-diagnostic must not feed future bandwidth into the policy.
+The remaining long-stall case was examined in the later
+[stall diagnosis](../runs/stall-diagnosis/report.md). It compared minimum-quality
+download demand with service available before the playback buffer emptied.
+That is an offline diagnostic; future bandwidth must not become a policy input.

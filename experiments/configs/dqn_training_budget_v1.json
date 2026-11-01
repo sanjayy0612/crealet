@@ -1,0 +1,73 @@
+{
+  "schema_version": 1,
+  "protocol_id": "abr-dqn-training-budget-v1",
+  "status": "checkpoints_frozen_ready_for_single_holdout_evaluation",
+  "question": "Does doubling the existing DQN training budget from 120 to 240 episodes improve the selected policy on unseen network routes?",
+  "task": "finite_vod_segment_representation_selection",
+  "training_data": {
+    "dataset": "data/startup-ladder/training.json",
+    "split": "train",
+    "training_route_groups": "Existing Norway HSDPA route groups; identical for both budgets"
+  },
+  "validation_data": {
+    "dataset": "data/startup-ladder/training.json",
+    "split": "validation",
+    "selection": "Select the highest-reward eligible checkpoint within each seed; evaluate every 20 episodes",
+    "limitation": "Three validation traces: two measured Oslo-Vestby sessions and one synthetic controlled outage. Use for checkpoint selection only, not as final generalization evidence."
+  },
+  "budgets": [
+    {
+      "episodes": 120,
+      "environment_steps": 5880,
+      "source": "Existing frozen startup-ladder runs"
+    },
+    {
+      "episodes": 240,
+      "environment_steps": 11760,
+      "run_mode": "Train from scratch with the same fixed seed, data, architecture, reward, safety filter and optimizer settings as the 120-episode runs"
+    }
+  ],
+  "seeds": [7, 11, 13],
+  "fixed_hyperparameters_source": "runs/startup-ladder/protocol.json fixed_training",
+  "policy_comparators": [
+    "highest_allowed with the same safety mask",
+    "RobustMPC with the same QoE weights and safety mask"
+  ],
+  "primary_metrics": [
+    "completion rate",
+    "startup seconds",
+    "rebuffer seconds and events",
+    "playback-duration-weighted VMAF from the aligned Envivio encodes",
+    "existing log-bitrate reward, reported as a proxy",
+    "batch-one decision latency"
+  ],
+  "fresh_test_requirement": {
+    "dataset": "data/ghent-holdout/dataset.json",
+    "dataset_sha256": "da9f0d6f07c223051f0866011e9a315b9abd47bed687397046dd3450c0298b6e",
+    "split": "test",
+    "sessions": 32,
+    "selection": "Every log in the official archive except the eight filenames already included in data/realistic_envivio; selected by filename before reading throughput values.",
+    "requirement": "Use this frozen test set only after training and checkpoint selection. Do not tune on it.",
+    "route_scope": "New sessions from an independent Ghent collection. The source groups by transport mode but does not provide enough route metadata to claim every geographic path is distinct."
+  },
+  "decision_rule": "Do not start either arm until the fresh test dataset and fingerprint are recorded. Compare 120 versus 240 on validation across all three paired seeds. Select checkpoints using validation only. Run the frozen test once after all settings and checkpoints are fixed. More steps are useful only if the 240-episode arm improves validation consistently and then improves the predeclared test outcomes without worse completion, startup or rebuffering.",
+  "current_training_evidence": {
+    "existing_budget_episodes": 120,
+    "existing_budget_environment_steps": 5880,
+    "seed_7_best_validation_episode": 100,
+    "seed_11_best_validation_episode": 80,
+    "seed_13_best_validation_episode": 40,
+    "interpretation": "Validation reward varied across checkpoints and the final checkpoint was not consistently best. This is not evidence that more steps will help; it motivates a controlled budget comparison."
+  },
+  "completed_240_episode_arm": {
+    "seed_7": {"selected_episode": 100, "checkpoint_sha256": "5d4eec933e04a038a323e48be3892e6add47325a0d663333a8ddfb6d61fe4a12", "best_validation_reward": 676.7627195089275},
+    "seed_11": {"selected_episode": 80, "checkpoint_sha256": "1387c0a746d8fe7bf2921045da620ba0a9847449151797a8e98fd454f81f6a92", "best_validation_reward": 662.4849062647853},
+    "seed_13": {"selected_episode": 40, "checkpoint_sha256": "5105966ee3b379e3c4de602e9a400be0f02854d59adcf32e592d0cc20deae97e", "best_validation_reward": 595.3836557433107}
+  },
+  "known_limits": [
+    "The VMAF encodes use the same Envivio source content as training; VMAF measures encoded-frame quality, not human acceptance.",
+    "The learned checkpoint was trained with a seven-rung ladder including an 8 kbps survival rung. Preserve that exact ladder for the primary budget comparison.",
+    "The current public traces are historical and do not represent current network conditions.",
+    "Do not use the 32 fresh Ghent test sessions to select checkpoints, tune parameters, or choose the training budget."
+  ]
+}

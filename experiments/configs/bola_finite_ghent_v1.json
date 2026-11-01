@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "protocol_id": "abr-bola-finite-ghent-v1",
+  "status": "frozen_independent_route_diagnostic",
+  "task": "finite_vod_segment_representation_selection",
+  "question": "Does BOLA-FINITE's finite-horizon buffer target improve the fixed BOLA score or safety-filtered highest-allowed rule on route-held-out Ghent LTE traces?",
+  "dataset": "data/realistic_envivio/dataset.json",
+  "split": "test",
+  "policies": ["bola_finite", "bola_finite_filtered", "bola_basic", "bola_basic_filtered", "highest_allowed", "dqn_frozen"],
+  "frozen_model": {
+    "checkpoint": "runs/learning-ablation/baseline-seed-7/accepted.npz",
+    "checkpoint_sha256": "5567f45b1e335142188f931d626f68777d2e1abac4ea13adb146adf000e63470",
+    "training_route_collection": "Norway HSDPA 2010-2011",
+    "training_candidate_ladder_kbps": [8.0, 300.0, 750.0, 1200.0, 1850.0, 2850.0, 4300.0],
+    "transfer_candidate_ladder_kbps": [300.0, 750.0, 1200.0, 1850.0, 2850.0, 4300.0],
+    "transfer_note": "Candidate Transformer has no slot embeddings and supports variable candidate counts; the 8 kbps training-only startup rung is absent from this transfer ladder. Treat this as cross-route and changed-action-set diagnostic evidence."
+  },
+  "bola": {
+    "segment_duration_s": 4.0,
+    "gamma_p": 5.0
+  },
+  "safety_filter": {
+    "min_buffer_s": 12.0,
+    "throughput_factor": 0.65
+  },
+  "stream_config": {
+    "mode": "vod",
+    "max_buffer_s": 60.0,
+    "startup_s": 1.0,
+    "resume_s": 1.0,
+    "request_timeout_s": 30.0,
+    "source_age_s": 3.0,
+    "encoder_delay_s": 0.0,
+    "target_latency_s": 3.0,
+    "catchup": true,
+    "min_rate": 0.95,
+    "max_rate": 1.05,
+    "catchup_gain": 0.03,
+    "latency_deadband_s": 0.1,
+    "control_tick_s": 0.1,
+    "known_vod_sizes": false
+  },
+  "qoe_weights": {
+    "rebuffer": 12.0,
+    "startup": 1.0,
+    "switch": 1.0,
+    "latency": 0.1,
+    "rate_deviation": 1.0
+  },
+  "measurement_limits": [
+    "Only two route sessions are in the held-out split; report per trace and do not infer statistical significance.",
+    "The Ghent routes are historical observed HTTP goodput and not controlled link capacity or a modern cellular sample.",
+    "The dataset has segment sizes and metadata but no retained video media payload; visual quality is not measured.",
+    "Mean log-bitrate QoE is a bitrate proxy, not VMAF, MOS, or human acceptance.",
+    "The finite-video implementation adds the BOLA-FINITE dynamic buffer target and explicit wait. It omits request abandonment and dash.js player integration.",
+    "The frozen DQN trained with a seven-rung ladder that included an 8 kbps rung. The transfer ladder has six rungs, so the action set differs even though the model accepts variable candidate counts.",
+    "This is a frozen diagnostic comparison. No policy parameters are selected from the test outcomes."
+  ]
+}

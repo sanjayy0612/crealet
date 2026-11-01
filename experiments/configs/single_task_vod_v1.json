@@ -1,0 +1,154 @@
+{
+  "schema_version": 1,
+  "protocol_id": "abr-single-task-vod-v1",
+  "status": "completed_diagnostic_screen",
+  "task": "finite_vod_segment_representation_selection",
+  "question": "Does the frozen learned controller improve VOD visual quality or playback outcomes over the highest-allowed rule under the same safety filter?",
+  "scope": {
+    "mode": "vod",
+    "observation_version": 2,
+    "training": "none; use frozen checkpoints for diagnostic screen",
+    "deployment_claim": false,
+    "generalization_claim": false
+  },
+  "policies": [
+    {
+      "name": "old_frozen",
+      "checkpoint": "runs/learning-ablation/baseline-seed-7/accepted.npz",
+      "checkpoint_sha256": "5567f45b1e335142188f931d626f68777d2e1abac4ea13adb146adf000e63470"
+    },
+    {
+      "name": "seed_7",
+      "checkpoint": "runs/startup-ladder/seed-7/accepted.npz",
+      "checkpoint_sha256": "0b89cec329eec93447462f29d87ba2fe4ce80646dc78678a0f01ab9f80b5d4ac"
+    },
+    {
+      "name": "seed_11",
+      "checkpoint": "runs/startup-ladder/seed-11/accepted.npz",
+      "checkpoint_sha256": "ce36e8d5f5bc2b0deae049a3c328b9dfc078978d791e493f323c55454c42deb3"
+    },
+    {
+      "name": "seed_13",
+      "checkpoint": "runs/startup-ladder/seed-13/accepted.npz",
+      "checkpoint_sha256": "ef242ac32cafa28d85ea0241879aaac3717050835486d2efdae86ef65854cce7"
+    },
+    {
+      "name": "highest_allowed",
+      "selection": "highest representation permitted by the checkpoint safety filter"
+    },
+    {
+      "name": "lowest",
+      "selection": "lowest representation"
+    }
+  ],
+  "baselines": [
+    {
+      "name": "bola_basic",
+        "implementation": "BOLA-Basic score using log bitrate utility and observation-v2 nominal candidate sizes; no explicit wait action",
+      "parameters": {
+        "segment_duration_s": 4.0,
+        "gamma_p": 5.0,
+        "safety_filter": false
+      }
+    },
+    {
+      "name": "bola_basic_filtered",
+      "implementation": "Same BOLA-Basic score, with the frozen checkpoint safety mask",
+      "parameters": {
+        "segment_duration_s": 4.0,
+        "gamma_p": 5.0,
+        "safety_filter": true
+      }
+    }
+  ],
+  "additional_transfer_reports": [
+    "runs/single-task-vod-v1/bola-transfer.json",
+    "runs/startup-ladder-budget-240/holdout.json",
+    "runs/controlled-capacity-transfer-v1/results.json",
+    "runs/controlled-capacity-transfer-v2/results.json"
+  ],
+  "safety_filter": {
+    "min_buffer_s": 12.0,
+    "throughput_factor": 0.65
+  },
+  "stream_config": {
+    "mode": "vod",
+    "max_buffer_s": 60.0,
+    "startup_s": 1.0,
+    "resume_s": 1.0,
+    "request_timeout_s": 30.0,
+    "source_age_s": 3.0,
+    "encoder_delay_s": 0.0,
+    "target_latency_s": 3.0,
+    "catchup": true,
+    "min_rate": 0.95,
+    "max_rate": 1.05,
+    "catchup_gain": 0.03,
+    "latency_deadband_s": 0.1,
+    "control_tick_s": 0.1,
+    "known_vod_sizes": false
+  },
+  "request_recovery": {
+    "max_retries": 4,
+    "poll_s": 1.0,
+    "min_observation_s": 2.0,
+    "no_progress_s": 3.0,
+    "buffer_reserve_s": 2.0,
+    "backoff_s": 2.0,
+    "restart_fraction": 0.8,
+    "early_abandon": true
+  },
+  "media": [
+    {
+      "name": "envivio",
+      "dataset": "data/transfer-sessions/envivio.json",
+      "media_dir": "artifacts/startup-ladder-v1"
+    },
+    {
+      "name": "sintel",
+      "dataset": "data/transfer-sessions/sintel.json",
+      "media_dir": "artifacts/sintel-ladder-v1"
+    }
+  ],
+  "split": "test",
+  "metrics": [
+    "completion",
+    "startup_s",
+    "rebuffer_s",
+    "stall_events",
+    "playback_duration_weighted_vmaf",
+    "mean_selected_bitrate_kbps",
+    "existing_log_bitrate_reward",
+    "batch1_decision_latency_p50_ms",
+    "batch1_decision_latency_p95_ms"
+  ],
+  "not_measured_in_this_screen": [
+    "batch1_decision_latency_p50_ms",
+    "batch1_decision_latency_p95_ms",
+    "human_visual_acceptance"
+  ],
+  "quality_metric": {
+    "name": "VMAF",
+    "implementation": "libvmaf",
+    "status": "libvmaf_available",
+    "alignment": "decoded output frames aligned at 25 fps; upscale each distorted rung to source resolution with bicubic scaling before VMAF so resolution loss remains measured",
+    "human_review_required": true
+  },
+  "engineering_limits": {
+    "max_startup_s": 3.0,
+    "max_rebuffer_s": 8.0,
+    "status": "diagnostic_only_not_user_accepted"
+  },
+  "known_limits": [
+    "The four transfer sessions are from one historical ferry route.",
+    "The source network traces were collected in 2010-2011.",
+    "Only two source videos are available; Sintel is the held-out content.",
+    "BOLA-Basic uses nominal candidate sizes and approximates its no-download decision with the highest-scoring rung; the simulator buffer cap supplies the wait at full buffer.",
+    "BOLA-FINITE startup/wind-down adaptation and its explicit pause action are not implemented in this first baseline screen.",
+    "BOLA gamma_p=5 is the published example parameter, not tuned for this project.",
+    "Metric tool is installed locally; record its exact version and build configuration in the output manifest.",
+    "VMAF results are quality diagnostics for these generated encodes and do not establish human acceptance."
+  ],
+  "artifacts_directory": "runs/single-task-vod-v1",
+  "selection_rule": "No model or policy selection from these test cases; report all cases and retain failures."
+}

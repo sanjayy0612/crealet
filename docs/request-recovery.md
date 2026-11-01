@@ -57,9 +57,10 @@ are not untouched test evidence. Lower partial-playback stall totals from the
 original failed runs do not describe a full video. The replay uses measured
 application goodput, not a causal radio or packet model.
 
-The next useful experiment is a startup/resume-buffer tradeoff on separate
-network sessions, keeping explicit startup and stall limits. These results do not
-support promoting the model or claiming that further training alone fixes outages.
+The startup/resume-buffer tradeoff was tested in the later
+[buffer experiment](buffer-experiment.md). It did not change the default
+settings or justify model promotion. These recovery results do not support the
+claim that further training alone fixes outages.
 
 See [the complete comparison](../runs/request-recovery/report.md),
 [fixed protocol](../runs/request-recovery/protocol.json), and

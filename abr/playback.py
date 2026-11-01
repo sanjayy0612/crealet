@@ -32,8 +32,12 @@ class Player:
             self.started = self.playing = True
             self.stalled = False
 
-    def append(self, duration, bitrate):
-        self.queue.append([float(duration), float(bitrate)])
+    def append(self, duration, bitrate, quality_utility=None):
+        if quality_utility is not None:
+            quality_utility = float(quality_utility)
+            if not math.isfinite(quality_utility) or quality_utility < 0:
+                raise ValueError('Quality utility must be finite and nonnegative')
+        self.queue.append([float(duration), float(bitrate), quality_utility])
         self.buffer_s += duration
         self.peak_buffer_s = max(self.peak_buffer_s, self.buffer_s)
         self._resume()
@@ -74,7 +78,10 @@ class Player:
                 if self.previous_bitrate is not None:
                     self.stats["switch_log"] += abs(math.log(unit[1] / self.previous_bitrate))
                 self.previous_bitrate = unit[1]
-            self.stats["quality_integral"] += media_s * math.log(unit[1] / self.min_bitrate)
+            quality_utility = unit[2]
+            if quality_utility is None:
+                quality_utility = math.log(unit[1] / self.min_bitrate)
+            self.stats["quality_integral"] += media_s * quality_utility
             self.stats["bitrate_integral"] += media_s * unit[1]
             self.stats["rate_deviation_s"] += dt * abs(rate - 1.)
             self.stats["playback_wall_s"] += dt

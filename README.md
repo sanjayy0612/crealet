@@ -26,25 +26,41 @@ Its [original prompt](docs/images/abr-working.prompt.txt) and [native-label edit
 | [Frozen 60 s validation](runs/prefetch-validation/report.md) | Four more sessions, 30 simulator episodes and eight native trials; two new sessions had excessive startup, and two browser runs timed out | Playback gates failed; no retraining or default change. Browser memory and discarded downloads are recorded |
 | [Native recovery](runs/native-recovery/report.md) | All six recovery-on browser runs finished; both recovery-off hard controls timed out. Hard-case stalls were **0.00 s for DQN / 0.15 s for the rule** | Request recovery works on these development cases; 29 s and 8 s startup waits still need smaller startup media |
 | [Real startup media and matched training](runs/startup-ladder/report.md) | A real 8 kbps / 96x54 rung cut the known native startup cases below 3 s; a second video also played. Three new 120-episode seeds were tested on four unused sessions | Every trained seed lost to the rule on transfer reward. One new session still had about 10.35 s startup; no promotion |
+| [Single-task VOD quality screen](docs/research/single_task_vod_study.md) | Frame-aligned VMAF scored 64 frozen simulator cases across two videos and four ferry sessions, including BOLA-Basic | The old DQN exactly matched the highest-allowed rule; newer DQNs lost or tied. BOLA-Basic beat the rule on Envivio but lost on Sintel. No model promotion |
+| [Independent-route BOLA-FINITE diagnostic](docs/research/single_task_vod_study.md#independent-route-bola-finite-diagnostic) | Finite BOLA, fixed BOLA, safety-filtered variants, highest-allowed rule, and frozen DQN on two route-held-out Ghent LTE sessions | Finite BOLA had the best unfiltered bitrate-proxy reward; the safety-filtered result was worse. Two routes, no VMAF, and a changed DQN candidate set are diagnostic only |
+| [RobustMPC head-to-head](docs/research/single_task_vod_study.md#robustmpc-head-to-head) | Five-chunk RobustMPC versus frozen DQN and highest-allowed rule on those two Ghent sessions | RobustMPC matched the rule on all decisions; the DQN differed once per route. Diagnostic only: previously viewed test traces, high-service routes, no VMAF |
+| [DQN training-budget comparison](docs/research/training_budget_decision.md) | 120 versus 240 episodes across three matched seeds, followed by a frozen 32-session Ghent holdout; selected checkpoints and action sequences were identical across budgets | More training did not help; the follow-up controlled-capacity study is summarized below |
+| [Controlled-capacity transfer study](docs/research/controlled_capacity_transfer.md) | Scenario-trained and VMAF-reward DQNs versus log-reward DQNs, highest-allowed, and five-chunk RobustMPC across three frozen stress-profile sets and two contents | VMAF reward reduced seed 13’s collapse but moved seed 11 the other way. No repeatable gain over highest-allowed; stop training this DQN baseline |
+| [Learned throughput predictor study](docs/research/throughput_predictor_study.md) | Supervised p20 forecast feeding RobustMPC, evaluated on synthetic v4 profiles and 32 measured historical Ghent sessions | Better forecast error than harmonic estimation, but playback tied highest-allowed on 31/32 sessions with no stall benefit; do not train further without new, lower-service measured traces |
 
-**Current decision: keep the default buffer settings and the frozen baseline.**
-DQN and the highest-allowed rule chose identical actions in all 54 paired
-profile/session comparisons in the buffer experiment. Larger resume buffers
-sometimes reduced the number of pauses while increasing total stall duration.
+**Current project status: pause model training and promotion.** The DQN,
+VMAF-reward DQN, BOLA, RobustMPC, and learned-throughput-predictor studies do
+not establish a repeatable playback advantage over the highest-allowed rule.
+Keep the frozen DQN as the existing model reference and highest-allowed as the
+simple policy reference. Resume model work only after collecting new measured
+network traces with recorded RTT and sustained service near or below the video
+bitrate ladder. The available measured traces are historical and most sessions
+did not create a stall trade-off.
+
+The buffer study also found that larger resume buffers sometimes reduced the
+number of pauses while increasing total stall duration. The default buffer
+settings remain unchanged.
 
 The recent experiments require every video to finish, startup to stay at or below
 3 seconds, and total stalls to stay at or below 8 seconds. Training acceptance
 also checks the per-validation-trace throughput baseline. Partial-playback metrics
 are retained and explicitly distinguished from full-video results.
 
-The latest regression check passed **157 tests**, with two existing Gymnasium
-warnings about infinite observation-space bounds. See the
+The startup-media/training audit records **157 passing tests** and two existing
+Gymnasium warnings about infinite observation-space bounds. Later research
+experiments were checked with compilation and artifact-integrity checks; the
+full test suite was not rerun after those changes. See the
 [startup-media/training audit](runs/startup-ladder/verification.json).
 
 ## How it works
 
-1. **Observe:** collect eight recent download rows, five player-state values,
-   public stream settings, and the available representations.
+1. **Observe:** the default DQN path collects eight recent download rows, five
+   player-state values, public stream settings, and the available representations.
 2. **Score:** the frozen Dueling Double DQN returns one action value per bitrate.
 3. **Filter and choose:** an observed-goodput rule masks higher bitrates before
    taking the highest remaining score. The lowest bitrate remains available.
@@ -177,6 +193,9 @@ See [player instructions and capture checks](experiments/validation/POLICY_PLAYE
   See [asset preparation and attribution](docs/startup-ladder.md).
 - `data/transfer-sessions/` contains four unused-session tests. The three new
   checkpoints were fixed from validation before scoring these sessions/content.
+- `data/ghent-holdout/` contains 32 historical measured Ghent 4G sessions. They
+  were held out from the original eight-session pilot, but later used in
+  project diagnostics; they are not a current or untouched network benchmark.
 
 The simulator supports finite VOD and a finite low-latency live event using
 explicit part metadata. The recent training, recovery and buffer evidence is

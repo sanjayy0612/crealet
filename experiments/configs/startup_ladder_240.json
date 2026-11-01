@@ -1,0 +1,86 @@
+{
+  "checkpoint": "runs/learning-ablation/baseline-seed-7/accepted.npz",
+  "checkpoint_sha256": "5567f45b1e335142188f931d626f68777d2e1abac4ea13adb146adf000e63470",
+  "config": {
+    "mode": "vod",
+    "max_buffer_s": 60.0,
+    "startup_s": 1.0,
+    "resume_s": 1.0,
+    "request_timeout_s": 30.0,
+    "source_age_s": 3.0,
+    "encoder_delay_s": 0.0,
+    "target_latency_s": 3.0,
+    "catchup": true,
+    "min_rate": 0.95,
+    "max_rate": 1.05,
+    "catchup_gain": 0.03,
+    "latency_deadband_s": 0.1,
+    "control_tick_s": 0.1,
+    "known_vod_sizes": false
+  },
+  "recovery": {
+    "max_retries": 4,
+    "poll_s": 1.0,
+    "min_observation_s": 2.0,
+    "no_progress_s": 3.0,
+    "buffer_reserve_s": 2.0,
+    "backoff_s": 2.0,
+    "restart_fraction": 0.8,
+    "early_abandon": true
+  },
+  "safety": {
+    "min_buffer_s": 12.0,
+    "throughput_factor": 0.65
+  },
+  "media_index_sha256": "1ef77a9d02552d4d05e1d0aa218a4d749e50aa47fd2b3d9cd9c4a18d65271647",
+  "training_dataset": "data/startup-ladder/training.json",
+  "development_dataset": "data/startup-ladder/development.json",
+  "targets": {
+    "startup_s": 3.0,
+    "rebuffer_s": 8.0,
+    "complete": true
+  },
+  "fixed_training": {
+    "seeds": [
+      7,
+      11,
+      13
+    ],
+    "episodes": 240,
+    "validation_every": 20,
+    "warmup": 500,
+    "learn_every": 4,
+    "batch_size": 64,
+    "target_every": 250,
+    "replay_capacity": 50000,
+    "learning_rate": 0.0001,
+    "gamma": 1.0,
+    "epsilon_steps": 10000,
+    "baseline": "highest_allowed"
+  },
+  "training_gate": "All frozen validation/development and six native playback cases must meet timing/completion limits",
+  "quality_warning": "8 kbps / 96x54 is a survival rung; startup gain trades substantial visual quality",
+  "test_status": "Known development sessions and the same video; no claim of untouched-test generalization",
+  "budget_comparison": {
+    "protocol_id": "abr-dqn-training-budget-v1",
+    "comparison_arm": "240_episodes_from_scratch",
+    "reference_arm": "existing_120_episode_runs",
+    "holdout_dataset": "data/ghent-holdout/dataset.json",
+    "holdout_dataset_sha256": "da9f0d6f07c223051f0866011e9a315b9abd47bed687397046dd3450c0298b6e",
+    "holdout_split": "test",
+    "holdout_sessions": 32,
+    "holdout_rule": "Do not use for training or checkpoint selection; score once after all three checkpoints are frozen."
+  },
+  "frozen_checkpoints": {
+    "120_episode_reference": {
+      "seed_7": "0b89cec329eec93447462f29d87ba2fe4ce80646dc78678a0f01ab9f80b5d4ac",
+      "seed_11": "ce36e8d5f5bc2b0deae049a3c328b9dfc078978d791e493f323c55454c42deb3",
+      "seed_13": "ef242ac32cafa28d85ea0241879aaac3717050835486d2efdae86ef65854cce7"
+    },
+    "240_episode_selected": {
+      "seed_7": {"sha256": "5d4eec933e04a038a323e48be3892e6add47325a0d663333a8ddfb6d61fe4a12", "selected_episode": 100},
+      "seed_11": {"sha256": "1387c0a746d8fe7bf2921045da620ba0a9847449151797a8e98fd454f81f6a92", "selected_episode": 80},
+      "seed_13": {"sha256": "5105966ee3b379e3c4de602e9a400be0f02854d59adcf32e592d0cc20deae97e", "selected_episode": 40}
+    }
+  }
+}

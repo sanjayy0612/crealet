@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "protocol_id": "abr-robust-mpc-ghent-v1",
+  "status": "frozen_diagnostic",
+  "task": "finite_vod_segment_representation_selection",
+  "dataset": "data/realistic_envivio/dataset.json",
+  "split": "test",
+  "frozen_model": {
+    "checkpoint": "runs/learning-ablation/baseline-seed-7/accepted.npz",
+    "checkpoint_sha256": "5567f45b1e335142188f931d626f68777d2e1abac4ea13adb146adf000e63470"
+  },
+  "robust_mpc": {
+    "horizon_chunks": 5,
+    "throughput_window": 5,
+    "error_window": 5,
+    "rtt_s": 0.08
+  },
+  "safety_filter": {
+    "min_buffer_s": 12.0,
+    "throughput_factor": 0.65
+  },
+  "stream_config": {
+    "mode": "vod",
+    "max_buffer_s": 60.0,
+    "startup_s": 1.0,
+    "resume_s": 1.0,
+    "request_timeout_s": 30.0,
+    "source_age_s": 3.0,
+    "encoder_delay_s": 0.0,
+    "target_latency_s": 3.0,
+    "catchup": true,
+    "min_rate": 0.95,
+    "max_rate": 1.05,
+    "catchup_gain": 0.03,
+    "latency_deadband_s": 0.1,
+    "control_tick_s": 0.1,
+    "known_vod_sizes": false
+  },
+  "qoe_weights": {
+    "rebuffer": 12.0,
+    "startup": 1.0,
+    "switch": 1.0,
+    "latency": 0.1,
+    "rate_deviation": 1.0
+  },
+  "limits": [
+    "The two Ghent test sessions were already viewed in the BOLA diagnostic; this is a diagnostic comparison, not a blind confirmatory test.",
+    "Only two test sessions are available; report per trace and do not infer statistical significance.",
+    "The Ghent collection is historical observed HTTP goodput, not controlled link capacity or a modern cellular sample.",
+    "The DQN was trained with seven candidates including an 8 kbps startup rung; this transfer ladder contains six candidates.",
+    "RobustMPC uses nominal bitrate-duration sizes for future chunks and constant predicted goodput over its five-chunk horizon.",
+    "The RobustMPC rollout approximates the environment's buffer cap and fixed RTT; it does not model transport protocol dynamics or request abandonment.",
+    "The objective is the project's log-bitrate QoE proxy, not VMAF, MOS, or human acceptance.",
+    "The first RobustMPC action is constrained by the same safety mask as the frozen DQN and highest-allowed rule."
+  ]
+}

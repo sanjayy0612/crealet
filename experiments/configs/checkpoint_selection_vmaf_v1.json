@@ -1,0 +1,162 @@
+{
+  "schema_version": 1,
+  "protocol_id": "abr-validation-checkpoint-vmaf-v1",
+  "status": "validation_only_diagnostic",
+  "scope": "Compare validation-selected reward checkpoints with checkpoints selected by validation VMAF under the same completion/startup/stall gates. This is a checkpoint-selection diagnostic, not a fresh-test evaluation.",
+  "policies": [
+    {
+      "name": "selection_v1_seed_7_episode_020",
+      "checkpoint": "runs/controlled-capacity-selection-v1/seed-7/validation-checkpoints/episode-020.npz",
+      "checkpoint_sha256": "5a242a256d682a00b742af8d8c0193800953deadd9f19c3e44659a63eaf3ba04"
+    },
+    {
+      "name": "selection_v1_seed_7_episode_040",
+      "checkpoint": "runs/controlled-capacity-selection-v1/seed-7/validation-checkpoints/episode-040.npz",
+      "checkpoint_sha256": "cb43298c670ef8ed06d008f7fc0cb5aceca0a6fc62f5f435a4ba5ec91bce2085"
+    },
+    {
+      "name": "selection_v1_seed_7_episode_060",
+      "checkpoint": "runs/controlled-capacity-selection-v1/seed-7/validation-checkpoints/episode-060.npz",
+      "checkpoint_sha256": "b924245bf7659b790825fce8f5c668f71fbb372a23cdcfe8cf54d724cbccf9fd"
+    },
+    {
+      "name": "selection_v1_seed_7_episode_080",
+      "checkpoint": "runs/controlled-capacity-selection-v1/seed-7/validation-checkpoints/episode-080.npz",
+      "checkpoint_sha256": "dac6bcef3e38f31ea9042869a3f991d8e068d26fa1790c3ea3d16cc7c6c6d4a0"
+    },
+    {
+      "name": "selection_v1_seed_7_episode_100",
+      "checkpoint": "runs/controlled-capacity-selection-v1/seed-7/validation-checkpoints/episode-100.npz",
+      "checkpoint_sha256": "2492fa78b4ea869396e76e0542ec985d7e9963701686485b3b86977ffbe24ecf"
+    },
+    {
+      "name": "selection_v1_seed_7_episode_120",
+      "checkpoint": "runs/controlled-capacity-selection-v1/seed-7/validation-checkpoints/episode-120.npz",
+      "checkpoint_sha256": "f87e4947ff2f5ccee163d6985f277ff8cbbac023f620dd7da35e9652da8e51d6"
+    },
+    {
+      "name": "selection_v1_seed_11_episode_020",
+      "checkpoint": "runs/controlled-capacity-selection-v1/seed-11/validation-checkpoints/episode-020.npz",
+      "checkpoint_sha256": "c64e3fff5102b5cdbb45681b46d29f8008e6e5fa69aab6818abf8dc7be0ebd9b"
+    },
+    {
+      "name": "selection_v1_seed_11_episode_040",
+      "checkpoint": "runs/controlled-capacity-selection-v1/seed-11/validation-checkpoints/episode-040.npz",
+      "checkpoint_sha256": "a7753acc46ceb77a68feda11e8c57a347084bf67fec174b01e8fd753c7914640"
+    },
+    {
+      "name": "selection_v1_seed_11_episode_060",
+      "checkpoint": "runs/controlled-capacity-selection-v1/seed-11/validation-checkpoints/episode-060.npz",
+      "checkpoint_sha256": "2f21fe9fcb1fd91c45e0264e267b0fd42d011775c5035f518b6ab6028f092b77"
+    },
+    {
+      "name": "selection_v1_seed_11_episode_080",
+      "checkpoint": "runs/controlled-capacity-selection-v1/seed-11/validation-checkpoints/episode-080.npz",
+      "checkpoint_sha256": "25537012c697fb3d49567b792a3564e3fcf442724fcf5d8a19234ccdab3c39b1"
+    },
+    {
+      "name": "selection_v1_seed_11_episode_100",
+      "checkpoint": "runs/controlled-capacity-selection-v1/seed-11/validation-checkpoints/episode-100.npz",
+      "checkpoint_sha256": "9390e795a9de62206bc19eec946437bbd362067fa70c5e414d44aaf7daeb3e4c"
+    },
+    {
+      "name": "selection_v1_seed_11_episode_120",
+      "checkpoint": "runs/controlled-capacity-selection-v1/seed-11/validation-checkpoints/episode-120.npz",
+      "checkpoint_sha256": "d218e8beb312965f163f530993dc0b31a1bba78d0df5a9e2cae436fb56dec089"
+    },
+    {
+      "name": "selection_v1_seed_13_episode_020",
+      "checkpoint": "runs/controlled-capacity-selection-v1/seed-13/validation-checkpoints/episode-020.npz",
+      "checkpoint_sha256": "9d1eda5a9100b2c05cf6c193cdaf77412f9550bb3fafffee3c69e1256278e5d4"
+    },
+    {
+      "name": "selection_v1_seed_13_episode_040",
+      "checkpoint": "runs/controlled-capacity-selection-v1/seed-13/validation-checkpoints/episode-040.npz",
+      "checkpoint_sha256": "d64775b72ed653961137b6b8709a8796616858c3f2c8b1d65fda0e3bdc1f59f0"
+    },
+    {
+      "name": "selection_v1_seed_13_episode_060",
+      "checkpoint": "runs/controlled-capacity-selection-v1/seed-13/validation-checkpoints/episode-060.npz",
+      "checkpoint_sha256": "8e2622d535099d10bbfa4fcd054334046793ad494e77f538c75b41971f04de2d"
+    },
+    {
+      "name": "selection_v1_seed_13_episode_080",
+      "checkpoint": "runs/controlled-capacity-selection-v1/seed-13/validation-checkpoints/episode-080.npz",
+      "checkpoint_sha256": "3a852442f0ccafbad840802f3576fbb57024c8cf9b2a1f99d60a021b9a40f2fb"
+    },
+    {
+      "name": "selection_v1_seed_13_episode_100",
+      "checkpoint": "runs/controlled-capacity-selection-v1/seed-13/validation-checkpoints/episode-100.npz",
+      "checkpoint_sha256": "b0701a97204c37c2662fd2b7c7dab09ffd59ce72283e71a3b209b56200ad5eac"
+    },
+    {
+      "name": "selection_v1_seed_13_episode_120",
+      "checkpoint": "runs/controlled-capacity-selection-v1/seed-13/validation-checkpoints/episode-120.npz",
+      "checkpoint_sha256": "7fc26476260cd92eca4f48fa9bb175306aac4f319c46c8b41d453dc52cc7077b"
+    }
+  ],
+  "baselines": [
+    {
+      "name": "selection_v1_highest_allowed",
+      "selection": "Highest representation allowed by the frozen safety mask"
+    }
+  ],
+  "additional_transfer_reports": [
+    "runs/controlled-capacity-selection-v1/validation_decisions.json"
+  ],
+  "safety_filter": {
+    "min_buffer_s": 12.0,
+    "throughput_factor": 0.65
+  },
+  "stream_config": {
+    "mode": "vod",
+    "max_buffer_s": 60.0,
+    "startup_s": 1.0,
+    "resume_s": 1.0,
+    "request_timeout_s": 30.0,
+    "source_age_s": 3.0,
+    "encoder_delay_s": 0.0,
+    "target_latency_s": 3.0,
+    "catchup": true,
+    "min_rate": 0.95,
+    "max_rate": 1.05,
+    "catchup_gain": 0.03,
+    "latency_deadband_s": 0.1,
+    "control_tick_s": 0.1,
+    "known_vod_sizes": false
+  },
+  "request_recovery": {
+    "max_retries": 4,
+    "poll_s": 1.0,
+    "min_observation_s": 2.0,
+    "no_progress_s": 3.0,
+    "buffer_reserve_s": 2.0,
+    "backoff_s": 2.0,
+    "restart_fraction": 0.8,
+    "early_abandon": true
+  },
+  "media": [
+    {
+      "name": "envivio",
+      "dataset": "data/transfer-sessions/envivio.json",
+      "media_dir": "artifacts/startup-ladder-v1"
+    }
+  ],
+  "split": "validation",
+  "metrics": [
+    "completion",
+    "startup_s",
+    "rebuffer_s",
+    "playback_duration_weighted_vmaf",
+    "mean_selected_bitrate_kbps",
+    "existing_log_bitrate_reward"
+  ],
+  "quality_metric": {
+    "name": "VMAF",
+    "implementation": "libvmaf",
+    "status": "libvmaf_available",
+    "alignment": "decoded output frames aligned at 25 fps; upscale each distorted rung to source resolution with bicubic scaling before VMAF so resolution loss remains measured",
+    "human_review_required": true
+  },
+  "artifacts_directory": "runs/controlled-capacity-selection-v1/vmaf"
+}

@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "scenario_set_id": "controlled-capacity-drops-v1",
+  "generator_seed": 20261101,
+  "trace_duration_s": 360,
+  "interval_s": 1,
+  "rtt_s": 0.08,
+  "families": [
+    "step_drop_recovery",
+    "repeated_capacity_changes",
+    "zero_outage_then_degraded_recovery"
+  ],
+  "split_sizes_per_family": {
+    "train": 6,
+    "validation": 3,
+    "test": 4
+  },
+  "capacity_units": "kbps",
+  "generation": {
+    "step_drop_recovery": {
+      "baseline_kbps": [3600, 7200],
+      "drop_kbps": [180, 900],
+      "drop_start_s": [45, 120],
+      "drop_duration_s": [25, 70],
+      "recovery_fraction_of_baseline": [0.65, 1.0]
+    },
+    "repeated_capacity_changes": {
+      "plateau_kbps": [250, 6800],
+      "first_transition_s": [25, 55],
+      "subsequent_transition_spacing_s": [25, 60],
+      "transition_count": 4
+    },
+    "zero_outage_then_degraded_recovery": {
+      "baseline_kbps": [3600, 7200],
+      "outage_start_s": [45, 120],
+      "outage_duration_s": [4, 14],
+      "degraded_kbps": [180, 850],
+      "degraded_duration_s": [18, 55],
+      "recovery_fraction_of_baseline": [0.65, 1.0]
+    }
+  },
+  "selection_rule": "All generated test profiles are retained. Test profiles use a split-specific random stream and are not used for training, checkpoint selection, or tuning.",
+  "semantics": "controlled_capacity",
+  "limitations": [
+    "These are controlled application-goodput profiles, not measured radio traces or packet-level network simulations.",
+    "The test distribution shares scenario families with training but uses independent parameter draws; it measures transfer across rates and transition timing, not unseen transition families.",
+    "The two content ladders share the same seven nominal bitrate choices; their segment sizes and durations differ."
+  ]
+}

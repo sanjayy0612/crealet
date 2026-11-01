@@ -1,0 +1,162 @@
+{
+  "schema_version": 1,
+  "protocol_id": "abr-controlled-capacity-stress-transfer-v2",
+  "status": "frozen_before_test_evaluation",
+  "question": "Does training on severe controlled capacity changes improve the frozen DQN on held-out parameter draws and Sintel content?",
+  "scope": {
+    "training": "120 episodes per seed on v2 controlled Envivio train profiles",
+    "checkpoint_selection": "v2 Envivio validation profiles only",
+    "objective": "Existing log-bitrate QoE; unchanged from the reference training protocol",
+    "deployment_claim": false,
+    "stress_test_note": "Stress ranges were selected after the v1 pilot showed zero rebuffering. The v2 test profiles are fresh parameter draws, but this remains an engineering stress test."
+  },
+  "scenario_spec": "experiments/scenarios/controlled_capacity_stress_v2.json",
+  "scenario_set_id": "controlled-capacity-stress-v2",
+  "scenario_generator_seed": 20261102,
+  "dataset_fingerprints": {
+    "envivio": "1d500c30c2014e827d959c1f44055c6594d3fdff28e3257644108e7eb307015c",
+    "sintel": "5655027d6e3d8d300d6d58511d56e4aeeee0f72cef2a414576acc5bd7cc94fec"
+  },
+  "test_set": {
+    "split": "test",
+    "profiles": 12,
+    "profile_families": [
+      "step_drop_recovery",
+      "repeated_capacity_changes",
+      "zero_outage_then_degraded_recovery"
+    ],
+    "content_cases": 24,
+    "selection": "All 12 fresh generated test profiles are evaluated on Envivio and Sintel after all six DQN checkpoints are frozen.",
+    "note": "The generator severity was raised after v1 pilot results; report as an engineering stress test, not a post-hoc untouched benchmark."
+  },
+  "contents": {
+    "envivio": {
+      "dataset": "data/controlled-capacity-stress-v2/envivio.json",
+      "source_dataset": "data/startup-ladder/training.json",
+      "media_dir": "artifacts/startup-ladder-v1",
+      "source_video": "artifacts/startup-ladder-v1/source.mp4",
+      "segments": 49
+    },
+    "sintel": {
+      "dataset": "data/controlled-capacity-stress-v2/sintel.json",
+      "source_dataset": "data/sintel-ladder/training.json",
+      "media_dir": "artifacts/sintel-ladder-v1",
+      "source_video": "artifacts/sintel-trailer-480p.mp4",
+      "segments": 14
+    }
+  },
+  "stream_config": {
+    "mode": "vod",
+    "max_buffer_s": 60.0,
+    "startup_s": 1.0,
+    "resume_s": 1.0,
+    "request_timeout_s": 30.0,
+    "source_age_s": 3.0,
+    "encoder_delay_s": 0.0,
+    "target_latency_s": 3.0,
+    "catchup": true,
+    "min_rate": 0.95,
+    "max_rate": 1.05,
+    "catchup_gain": 0.03,
+    "latency_deadband_s": 0.1,
+    "control_tick_s": 0.1,
+    "known_vod_sizes": false
+  },
+  "recovery": {
+    "max_retries": 4,
+    "poll_s": 1.0,
+    "min_observation_s": 2.0,
+    "no_progress_s": 3.0,
+    "buffer_reserve_s": 2.0,
+    "backoff_s": 2.0,
+    "restart_fraction": 0.8,
+    "early_abandon": true
+  },
+  "qoe_weights": {
+    "rebuffer": 12.0,
+    "startup": 1.0,
+    "switch": 1.0,
+    "latency": 0.1,
+    "rate_deviation": 1.0
+  },
+  "safety": {
+    "min_buffer_s": 12.0,
+    "throughput_factor": 0.65
+  },
+  "policies": [
+    {
+      "name": "controlled_v2_original_seed_7",
+      "kind": "dqn",
+      "checkpoint": "runs/startup-ladder/seed-7/accepted.npz",
+      "sha256": "0b89cec329eec93447462f29d87ba2fe4ce80646dc78678a0f01ab9f80b5d4ac",
+      "training": "original 120 episode Envivio/Norway run"
+    },
+    {
+      "name": "controlled_v2_trained_seed_7",
+      "kind": "dqn",
+      "checkpoint": "runs/controlled-capacity-training-v2/seed-7/accepted.npz",
+      "sha256": "3c3e32a56b0d1c443965f0737c753c087d84d9083158575721bb30579cc26712",
+      "selected_episode": 20,
+      "training": "120 episodes on v2 controlled Envivio train profiles"
+    },
+    {
+      "name": "controlled_v2_original_seed_11",
+      "kind": "dqn",
+      "checkpoint": "runs/startup-ladder/seed-11/accepted.npz",
+      "sha256": "ce36e8d5f5bc2b0deae049a3c328b9dfc078978d791e493f323c55454c42deb3",
+      "training": "original 120 episode Envivio/Norway run"
+    },
+    {
+      "name": "controlled_v2_trained_seed_11",
+      "kind": "dqn",
+      "checkpoint": "runs/controlled-capacity-training-v2/seed-11/accepted.npz",
+      "sha256": "cb453ced83f75eeb5d35a29b68bfafb2a57b78aac23672b328415ba9cb154e53",
+      "selected_episode": 20,
+      "training": "120 episodes on v2 controlled Envivio train profiles"
+    },
+    {
+      "name": "controlled_v2_original_seed_13",
+      "kind": "dqn",
+      "checkpoint": "runs/startup-ladder/seed-13/accepted.npz",
+      "sha256": "ef242ac32cafa28d85ea0241879aaac3717050835486d2efdae86ef65854cce7",
+      "training": "original 120 episode Envivio/Norway run"
+    },
+    {
+      "name": "controlled_v2_trained_seed_13",
+      "kind": "dqn",
+      "checkpoint": "runs/controlled-capacity-training-v2/seed-13/accepted.npz",
+      "sha256": "32f7d4fbac62dec7774dd971aef227e63e6b028cec33bdfee06e55b583d7836a",
+      "selected_episode": 60,
+      "training": "120 episodes on v2 controlled Envivio train profiles"
+    },
+    {
+      "name": "controlled_v2_highest_allowed",
+      "kind": "highest_allowed",
+      "selection": "Highest representation allowed by frozen safety filter"
+    },
+    {
+      "name": "controlled_v2_robust_mpc",
+      "kind": "robust_mpc",
+      "selection": "Five-chunk RobustMPC with same safety filter and QoE weights"
+    }
+  ],
+  "robust_mpc": {
+    "horizon_chunks": 5,
+    "throughput_window": 5,
+    "error_window": 5,
+    "rtt_s": 0.08
+  },
+  "primary_metrics": [
+    "completion",
+    "rebuffer_s and events",
+    "per-session duration-weighted VMAF",
+    "startup_s",
+    "decision latency p50 and p95",
+    "log-bitrate reward proxy"
+  ],
+  "interpretation_rule": "Report all scenario families and both content ladders. Do not change policy, checkpoint, safety, reward, or scenario parameters after viewing test results. A successful diagnostic is repeatable DQN benefit on rebuffering or VMAF without loss of completion; this is not a deployment gate.",
+  "scenario_spec_sha256": "d4f41641eba0d3bddd96b139947bb36c5276ccf69f0586fffcf140dcb2b85370",
+  "training_protocol": "experiments/configs/controlled_capacity_training_v2.json",
+  "training_protocol_sha256": "9cba90cd0f68a9bf19b8eda0695f624f01f340f4c1de5f217cb4a14929420d45",
+  "output": "runs/controlled-capacity-transfer-v2/results.json"
+}
