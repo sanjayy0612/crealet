@@ -13,3 +13,20 @@ accuracy and the distinction between offline training and frozen inference.
 tool changed only the recovery support label to include the native player.
 The exact edit prompt is `abr-working-native.prompt.txt`; the earlier asset
 is retained for history. The current image was visually inspected.
+
+## Research comparison figures
+
+The README comparison charts are generated SVGs, not decorative illustrations.
+They are rendered from the committed result summaries with
+`python scripts/render_readme_figures.py`:
+
+- `vmaf-policy-comparison.svg` compares mean VMAF for highest-allowed,
+  RobustMPC, and three-seed DQN results on Envivio and Sintel. DQN whiskers show
+  the observed min-to-max seed means, not confidence intervals.
+- `bola-vmaf-comparison.svg` compares BOLA-Basic, its safety-filtered variant,
+  highest-allowed, and the frozen DQN on the separate four-session VOD screen.
+- `predictor-vs-playback.svg` compares throughput forecast error and decision
+  latency on 32 historical Ghent sessions, with the reported playback outcome.
+
+Each chart describes a specific experiment. The figures should not be read as a
+single head-to-head leaderboard because their datasets and protocols differ.
